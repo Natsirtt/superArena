@@ -10,6 +10,7 @@ function getControllersManager()
         
         this.unbindedControllers = {}
         this.bindedControllers = {}
+        this.unusedControllers = {}
         
         for i, j in ipairs(love.joystick.getJoysticks()) do
             this.unbindedControllers[#this.unbindedControllers + 1] = newController(j)
@@ -34,16 +35,15 @@ function mt:getFirstNewController()
     return controller, pos
 end
 
-function mt:tryBindingControllerToNextPlayer()
+function mt:tryBindingNewController()
     local c, pos = self:getFirstNewController()
     if c ~= nil then
-        self.bindedControllers[#self.bindedControllers +1] = c
+        self.bindedControllers[#self.bindedControllers + 1] = c
+        self.unusedControllers[#self.unusedControllers + 1] = c
         table.remove(self.unbindedControllers, pos)
+        return true
     end
-end
-
-function mt:getControllerForPlayer(playerNo)
-    return self.bindedControllers[playerNo]
+    return false
 end
 
 function mt:getUnbindedControllers()
@@ -52,6 +52,21 @@ end
 
 function mt:getBindedControllers()
     return self.bindedControllers
+end
+
+function mt:getBindedControllersNb()
+    return #self.bindedControllers
+end
+
+function mt:getUnusedController()
+    local size = #self.unusedControllers
+    if size == 0 then
+        return nil
+    end
+    
+    local c = self.unusedControllers[size]
+    table.remove(self.unusedControllers, size)
+    return c
 end
 
 function mt:debugInfo()
