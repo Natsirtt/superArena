@@ -142,27 +142,28 @@ end
 
 -- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
 function arena_mt:getValidQuad(lastQuad, newQuad)
-	local x, y, w, h = newQuad:getViewport()
+	local x = newQuad.x
+	local y = newQuad.y
 	
 	local i = x / TILE_SIZE
 	if (i == 1) or (i == ARENA_WIDTH) then
-		x = min(max(TILE_SIZE, x), (ARENA_WIDTH - 2) * TILE_SIZE)
+		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 2) * TILE_SIZE)
 	end
-	local x2 = x + w
+	local x2 = x + newQuad.w
 	i = x2 / TILE_SIZE
 	if (i == 1) or (i == ARENA_WIDTH) then
-		x = min(max(TILE_SIZE, x), (ARENA_WIDTH - 2) * TILE_SIZE)
+		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 2) * TILE_SIZE)
 	end
 	
 	local j = y / TILE_SIZE
 	if (j == 1) or (j == ARENA_HEIGHT) then
-		y = min(max(TILE_SIZE, y), (ARENA_HEIGHT - 2) * TILE_SIZE)
+		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 2) * TILE_SIZE)
 	end
-	local y2 = y + h
+	local y2 = y + newQuad.h
 	i = x2 / TILE_SIZE
 	if (j == 1) or (i == ARENA_HEIGHT) then
-		y = min(max(TILE_SIZE, y), (ARENA_HEIGHT - 2) * TILE_SIZE)
+		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 2) * TILE_SIZE)
 	end
 	
-	return love.graphics.newQuad(x, y, w, h)
+	return {x = x, y = y, w = w, h = h}
 end
