@@ -1,3 +1,6 @@
+love.filesystem.load("controllers/controller.lua")()
+love.filesystem.load("controllers/controllersManager.lua")()
+
 function love.load(arg)
     love.window.setTitle("Bugfree Happiness")
     love.window.setMode(1024, 768, {
