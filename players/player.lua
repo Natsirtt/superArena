@@ -2,7 +2,7 @@ local mt = {}
 mt.__index = mt
 
 local MAX_LIFE = 10
-local SPEED_BASE = 100
+local SPEED_BASE = 500
 local RADIUS = 20
 
 function newPlayer()
@@ -28,13 +28,13 @@ end
 function mt:getQuad()
     return {x = self.x - RADIUS,
             y = self.y - RADIUS,
-            w = RADIUS,
-            h = RADIUS}
+            w = RADIUS * 2,
+            h = RADIUS * 2}
 end
 
 function mt:setPositionFromQuad(quad)
-    self.x = quad.x
-    self.y = quad.y
+    self.x = quad.x + RADIUS
+    self.y = quad.y + RADIUS
 end
 
 function mt:update(dt)

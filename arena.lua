@@ -144,25 +144,27 @@ end
 function arena_mt:getValidQuad(lastQuad, newQuad)
 	local x = newQuad.x
 	local y = newQuad.y
+	local w = newQuad.w
+	local h = newQuad.h
 	
 	local i = x / TILE_SIZE
-	if (i == 1) or (i == ARENA_WIDTH) then
-		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 2) * TILE_SIZE)
+	if (i <= 1) or (i >= ARENA_WIDTH - 2) then
+		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 1) * TILE_SIZE - w)
 	end
 	local x2 = x + newQuad.w
 	i = x2 / TILE_SIZE
-	if (i == 1) or (i == ARENA_WIDTH) then
-		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 2) * TILE_SIZE)
+	if (i == 1) or (i >= (ARENA_WIDTH - 2)) then
+		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 1) * TILE_SIZE - w)
 	end
 	
 	local j = y / TILE_SIZE
-	if (j == 1) or (j == ARENA_HEIGHT) then
-		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 2) * TILE_SIZE)
+	if (j <= 1) or (j >= (ARENA_HEIGHT - 2)) then
+		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 1) * TILE_SIZE - h)
 	end
 	local y2 = y + newQuad.h
-	i = x2 / TILE_SIZE
-	if (j == 1) or (i == ARENA_HEIGHT) then
-		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 2) * TILE_SIZE)
+	j = y2 / TILE_SIZE
+	if (j <= 1) or (i >= (ARENA_HEIGHT - 2)) then
+		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 1) * TILE_SIZE - h)
 	end
 	
 	return {x = x, y = y, w = w, h = h}
