@@ -109,6 +109,10 @@ function arenaPhaseDraw(self)
 	
 end
 
+function mt:playerAttack(player)
+
+end
+
 function mt:debugInfo()
 	local res = "players = {"
 	for i, _ in ipairs(self.players) do
