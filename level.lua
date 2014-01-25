@@ -120,15 +120,45 @@ function level_mt:getHeight()
 end
 
 -- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
-function level_mt:getValidQuad(lastQuad, newQuad)
+function level_mt:getValidQuad(lastQuad, newQuad, dx, dy)
+	local quad = newQuad
 	for j, t in ipairs(self.boxes) do
 		for i, box in ipairs(t) do
-			if (box ~= nil) and (newQuad ~= nil) then
-				if (rectCollision(box, newQuad)) then
-					return lastQuad
+			if (box ~= nil) and (quad ~= nil) then
+				if (rectCollision(box, quad)) then
+					local c1 = getQuadCenter(quad)
+					local newDX = dx
+					local newDY = dy
+					if (c1.x >= box[1].x) and (c1.x <= box[2].x) then
+						newDY = 0
+					end
+					if (c1.y >= box[1].y) and (c1.y <= box[3].y) then
+						newDX = 0
+					end
+					local x = lastQuad[1].x + newDX
+					if (dx > 0) and (newDX == 0) then
+						x = box[1].x - getQuadWidth(quad) - 1
+					elseif (dx < 0) and (newDX == 0) then
+						x = box[2].x + 1
+					end
+					local y = lastQuad[1].y + newDY
+					if (dy > 0) and (newDY == 0) then
+						y = box[1].y - getQuadHeight(quad) - 1
+					elseif (dy < 0) and (newDY == 0) then
+						y = box[3].y + 1
+					end
+					quad = {
+						{x = x,                      y = y},
+						{x = x + getQuadWidth(quad), y = y},
+						{x = x + getQuadWidth(quad), y = y + getQuadHeight(quad)},
+						{x = x,                      y = y + getQuadHeight(quad)}
+					}
 				end
 			end
 		end
 	end
-	return newQuad
+	return quad
 end
+
+
+

@@ -16,19 +16,19 @@ function newSegment(p1, p2)
     return setmetatable(this, mt)
 end
 
--- function mt:min(seg)
-	-- if self.x < seg.x then
-		-- return self
-	-- end
-	-- return seg
--- end
+function mt:min(seg)
+	if self.x < seg.x then
+		return self
+	end
+	return seg
+end
 
--- function mt:max(seg)
-	-- if self.x > seg.x then
-		-- return self
-	-- end
-	-- return seg
--- end
+function mt:max(seg)
+	if self.x > seg.x then
+		return self
+	end
+	return seg
+end
 
 function mt:overlaps(segment)
 	if (segment == nil) then
@@ -49,8 +49,8 @@ function mt:overlaps(segment)
 	end
 
 	-- now one segment is partially over the other
-	if ((minX == self.p1.x) and (segment.p2.x <= self.p2.x)) or
-		 ((minX == segment.p1.x) and (self.p2.x <= segment.p2.x)) then
+	if ((minX == self.p1.x) and (segment.p1.x <= self.p2.x)) or
+		 ((minX == segment.p1.x) and (self.p1.x <= segment.p2.x)) then
 		return true
 	end
 
