@@ -5,9 +5,13 @@ local MAX_LIFE = 10
 local SPEED_BASE = 500
 local RADIUS = 20
 
+local PLAYER_TILE = {x = 350, y = 0, width = 50, height = 50}
+
 function newPlayer()
     local this = {}
+	this.tileSet = love.graphics.newImage("tileset.png")
     
+	this.angle = 0
     this.x = 400
     this.y = 400
     this.dx = 0
@@ -41,10 +45,18 @@ function mt:update(dt)
     self.dx, self.dy = self.controller:getAxes()
     self.x = self.x + dt * self.dx * self.speed
     self.y = self.y + dt * self.dy * self.speed
+	
+	
 end
 
 function mt:draw()
-    love.graphics.circle("fill", self.x, self.y, RADIUS, 10)
+	love.graphics.push()
+	love.graphics.translate(self.x, self.y)
+	love.graphics.rotate(math.rad(-self.angle))
+	local quad = love.graphics.newQuad(PLAYER_TILE.x, PLAYER_TILE.y, PLAYER_TILE.width, PLAYER_TILE.height, self.tileSet:getWidth(), self.tileSet:getHeight())
+	love.graphics.draw(self.tileSet, quad, 0 - RADIUS, 0 - RADIUS, 0, RADIUS * 2 / 50, RADIUS * 2 / 50)
+	
+	love.graphics.pop()
 end
 
 function mt:isDead()
