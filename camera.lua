@@ -40,7 +40,7 @@ function mt:draw()
 		love.graphics.translate(dx, dy)
 	end
 	
-	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * SHAKE_PER_SECOND * 360.0)))
+	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 360.0)))
 	if (blinkTimer ~= 0) then
 		percent = math.abs(percent)
 		local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)

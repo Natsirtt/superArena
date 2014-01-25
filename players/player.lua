@@ -7,10 +7,18 @@ local RADIUS = 20
 local DEFENDING_MAX_TIME = 5
 local ANIMATION_RATE = 0.1
 
+PLAYER_DAMAGE = 1
+
+local BLINK_LIMIT = 0.2
+local BLINK_PER_SECOND = 15.0
+
 function newPlayer(gameManager, playerNo)
     local this = {}
 	
 	local tileSet = love.graphics.newImage("assets/player"..playerNo..".png")
+	
+	this.blinkTimer = 0.0
+	this.blinkColor = {r = 255, g = 0, b = 255}
 	
 	this.assets = {}
 	this.assets["idle"] = {}
@@ -136,6 +144,13 @@ function newPlayer(gameManager, playerNo)
     return setmetatable(this, mt)
 end
 
+function mt:blink(color)
+	if (self.blinkTimer == 0) then
+		self.blinkTimer = BLINK_LIMIT
+		self.blinkColor = color
+	end
+end
+
 function mt:getQuad()
 	return {
 		{x = self.x - RADIUS, y = self.y - RADIUS},
@@ -202,13 +217,10 @@ function mt:attack()
 end
 
 function mt:update(dt)
+	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
 	if (not self:isDead()) then
 		-- position checking
 		self.dx, self.dy = self.controller:getAxes()
-		if (self.controller:isDown(10)) then
-			self.gameManager.camera:shake()
-			self.gameManager.camera:blink({r = 180, g = 20, b = 20})
-		end
 		if (self.controller:isDown(13)) then
 			if not self.temporaryAsset then
 				self:attack()
@@ -303,6 +315,17 @@ function mt:update(dt)
 end
 
 function mt:draw()
+	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 360.0)))
+	if (blinkTimer ~= 0) then
+		percent = math.abs(percent)
+		local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)
+		local g = self.blinkColor.g + (255 - self.blinkColor.g) * (1 - percent)
+		local b = self.blinkColor.b + (255 - self.blinkColor.b) * (1 - percent)
+		love.graphics.setColor(r, g, b)
+	else
+		love.graphics.setColor(255, 255, 255)
+	end
+	
 	love.graphics.push()
 	--love.graphics.translate(self.x, self.y)
 	--love.graphics.rotate(math.rad(-self.angle))
@@ -331,23 +354,27 @@ function mt:getLife()
 end
 
 function mt:hit(lifePoints)
-    self.life = self.life - lifePoints
-	if (self:isDead()) then
-		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
-		p:setEmissionRate(100)
-		p:setSpeed(300, 400)
-		p:setPosition(self.x, self.y)
-		p:setEmitterLifetime(0.3)
-		p:setParticleLifetime(1)
-		p:setDirection(0)
-		p:setSpread(360)
-		p:setRadialAcceleration(-3000)
-		p:setTangentialAcceleration(1000)
-		p:stop()
-		self.deathParticleSystem = p
-		p:start()
-		
-		self.deathSound:play()
+	if (not self:isDead()) then
+		self.life = self.life - lifePoints
+		self.gameManager.camera:shake()
+		self:blink({r = 180, g = 20, b = 20})
+		if (self:isDead()) then
+			local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
+			p:setEmissionRate(100)
+			p:setSpeed(300, 400)
+			p:setPosition(self.x, self.y)
+			p:setEmitterLifetime(0.3)
+			p:setParticleLifetime(1)
+			p:setDirection(0)
+			p:setSpread(360)
+			p:setRadialAcceleration(-3000)
+			p:setTangentialAcceleration(1000)
+			p:stop()
+			self.deathParticleSystem = p
+			p:start()
+			
+			self.deathSound:play()
+		end
 	end
 end
 
