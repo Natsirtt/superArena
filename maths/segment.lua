@@ -36,8 +36,9 @@ function mt:max(seg)
 		return self
 	end
 	return seg
+end
 
-function mt:overlap(segment)
+function mt:overlaps(segment)
 	local minX = maths.min(segment:getX(), self:getX())
 	local minY = maths.min(segment:getY(), self:getY())
 
@@ -48,7 +49,7 @@ function mt:overlap(segment)
 
 	-- first case : one segment totally eat the other
 	if ((minX == self:getX()) and (minY == segment:getY())) or
-	   ((minX == segment:getX())  and (mint y == self:getY())) then
+	   ((minX == segment:getX())  and (minY == self:getY())) then
 		return true
 	end
 

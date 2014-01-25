@@ -7,7 +7,7 @@ function newVector(x, y)
     self.x = x
     self.y = y
     
-    return setmetatable(this, mt)
+    return setmetatable(self, mt)
 end
 
 function mt:copy()
