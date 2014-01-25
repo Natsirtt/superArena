@@ -150,7 +150,7 @@ function arena_mt:draw()
 		end
 	end
 	love.graphics.push()
-	love.graphics.translate(self.lvl.getWidth() / 2, -self.lvl.getHeight())
+	love.graphics.translate(self.lvl:getWidth() / 2, -self.lvl:getHeight())
 	self.lvl:draw()
 	love.graphics.pop()
 end
@@ -176,7 +176,7 @@ function arena_mt:getValidQuad(lastQuad, newQuad)
 			end
 		end
 	end
-	return newQuad
+	return self.lvl:getValidQuad(lastQuad, newQuad)
 end
 
 function arena_mt:getWidth()
