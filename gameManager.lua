@@ -42,7 +42,7 @@ function addingPlayersPhase(self, dt)
 	-- adding a new player
 	local added = getControllersManager():tryBindingNewController()
 	if added then
-		self.players[#self.players + 1] = newPlayer(self)
+		self.players[#self.players + 1] = newPlayer(self, #self.players + 1)
 		-- a little idle time to let the player some time
 		-- to release the button, or the first test of this
 		-- function will be true
