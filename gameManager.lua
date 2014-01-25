@@ -7,7 +7,6 @@ function newGameManager()
 	local self = {}
 
 	self.players = {}
-	self.alivePlayers = {}
 	self.arena = nil
 
 	self.task = addingPlayersPhase
@@ -45,7 +44,6 @@ function addingPlayersPhase(self, dt)
 	if added then
 		local p = newPlayer(self, #self.players + 1)
 		self.players[#self.players + 1] = p
-		self.alivePlayers[#self.alivePlayers + 1] = p
 		-- a little idle time to let the player some time
 		-- to release the button, or the first test of this
 		-- function will be true
@@ -78,9 +76,7 @@ function arenaPhase(self, dt)
 	for _, player in ipairs(self.players) do
 		local lastQuad = player:getQuad()
 		player:update(dt)
-		if player:isDead() then
-			table.remove(self.alivePlayers, player)
-		end
+
 		-- arena hitbox
 		local quad = self.arena:getValidQuad(lastQuad, player:getQuad(), player.dx * player.speed * dt, player.dy * player.speed * dt)
         player:setPositionFromQuad(quad)
@@ -98,7 +94,7 @@ function arenaPhaseDraw(self)
 	local h = self.arena.getHeight()
 	
 	--love.graphics.translate(love.window.getWidth() / 2 - w / 2, love.window.getHeight() / 2 - h / 2)
-	local x, y = self.camera:getBestPosition(self.alivePlayers)
+	local x, y = self.camera:getBestPosition(self:getAlivePlayers())
 	love.graphics.translate(love.window.getWidth() / 2 - x, love.window.getHeight() / 2 - y)
 	
 	self.camera:draw()
@@ -114,7 +110,13 @@ function arenaPhaseDraw(self)
 end
 
 function mt:getAlivePlayers()
-	return self.alivePlayers
+	local alive = {}
+	for i, p in ipairs(self.players) do
+		if (not p:isDead()) then
+			table.insert(alive, p)
+		end
+	end
+	return alive
 end
 
 function mt:playerAttack(player)
@@ -135,7 +137,7 @@ function mt:playerAttack(player)
 		{x = player.x - dx2 / 2 + dx, y = player.y - dx2 / 2 + dy},
 		{x = player.x - dx2 / 2,      y = player.y - dx2 / 2},
 	}
-	for _, p in ipairs(self.players) do
+	for _, p in ipairs(self:getAlivePlayers()) do
 		if (p ~= player) then
 			if (rectCollision(hitBox, p:getQuad())) then
 				p:hit(PLAYER_DAMAGE)
