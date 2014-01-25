@@ -11,11 +11,12 @@ local BLINK_PER_SECOND = 20.0
 function newCamera()
     local this = {}
 	
+	this.shakeSound = love.audio.newSource("shake.wav", "static")
+	this.shakeSound:setLooping(true)
 	this.shakeTimer = 0.0
 	this.blinkTimer = 0.0
 	this.blinkColor = {r = 255, g = 0, b = 255}
 	
-    
     return setmetatable(this, mt)
 end
 
@@ -30,6 +31,8 @@ function mt:draw()
 		local dx = math.sin(math.rad((SHAKE_LIMIT - self.shakeTimer * SHAKE_PER_SECOND * 360.0))) * SHAKE_AMPLITUDE
 		local dy = math.cos(math.rad((SHAKE_LIMIT - self.shakeTimer * SHAKE_PER_SECOND * 360.0))) * SHAKE_AMPLITUDE
 		love.graphics.translate(dx, dy)
+	else
+		love.audio.stop(self.shakeSound)
 	end
 	
 	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * SHAKE_PER_SECOND * 360.0)))
@@ -47,6 +50,7 @@ end
 
 function mt:shake()
 	self.shakeTimer = SHAKE_LIMIT
+	love.audio.play(self.shakeSound)
 end
 
 function mt:blink(color)

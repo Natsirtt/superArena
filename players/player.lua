@@ -43,6 +43,10 @@ end
 
 function mt:update(dt)
     self.dx, self.dy = self.controller:getAxes()
+	if (self.controller:isDown(0)) then
+		
+	end
+	
     self.x = self.x + dt * self.dx * self.speed
     self.y = self.y + dt * self.dy * self.speed
 	
