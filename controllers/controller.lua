@@ -28,6 +28,12 @@ function mt:isAnyDown()
     return false
 end
 
+function mt:rumble(f)
+	if (self.joystick:isVibrationSupported()) then
+		self.joystick:setVibration(f, f)
+	end
+end
+
 function mt:getAxes()
     local x, y = self.joystick:getAxes()
     

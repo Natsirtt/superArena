@@ -11,6 +11,12 @@ local PLAYER_TILE = {x = 350, y = 0, width = 50, height = 50}
 function newPlayer(gameManager)
     local this = {}
 	this.tileSet = love.graphics.newImage("tileset.png")
+	
+	local imageData = this.tileSet:getData()
+	
+	local nid = love.image.newImageData(50, 50)
+	nid:paste(imageData, 0, 0, 350, 0, 50, 50)
+	this.playerImage = love.graphics.newImage(nid)
 
 	this.gameManager = gameManager
     
@@ -24,6 +30,11 @@ function newPlayer(gameManager)
     this.speed = SPEED_BASE
     this.hitbox = {}
     this.controller = getControllersManager():getUnusedController()
+	
+	this.deathTimer = 0
+	this.deathParticleSystem = nil
+	
+	
     
     --if this.controller == nil then
         -- should not happen if we use stuff correctly
@@ -59,47 +70,56 @@ function mt:canAttack()
 end
 
 function mt:attack()
-	if self:canAttack()
+	if self:canAttack() then
 		self.gameManager:playerAttack(self)
 	end
 end
 
 function mt:update(dt)
-	-- position checking
-    self.dx, self.dy = self.controller:getAxes()
-	if (self.controller:isDown(0)) then
+	if (not self:isDead()) then
+		-- position checking
+		self.dx, self.dy = self.controller:getAxes()
+		if (self.controller:isDown(10)) then
+			self.gameManager.camera:shake()
+			self.gameManager.camera:blink({r = 180, g = 20, b = 20})
+		end
+		if (self.controller:isDown(11)) then
+			self:hit(self.life)
+		end
 		
-	end
-	
-    self.x = self.x + dt * self.dx * self.speed
-    self.y = self.y + dt * self.dy * self.speed
-	
-	if (self.dx == -1) and (self.dy == -1) then
-		self.angle = 45
-	elseif (self.dx == -1) and (self.dy == 0) then
-		self.angle = 90
-	elseif (self.dx == -1) and (self.dy == 1) then
-		self.angle = 135
-	elseif (self.dx == 1) and (self.dy == -1) then
-		self.angle = -45
-	elseif (self.dx == 1) and (self.dy == 0) then
-		self.angle = -90
-	elseif (self.dx == 1) and (self.dy == 1) then
-		self.angle = -135
-	elseif (self.dx == 0) and (self.dy == -1) then
-		self.angle = 0
-	elseif (self.dx == 0) and (self.dy == 1) then
-		self.angle = 180
-	end
+		self.x = self.x + dt * self.dx * self.speed
+		self.y = self.y + dt * self.dy * self.speed
+		
+		if (self.dx == -1) and (self.dy == -1) then
+			self.angle = 45
+		elseif (self.dx == -1) and (self.dy == 0) then
+			self.angle = 90
+		elseif (self.dx == -1) and (self.dy == 1) then
+			self.angle = 135
+		elseif (self.dx == 1) and (self.dy == -1) then
+			self.angle = -45
+		elseif (self.dx == 1) and (self.dy == 0) then
+			self.angle = -90
+		elseif (self.dx == 1) and (self.dy == 1) then
+			self.angle = -135
+		elseif (self.dx == 0) and (self.dy == -1) then
+			self.angle = 0
+		elseif (self.dx == 0) and (self.dy == 1) then
+			self.angle = 180
+		end
 
-	-- defending checking
-	if self:isDefending() then
-		self.defendingTimeLeft = self.defendingTimeLeft - dt
-		if self.defendingTimeLeft <= 0 then
-			self:setDefending(false)
+		-- defending checking
+		if self:isDefending() then
+			self.defendingTimeLeft = self.defendingTimeLeft - dt
+			if self.defendingTimeLeft <= 0 then
+				self:setDefending(false)
+			end
+		else
+
 		end
 	else
-
+		self.deathTimer = self.deathTimer + dt
+		self.deathParticleSystem:update(dt)
 	end
 end
 
@@ -109,6 +129,11 @@ function mt:draw()
 	love.graphics.rotate(math.rad(-self.angle))
 	local quad = love.graphics.newQuad(PLAYER_TILE.x, PLAYER_TILE.y, PLAYER_TILE.width, PLAYER_TILE.height, self.tileSet:getWidth(), self.tileSet:getHeight())
 	love.graphics.draw(self.tileSet, quad, 0 - RADIUS, 0 - RADIUS, 0, RADIUS * 2 / 50, RADIUS * 2 / 50)
+	
+	if (self:isDead()) then
+		love.graphics.print("Le joueur est mort x(", 0, 0)
+		love.graphics.draw(self.deathParticleSystem)
+	end
 	
 	love.graphics.pop()
 end
@@ -123,6 +148,22 @@ end
 
 function mt:hit(lifePoints)
     self.life = self.life - lifePoints
+	if (self:isDead()) then
+		local p = love.graphics.newParticleSystem(self.playerImage, 1000)
+		p:setEmissionRate(100)
+		p:setSpeed(300, 400)
+		p:setPosition(0, 0)
+		p:setEmitterLifetime(5)
+		p:setParticleLifetime(1)
+		p:setDirection(0)
+		p:setSpread(360)
+		p:setRadialAcceleration(-2000)
+		p:setTangentialAcceleration(1000)
+		p:stop()
+		self.deathParticleSystem = p
+		p:start()
+	end
+	
 end
 
 function mt:heal(lifePoints)

@@ -24,6 +24,13 @@ end
 function mt:update(dt)
 	self.shakeTimer = math.max(self.shakeTimer - dt, 0.0)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
+	
+	if (self.shakeTimer == 0) then
+		love.audio.stop(self.shakeSound)
+		for _, c in ipairs(getControllersManager():getBindedControllers()) do
+			c:rumble(0)
+		end
+	end
 end
 
 function mt:draw()
@@ -31,8 +38,6 @@ function mt:draw()
 		local dx = math.sin(math.rad((SHAKE_LIMIT - self.shakeTimer * SHAKE_PER_SECOND * 360.0))) * SHAKE_AMPLITUDE
 		local dy = math.cos(math.rad((SHAKE_LIMIT - self.shakeTimer * SHAKE_PER_SECOND * 360.0))) * SHAKE_AMPLITUDE
 		love.graphics.translate(dx, dy)
-	else
-		love.audio.stop(self.shakeSound)
 	end
 	
 	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * SHAKE_PER_SECOND * 360.0)))
@@ -49,11 +54,18 @@ end
 
 
 function mt:shake()
-	self.shakeTimer = SHAKE_LIMIT
-	love.audio.play(self.shakeSound)
+	if (self.shakeTimer == 0) then
+		self.shakeTimer = SHAKE_LIMIT
+		love.audio.play(self.shakeSound)
+		for _, c in ipairs(getControllersManager():getBindedControllers()) do
+			c:rumble(1)
+		end
+	end
 end
 
 function mt:blink(color)
-	self.blinkTimer = BLINK_LIMIT
-	self.blinkColor = color
+	if (self.blinkTimer == 0) then
+		self.blinkTimer = BLINK_LIMIT
+		self.blinkColor = color
+	end
 end

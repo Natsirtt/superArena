@@ -42,7 +42,7 @@ function addingPlayersPhase(self, dt)
 	-- adding a new player
 	local added = getControllersManager():tryBindingNewController()
 	if added then
-		self.players[#self.players + 1] = newPlayer()
+		self.players[#self.players + 1] = newPlayer(self)
 		-- a little idle time to let the player some time
 		-- to release the button, or the first test of this
 		-- function will be true
@@ -64,12 +64,7 @@ function arenaPhase(self, dt)
 		self.camera = newCamera()
 		self.phaseInitialized = true
 	end
-	
-    if (love.keyboard.isDown("a")) then
-        self.camera:shake()
-		self.camera:blink({r = 180, g = 20, b = 20})
-    end
-	
+
 	self.camera:update(dt)
 
 	love.graphics.setNewFont(24)
