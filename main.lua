@@ -2,48 +2,38 @@ love.filesystem.load("arena.lua")()
 love.filesystem.load("controllers/controller.lua")()
 love.filesystem.load("controllers/controllersManager.lua")()
 love.filesystem.load("players/player.lua")()
+love.filesystem.load("gameManager.lua")()
 
 local globalTimer = 60 -- En secondes (à modfier)
+local gameManager
 
 function love.load(arg)
 	love.window.setTitle("Bugfree Happiness")
-    love.window.setMode(800, 800, {
+    local _, _, flags = love.window.getMode()
+    local w, h = love.window.getDesktopDimensions(flags.display)
+    love.window.setMode(w, h, {
         fullscreen = false,
         fsaa = 4,
+        borderless = true
     })
-    
-	arena = newArena()
+    gameManager = newGameManager()
 end
 
 playerOK = false
 function love.update(dt)
 	globalTimer = math.max(0, globalTimer - dt)
-
-    if not playerOK then
-        playerOK = getControllersManager():tryBindingNewController()
-        if playerOK then
-            player = newPlayer()
-        end
-    end
     
     if (love.keyboard.isDown("escape")) then
         love.event.quit()
     end
-    if (love.keyboard.isDown("a")) then
-        arena:destroyLeftDoor()
-    end
-	love.graphics.setNewFont(24)
     
-    if playerOK then
-        player:update(dt)
-        local quad = arena:getValidQuad(nil, player:getQuad())
-        player:setPositionFromQuad(quad)
-    end
+	gameManager:update(dt)
 end
 
 function love.draw()
 	love.graphics.setColor(255, 255, 255)
-	arena:draw()
+
+    gameManager:draw()
 	
 	love.graphics.setNewFont(24)
 	love.graphics.setColor(255, 0, 0)
