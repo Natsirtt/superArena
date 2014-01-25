@@ -50,8 +50,8 @@ end
 function mt:getQuad()
 	return {
 		{x = self.x - RADIUS, y = self.y - RADIUS},
-		{x = self.x + RADIUS, y = self.y - RADIUS}
-		{x = self.x + RADIUS, y = self.y + RADIUS}
+		{x = self.x + RADIUS, y = self.y - RADIUS},
+		{x = self.x + RADIUS, y = self.y + RADIUS},
 		{x = self.x - RADIUS, y = self.y + RADIUS}
 	}
 end
@@ -64,8 +64,13 @@ function mt:oldGetQuad()
 end
 
 function mt:setPositionFromQuad(quad)
-    self.x = quad.x + RADIUS
-    self.y = quad.y + RADIUS
+	local pm1 = getMiddlePoint(quad[1], quad[3])
+	local pm2 = getMiddlePoint(quad[2], quad[4])
+	
+	local middle = getMiddlePoint(pm1, pm2)
+
+    self.x = middle.x
+    self.y = middle.y
 end
 
 function mt:setDefending(isDefending)

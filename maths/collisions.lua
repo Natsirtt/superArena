@@ -29,9 +29,9 @@
 --	return newSegment(pmin, pmax)
 --end
 
-local function getMiddlePoint(p1, p2)
-	return {x = (p1.x - p2.x) / 2 + p1.x,
-			y = (p1.y - p2.y) / 2 + p1.y}
+function getMiddlePoint(p1, p2)
+	return {x = (p1.x + p2.x) / 2,
+			y = (p1.y + p2.y) / 2}
 end
 
 function rectCollision(quad1, quad2)

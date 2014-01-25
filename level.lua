@@ -120,8 +120,10 @@ end
 function level_mt:getValidQuad(lastQuad, newQuad)
 	for j, t in ipairs(self.boxes) do
 		for i, box in ipairs(t) do
-			if (rectCollision(self.box, lastQuad)) then
-				return lastQuad
+			if (box ~= nil) and (newQuad ~= nil) then
+				if (rectCollision(box, newQuad)) then
+					return lastQuad
+				end
 			end
 		end
 	end

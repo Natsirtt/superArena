@@ -73,10 +73,10 @@ function arenaPhase(self, dt)
     end
 
 	for _, player in ipairs(self.players) do
-		local lastQuad = player:oldGetQuad()
+		local lastQuad = player:getQuad()
 		player:update(dt)
 		-- arena hitbox
-		local quad = self.arena:getValidQuad(lastQuad, player:oldGetQuad())
+		local quad = self.arena:getValidQuad(lastQuad, player:getQuad())
         player:setPositionFromQuad(quad)
     end
 end
