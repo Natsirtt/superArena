@@ -6,6 +6,7 @@ local SPEED_BASE = 500
 local RADIUS = 20
 local DEFENDING_MAX_TIME = 5
 local ANIMATION_RATE = 0.1
+local DIE_ANIMATION_FRAME_NB = 18
 
 function newPlayer(gameManager, playerNo)
     local this = {}
@@ -22,6 +23,12 @@ function newPlayer(gameManager, playerNo)
 	this.assets["attackLeft"] = {}
 	this.assets["attackUp"] = {}
 	this.assets["attackDown"] = {}
+	this.assets["shieldDown"] = {}
+	this.assets["shieldUp"] = {}
+	this.assets["shieldLeft"] = {}
+	this.assets["shieldRight"] = {}
+	this.assets["victory"] = {}
+	this.assets["die"] = {}
 
 	this.assetsX = "idle"
 	this.assetsY = 0
@@ -29,6 +36,7 @@ function newPlayer(gameManager, playerNo)
 	this.temporaryRemainingFrame = 0
 	this.assetsMod = 4
 	this.assestsLastChange = love.timer.getTime()
+	this.dieAnimationStarted = false
 
 	local imageData = tileSet:getData()
 	local nid = love.image.newImageData(150, 150)
@@ -106,6 +114,54 @@ function newPlayer(gameManager, playerNo)
 	table.insert(this.assets["attackDown"], love.graphics.newImage(nid))
 	nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
 	table.insert(this.assets["attackDown"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	-- shield
+
+	nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
+	table.insert(this.assets["shieldDown"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 150, 150 * j, 150, 150)
+	table.insert(this.assets["shieldRight"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 300, 150 * j, 150, 150)
+	table.insert(this.assets["shieldLeft"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 450, 150 * j, 150, 150)
+	table.insert(this.assets["shieldUp"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	-- victory
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * ((i - 1) % 2), 150 * j, 150, 150)
+		table.insert(this.assets["victory"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	--die animation
+
+	for i = 1, 5 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["die"], love.graphics.newImage(nid))
+	end
+	table.insert(this.assets["die"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["die"], love.graphics.newImage(nid))
+		table.insert(this.assets["die"], love.graphics.newImage(nid))
+	end
+	table.insert(this.assets["die"], love.graphics.newImage(nid))
+	table.insert(this.assets["die"], love.graphics.newImage(nid))
+	table.insert(this.assets["die"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
+	table.insert(this.assets["die"], love.graphics.newImage(nid))
 
 	this.deathSound = love.audio.newSource("death.wav", "static")
 
@@ -286,7 +342,6 @@ function mt:update(dt)
 		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
 			self.assestsLastChange = love.timer.getTime()
 			self.assetsY = (self.assetsY + 1) % self.assetsMod
-
 			if self.temporaryAsset then
 				if self.temporaryRemainingFrame <= 0 then
 					self:switchAttackAsset()
@@ -297,8 +352,20 @@ function mt:update(dt)
 			end
 		end
 	else
-		self.deathTimer = self.deathTimer + dt
-		self.deathParticleSystem:update(dt)
+		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
+			self.assestsLastChange = love.timer.getTime()
+			self.assetsX = "die"
+			
+			if not self.dieAnimationStarted then
+				self.assetsY = -1
+				self.dieAnimationStarted = true
+			end
+			if self.assetsY < DIE_ANIMATION_FRAME_NB - 1 then
+				self.assetsY = self.assetsY + 1
+			end
+		end
+		--self.deathTimer = self.deathTimer + dt
+		--self.deathParticleSystem:update(dt)
 	end
 end
 
@@ -306,20 +373,14 @@ function mt:draw()
 	love.graphics.push()
 	--love.graphics.translate(self.x, self.y)
 	--love.graphics.rotate(math.rad(-self.angle))
+	if (self:isDead()) then
+		-- love.graphics.draw(self.deathParticleSystem)
+	end
 
 	local tex = self.assets[self.assetsX][self.assetsY + 1]
 	love.graphics.draw(tex, self.x - tex:getWidth() / 2, self.y - tex:getHeight() / 2)
 	
-	
-	if (self:isDead()) then
-		love.graphics.draw(self.deathParticleSystem)
-	end
-	
 	love.graphics.pop()
-	
-	if (self:isDead()) then
-		love.graphics.print("Le joueur est mort x(", 100, 100)
-	end
 end
 
 function mt:isDead()
@@ -332,7 +393,10 @@ end
 
 function mt:hit(lifePoints)
     self.life = self.life - lifePoints
-	if (self:isDead()) then
+    if self:isDead() then
+    	self.assetsX = "die"
+    end
+	if false then --(self:isDead()) then
 		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
 		p:setEmissionRate(100)
 		p:setSpeed(300, 400)
@@ -356,4 +420,19 @@ function mt:heal(lifePoints)
     if self.life > MAX_LIFE then
         self.life = MAX_LIFE
     end
+end
+
+function mt:debugSprites(state)
+	local t = {}
+	if state == "shield" then
+		table.insert(t, self.assets["shieldDown"][1])
+		table.insert(t, self.assets["shieldRight"][1])
+		table.insert(t, self.assets["shieldLeft"][1])
+		table.insert(t, self.assets["shieldUp"][1])
+	else 
+		t = self.assets[state]
+	end
+	for j, sprite in ipairs(t) do
+		love.graphics.draw(sprite, 175 * (j - 1), 200)
+	end
 end

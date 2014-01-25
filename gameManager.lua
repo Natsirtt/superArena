@@ -99,6 +99,7 @@ function arenaPhaseDraw(self)
 	self.arena:draw()
 	for _, player in ipairs(self.players) do
 		player:draw()
+		--player:debugSprites("shield")
 	end
 	love.graphics.pop()
 	
