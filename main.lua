@@ -1,3 +1,4 @@
+love.filesystem.load("level.lua")()
 love.filesystem.load("arena.lua")()
 love.filesystem.load("controllers/controller.lua")()
 love.filesystem.load("controllers/controllersManager.lua")()

@@ -52,7 +52,6 @@ function mt:draw()
 	end
 end
 
-
 function mt:shake()
 	if (self.shakeTimer == 0) then
 		self.shakeTimer = SHAKE_LIMIT
@@ -68,4 +67,21 @@ function mt:blink(color)
 		self.blinkTimer = BLINK_LIMIT
 		self.blinkColor = color
 	end
+end
+
+function mt:getBestPosition(players)
+	local x = -1
+	local y = -1
+	
+	for _, p in ipairs(players) do
+		if (x == -1) or (y == -1) then
+			x = p.x
+			y = p.y
+		else
+			x = (x + p.x) / 2
+			y = (y + p.y) / 2
+		end
+	end
+	
+	return x, y
 end

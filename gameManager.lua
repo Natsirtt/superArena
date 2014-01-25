@@ -90,7 +90,9 @@ function arenaPhaseDraw(self)
 	local w = self.arena.getWidth()
 	local h = self.arena.getHeight()
 	
-	love.graphics.translate(love.window.getWidth() / 2 - w / 2, love.window.getHeight() / 2 - h / 2)
+	--love.graphics.translate(love.window.getWidth() / 2 - w / 2, love.window.getHeight() / 2 - h / 2)
+	local x, y = self.camera:getBestPosition(self.players)
+	love.graphics.translate(love.window.getWidth() / 2 - x, love.window.getHeight() / 2 - y)
 	
 	self.camera:draw()
 	self.arena:draw()
@@ -101,7 +103,6 @@ function arenaPhaseDraw(self)
 	
 	love.graphics.setColor(255, 0, 0)
 	love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
-	
 end
 
 function mt:playerAttack(player)

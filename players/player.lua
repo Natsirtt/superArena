@@ -12,6 +12,8 @@ function newPlayer(gameManager)
     local this = {}
 	this.tileSet = love.graphics.newImage("tileset.png")
 	
+	this.deathSound = love.audio.newSource("death.wav", "static")
+	
 	local imageData = this.tileSet:getData()
 	
 	local nid = love.image.newImageData(50, 50)
@@ -131,11 +133,14 @@ function mt:draw()
 	love.graphics.draw(self.tileSet, quad, 0 - RADIUS, 0 - RADIUS, 0, RADIUS * 2 / 50, RADIUS * 2 / 50)
 	
 	if (self:isDead()) then
-		love.graphics.print("Le joueur est mort x(", 0, 0)
 		love.graphics.draw(self.deathParticleSystem)
 	end
 	
 	love.graphics.pop()
+	
+	if (self:isDead()) then
+		love.graphics.print("Le joueur est mort x(", 100, 100)
+	end
 end
 
 function mt:isDead()
@@ -153,17 +158,18 @@ function mt:hit(lifePoints)
 		p:setEmissionRate(100)
 		p:setSpeed(300, 400)
 		p:setPosition(0, 0)
-		p:setEmitterLifetime(5)
+		p:setEmitterLifetime(0.3)
 		p:setParticleLifetime(1)
 		p:setDirection(0)
 		p:setSpread(360)
-		p:setRadialAcceleration(-2000)
+		p:setRadialAcceleration(-3000)
 		p:setTangentialAcceleration(1000)
 		p:stop()
 		self.deathParticleSystem = p
 		p:start()
+		
+		self.deathSound:play()
 	end
-	
 end
 
 function mt:heal(lifePoints)

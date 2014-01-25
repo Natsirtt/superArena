@@ -1,8 +1,8 @@
 local arena_mt = {}
 arena_mt.__index = arena_mt
 
-local ARENA_WIDTH = 16
-local ARENA_HEIGHT = 16
+local ARENA_WIDTH = 20
+local ARENA_HEIGHT = 20
 
 local TILE_SIZE = 50
 
@@ -20,10 +20,10 @@ local porteGauche         = {x = 300, y = 100, width = 100, height = 100}
 local porteGaucheDetruite = {x = 300, y = 200, width = 100, height = 100}
 local porteDroite         = {x = 300, y = 100, width = 100, height = 100} -- TODO ajouter au tileset
 local porteDroiteDetruite = {x = 300, y = 200, width = 100, height = 100} -- TODO ajouter au tileset
-local public        = {x = 300, y = 0, width = 15, height = 15}
-local public2       = {x = 300, y = 15, width = 15, height = 15}
-local publicDown        = {x = 315, y = 0, width = 15, height = 15}
-local publicDown2       = {x = 315, y = 15, width = 15, height = 15}
+local public              = {x = 300, y = 0, width = 15, height = 15}
+local public2             = {x = 300, y = 15, width = 15, height = 15}
+local publicDown          = {x = 315, y = 0, width = 15, height = 15}
+local publicDown2         = {x = 315, y = 15, width = 15, height = 15}
 
 function newArena()
 	local arena = {}
@@ -76,12 +76,14 @@ function newArena()
 			arena.tiles[i][j] = tile;
 		end
 	end
+	
+	arena.lvl = newLevel()
 
 	return setmetatable(arena, arena_mt)
 end
 
 function arena_mt:update(dt)
-	
+	self.lvl:update(dt)
 end
 
 function arena_mt:draw()
@@ -131,6 +133,10 @@ function arena_mt:draw()
 			end
 		end
 	end
+	love.graphics.push()
+	love.graphics.translate(self.lvl.getWidth() / 2, -self.lvl.getHeight())
+	self.lvl:draw()
+	love.graphics.pop()
 end
 
 function arena_mt:destroyLeftDoor()
