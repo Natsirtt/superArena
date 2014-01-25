@@ -5,20 +5,109 @@ local MAX_LIFE = 10
 local SPEED_BASE = 500
 local RADIUS = 20
 local DEFENDING_MAX_TIME = 5
+local ANIMATION_RATE = 0.1
 
-local PLAYER_TILE = {x = 350, y = 0, width = 50, height = 50}
-
-function newPlayer(gameManager)
+function newPlayer(gameManager, playerNo)
     local this = {}
-	this.tileSet = love.graphics.newImage("tileset.png")
 	
+	local tileSet = love.graphics.newImage("assets/player"..playerNo..".png")
+	
+	this.assets = {}
+	this.assets["idle"] = {}
+	this.assets["walkDown"] = {}
+	this.assets["walkRight"] = {}
+	this.assets["walkLeft"] = {}
+	this.assets["walkUp"] = {}
+	this.assets["attackRight"] = {}
+	this.assets["attackLeft"] = {}
+	this.assets["attackUp"] = {}
+	this.assets["attackDown"] = {}
+
+	this.assetsX = "idle"
+	this.assetsY = 0
+	this.temporaryAsset = false
+	this.temporaryRemainingFrame = 0
+	this.assetsMod = 4
+	this.assestsLastChange = love.timer.getTime()
+
+	local imageData = tileSet:getData()
+	local nid = love.image.newImageData(150, 150)
+	local j = 0
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idle"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["walkDown"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["walkRight"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["walkLeft"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["walkUp"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	for i = 1, 2 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["attackRight"], love.graphics.newImage(nid))
+	end
+	table.insert(this.assets["attackRight"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+	table.insert(this.assets["attackRight"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	for i = 1, 2 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["attackLeft"], love.graphics.newImage(nid))
+	end
+	table.insert(this.assets["attackLeft"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+	table.insert(this.assets["attackLeft"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	for i = 1, 2 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["attackUp"], love.graphics.newImage(nid))
+	end
+	table.insert(this.assets["attackUp"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+	table.insert(this.assets["attackUp"], love.graphics.newImage(nid))
+
+	j = j + 1
+
+	for i = 1, 2 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["attackDown"], love.graphics.newImage(nid))
+	end
+	table.insert(this.assets["attackDown"], love.graphics.newImage(nid))
+	nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+	table.insert(this.assets["attackDown"], love.graphics.newImage(nid))
+
 	this.deathSound = love.audio.newSource("death.wav", "static")
-	
-	local imageData = this.tileSet:getData()
-	
-	local nid = love.image.newImageData(50, 50)
-	nid:paste(imageData, 0, 0, 350, 0, 50, 50)
-	this.playerImage = love.graphics.newImage(nid)
 
 	this.gameManager = gameManager
     
@@ -85,6 +174,27 @@ function mt:canAttack()
 	return not self:isDefending()
 end
 
+function mt:switchAttackAsset()
+	local str = self.assetsX
+	if str == "walkUp" then
+		self.assetsX = "attackUp"
+	elseif (str == "walkDown") or (str == "idle") then
+		self.assetsX = "attackDown"
+	elseif str == "walkLeft" then
+		self.assetsX = "attackLeft"
+	elseif str == "walkRight" then
+		self.assetsX = "attackRight"
+	elseif str == "attackUp" then
+		self.assetsX = "walkUp"
+	elseif str == "attackDown" then
+		self.assetsX = "walkDown"
+	elseif str == "attackRight" then
+		self.assetsX = "walkRight"
+	else
+		self.assetsX = "walkLeft"
+	end
+end
+
 function mt:attack()
 	if self:canAttack() then
 		self.gameManager:playerAttack(self)
@@ -99,6 +209,14 @@ function mt:update(dt)
 			self.gameManager.camera:shake()
 			self.gameManager.camera:blink({r = 180, g = 20, b = 20})
 		end
+		if (self.controller:isDown(13)) then
+			if not self.temporaryAsset then
+				self:attack()
+				self:switchAttackAsset()
+				self.temporaryRemainingFrame = 4
+				self.temporaryAsset = true
+			end
+		end
 		if (self.controller:isDown(11)) then
 			self:hit(self.life)
 		end
@@ -108,20 +226,50 @@ function mt:update(dt)
 		
 		if (self.dx == -1) and (self.dy == -1) then
 			self.angle = 45
+			if not self.temporaryAsset then
+				self.assetsX = "walkUp"
+			end
 		elseif (self.dx == -1) and (self.dy == 0) then
 			self.angle = 90
+			if not self.temporaryAsset then
+				self.assetsX = "walkLeft"
+			end
 		elseif (self.dx == -1) and (self.dy == 1) then
 			self.angle = 135
-		elseif (self.dx == 1) and (self.dy == -1) then
+			if not self.temporaryAsset then
+				self.assetsX = "walkDown"
+			end
+		elseif (self.dx == 1) and (self.dy == -1) then		
 			self.angle = -45
+			if not self.temporaryAsset then
+				self.assetsX = "walkUp"
+			end
 		elseif (self.dx == 1) and (self.dy == 0) then
 			self.angle = -90
+			if not self.temporaryAsset then
+				self.assetsX = "walkRight"
+			end
 		elseif (self.dx == 1) and (self.dy == 1) then
 			self.angle = -135
+			if not self.temporaryAsset then
+				self.assetsX = "walkDown"
+			end
 		elseif (self.dx == 0) and (self.dy == -1) then
 			self.angle = 0
+			if not self.temporaryAsset then
+				self.assetsX = "walkUp"
+			end
 		elseif (self.dx == 0) and (self.dy == 1) then
 			self.angle = 180
+			if not self.temporaryAsset then
+				self.assetsX = "walkDown"
+			end
+		end
+
+		if (self.dx == 0) and (self.dy == 0) then
+			if not self.temporaryAsset then
+				self.assetsX = "idle"
+			end
 		end
 
 		-- defending checking
@@ -133,6 +281,21 @@ function mt:update(dt)
 		else
 
 		end
+
+		--animation
+		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
+			self.assestsLastChange = love.timer.getTime()
+			self.assetsY = (self.assetsY + 1) % self.assetsMod
+
+			if self.temporaryAsset then
+				if self.temporaryRemainingFrame <= 0 then
+					self:switchAttackAsset()
+					self.temporaryAsset = false
+				else
+					self.temporaryRemainingFrame = self.temporaryRemainingFrame - 1
+				end
+			end
+		end
 	else
 		self.deathTimer = self.deathTimer + dt
 		self.deathParticleSystem:update(dt)
@@ -141,10 +304,12 @@ end
 
 function mt:draw()
 	love.graphics.push()
-	love.graphics.translate(self.x, self.y)
-	love.graphics.rotate(math.rad(-self.angle))
-	local quad = love.graphics.newQuad(PLAYER_TILE.x, PLAYER_TILE.y, PLAYER_TILE.width, PLAYER_TILE.height, self.tileSet:getWidth(), self.tileSet:getHeight())
-	love.graphics.draw(self.tileSet, quad, 0 - RADIUS, 0 - RADIUS, 0, RADIUS * 2 / 50, RADIUS * 2 / 50)
+	--love.graphics.translate(self.x, self.y)
+	--love.graphics.rotate(math.rad(-self.angle))
+
+	local tex = self.assets[self.assetsX][self.assetsY + 1]
+	love.graphics.draw(tex, self.x - tex:getWidth() / 2, self.y - tex:getHeight() / 2)
+	
 	
 	if (self:isDead()) then
 		love.graphics.draw(self.deathParticleSystem)
@@ -168,10 +333,10 @@ end
 function mt:hit(lifePoints)
     self.life = self.life - lifePoints
 	if (self:isDead()) then
-		local p = love.graphics.newParticleSystem(self.playerImage, 1000)
+		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
 		p:setEmissionRate(100)
 		p:setSpeed(300, 400)
-		p:setPosition(0, 0)
+		p:setPosition(self.x, self.y)
 		p:setEmitterLifetime(0.3)
 		p:setParticleLifetime(1)
 		p:setDirection(0)
