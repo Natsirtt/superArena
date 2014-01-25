@@ -78,10 +78,13 @@ function mt:getBestPosition(players)
 			x = p.x
 			y = p.y
 		else
-			x = (x + p.x) / 2
-			y = (y + p.y) / 2
+			x = (x + p.x)
+			y = (y + p.y)
 		end
 	end
+	
+	x = x / #players
+	y = y / #players
 	
 	return x, y
 end

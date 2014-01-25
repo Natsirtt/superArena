@@ -36,13 +36,13 @@ function love.draw()
     gameManager:draw()
     local quad1 = {{x = 100, y = 100}, {x = 100, y = 120}, {x = 120, y = 120}, {x = 120, y = 100},}
     local quad2 = {{x = 90, y = 90}, {x = 90, y = 120}, {x = 120, y = 120}, {x = 120, y = 90},}
-    print("DEBUG : " .. tableString(rectCollision(quad1, quad2)))
+    print("DEBUG : " .. tostring(rectCollision(quad1, quad2)))
 end
 
-function tableString(table)
-    local res = "{"
-    for i,v in ipairs(table) do
-        res = res .. i.."= {"..v:debugInfo().."}, "
-    end
-    return res .. "}"
-end
+-- function tableString(table)
+    -- local res = "{"
+    -- for i,v in ipairs(table) do
+        -- res = res .. i.."= {"..v:debugInfo().."}, "
+    -- end
+    -- return res .. "}"
+-- end

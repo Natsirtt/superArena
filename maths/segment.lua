@@ -2,60 +2,55 @@ local mt = {}
 mt.__index = mt
 
 function newSegment(p1, p2)
-    local self = {}
+    local this = {}
 
-    self.p1 = {p1.x, p1.y}
-    self.p2 = {p2.x, p2.y}
+    this.p1 = {x = p1.x, y = p1.y}
+    this.p2 = {x = p2.x, y = p2.y}
 
     if (p1.x > p2.x) then
-    	local p = self.p2
-    	self.p2 = self.p1
-    	self.p1 = p
+    	local p = this.p2
+    	this.p2 = this.p1
+    	this.p1 = p
     end
     
     return setmetatable(this, mt)
 end
 
-function mt:getX()
-	return self.x
-end
+-- function mt:min(seg)
+	-- if self.x < seg.x then
+		-- return self
+	-- end
+	-- return seg
+-- end
 
-function mt:getY()
-	return self.y
-end
-
-function mt:min(seg)
-	if self:getX() < seg:getX() then
-		return self
-	end
-	return seg
-end
-
-function mt:max(seg)
-	if self:getX() > seg:getX() then
-		return self
-	end
-	return seg
-end
+-- function mt:max(seg)
+	-- if self.x > seg.x then
+		-- return self
+	-- end
+	-- return seg
+-- end
 
 function mt:overlaps(segment)
-	local minX = maths.min(segment:getX(), self:getX())
-	local minY = maths.min(segment:getY(), self:getY())
+	if (segment == nil) then
+		love.event.quit()
+	end
+	local minX = math.min(segment.p1.x, self.p1.x)
+	local minX2 = math.min(segment.p2.x, self.p2.x)
 
-	if (self:getX() == segment:getX()) then
+	if (self.p1.x == segment.p1.x) then
 		-- we use fake segments to verify
-		return newSegment(self:getY(), self:getX()):overlap(newSegment(segment:getY(), segment:getX()))
+		return newSegment(self.p1.y, self.p1.x):overlaps(newSegment(segment.p1.y, segment.p1.x))
 	end
 
 	-- first case : one segment totally eat the other
-	if ((minX == self:getX()) and (minY == segment:getY())) or
-	   ((minX == segment:getX())  and (minY == self:getY())) then
+	if ((minX == self.p1.x) and (minX2 == segment.p2.x)) or
+	   ((minX == segment.p1.x)  and (minX2 == self.p2.x)) then
 		return true
 	end
 
 	-- now one segment is partially over the other
-	if ((minX == self:getX()) and (segment:getX() <= self:getY())) or
-		 ((minX == segment:getX()) and (self:getX() <= segment:getY())) then
+	if ((minX == self.p1.x) and (segment.p2.x <= self.p2.x)) or
+		 ((minX == segment.p1.x) and (self.p2.x <= segment.p2.x)) then
 		return true
 	end
 

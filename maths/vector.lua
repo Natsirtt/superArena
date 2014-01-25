@@ -27,15 +27,15 @@ function mt:copy()
 end
 
 function mt:norme()
-	return math.sqrt(self:getX() * self:getX() + self:getY() * self:getY())
+	return math.sqrt(self.x * self.x + self.y * self.y)
 end
 
 function mt:normalize()
-	local oldNorme = self:norme()
-	self.x = self.x / oldNorme
-	self.y = self.y / oldNorme
+	local n = self:norme()
+	self.x = self.x / n
+	self.y = self.y / n
 end
 
 function mt:scalar(vector)
-	return self:getX() * vector:getX() + self:getY() * vector:getY()
+	return self.x * vector.x + self.y * vector.y
 end
