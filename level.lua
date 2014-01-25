@@ -59,16 +59,19 @@ function newLevel()
 	
 	level.tileSet = love.graphics.newImage("tileset.png")
 	
+	local dx = TILE_SIZE * LEVEL_WIDTH / 2
+	local dy = -TILE_SIZE * LEVEL_HEIGHT
+	
 	level.boxes = {}
 	for j, t in ipairs(LEVEL_MAP) do
 		level.boxes[j] = {}
 		for i, tileID in ipairs(t) do
 			if (tileID ~= 0) then
 				level.boxes[j][i] = {
-					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE},
-					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE},
-					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE + TILE_SIZE},
-					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE + TILE_SIZE}
+					{x = (i - 1) * TILE_SIZE + dx,             y = (j - 1) * TILE_SIZE + dy},
+					{x = (i - 1) * TILE_SIZE + dx + TILE_SIZE, y = (j - 1) * TILE_SIZE + dy},
+					{x = (i - 1) * TILE_SIZE + dx + TILE_SIZE, y = (j - 1) * TILE_SIZE + dy + TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + dx,             y = (j - 1) * TILE_SIZE + dy + TILE_SIZE}
 				}
 			end
 		end
