@@ -76,7 +76,7 @@ function arenaPhase(self, dt)
 		local lastQuad = player:getQuad()
 		player:update(dt)
 		-- arena hitbox
-		local quad = self.arena:getValidQuad(lastQuad, player:getQuad())
+		local quad = self.arena:getValidQuad(lastQuad, player:getQuad(), player.dx * player.speed * dt, player.dy * player.speed * dt)
         player:setPositionFromQuad(quad)
     end
 end
