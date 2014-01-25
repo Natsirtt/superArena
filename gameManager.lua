@@ -1,3 +1,5 @@
+love.filesystem.load("camera.lua")()
+
 local mt = {}
 mt.__index = mt
 
@@ -11,6 +13,9 @@ function newGameManager()
 	self.drawTask = addingPlayersPhaseDraw
 
 	self.phaseInitialized = false
+	
+	self.globalTimer = 60 -- En secondes (à modifier)
+	self.camera = nil
 
 	return setmetatable(self, mt)
 end
@@ -52,10 +57,20 @@ function addingPlayersPhaseDraw(self)
 end
 
 function arenaPhase(self, dt)
+	self.globalTimer = math.max(0, self.globalTimer - dt)
+
 	if not self.phaseInitialized then
 		self.arena = newArena()
+		self.camera = newCamera()
 		self.phaseInitialized = true
 	end
+	
+    if (love.keyboard.isDown("a")) then
+        self.camera:shake()
+		self.camera:blink({r = 180, g = 20, b = 20})
+    end
+	
+	self.camera:update(dt)
 
 	love.graphics.setNewFont(24)
 	if (love.keyboard.isDown("a")) then
@@ -74,11 +89,24 @@ function arenaPhaseDraw(self)
 	if not self.phaseInitialized then
 		return
 	end
-
+	
+	love.graphics.push()
+	
+	local w = self.arena.getWidth()
+	local h = self.arena.getHeight()
+	
+	love.graphics.translate(love.window.getWidth() / 2 - w / 2, love.window.getHeight() / 2 - h / 2)
+	
+	self.camera:draw()
 	self.arena:draw()
 	for _, player in ipairs(self.players) do
 		player:draw()
 	end
+	love.graphics.pop()
+	
+	love.graphics.setColor(255, 0, 0)
+	love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
+	
 end
 
 function mt:debugInfo()

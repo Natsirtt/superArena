@@ -73,8 +73,6 @@ function mt:draw()
 	love.graphics.draw(self.tileSet, quad, 0 - RADIUS, 0 - RADIUS, 0, RADIUS * 2 / 50, RADIUS * 2 / 50)
 	
 	love.graphics.pop()
-	
-	love.graphics.print(self.dx.." "..self.dy, 100, 100)
 end
 
 function mt:isDead()
