@@ -48,6 +48,15 @@ function newPlayer(gameManager)
 end
 
 function mt:getQuad()
+	return {
+		{x = self.x - RADIUS, y = self.y - RADIUS},
+		{x = self.x + RADIUS, y = self.y - RADIUS}
+		{x = self.x + RADIUS, y = self.y + RADIUS}
+		{x = self.x - RADIUS, y = self.y + RADIUS}
+	}
+end
+
+function mt:oldGetQuad()
     return {x = self.x - RADIUS,
             y = self.y - RADIUS,
             w = RADIUS * 2,

@@ -34,9 +34,9 @@ end
 
 function love.draw()
     gameManager:draw()
-    local quad1 = {{x = 100, y = 100}, {x = 100, y = 120}, {x = 120, y = 120}, {x = 120, y = 100},}
-    local quad2 = {{x = 90, y = 90}, {x = 90, y = 120}, {x = 120, y = 120}, {x = 120, y = 90},}
-    print("DEBUG : " .. tostring(rectCollision(quad1, quad2)))
+    --local quad1 = {{x = 10, y = 10}, {x = 10, y = 12}, {x = 12, y = 12}, {x = 12, y = 10},}
+    --local quad2 = {{x = 90, y = 90}, {x = 90, y = 120}, {x = 120, y = 120}, {x = 120, y = 90},}
+    --print("DEBUG : " .. tostring(rectCollision(quad1, quad2)))
 end
 
 -- function tableString(table)

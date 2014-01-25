@@ -28,6 +28,10 @@ function mt:isAnyDown()
     return false
 end
 
+function mt:isAttackButtonDown()
+    
+end
+
 function mt:rumble(f)
 	if (self.joystick:isVibrationSupported()) then
 		self.joystick:setVibration(f, f)
