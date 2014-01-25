@@ -46,7 +46,23 @@ function mt:update(dt)
     self.x = self.x + dt * self.dx * self.speed
     self.y = self.y + dt * self.dy * self.speed
 	
-	
+	if (self.dx == -1) and (self.dy == -1) then
+		self.angle = 45
+	elseif (self.dx == -1) and (self.dy == 0) then
+		self.angle = 90
+	elseif (self.dx == -1) and (self.dy == 1) then
+		self.angle = 135
+	elseif (self.dx == 1) and (self.dy == -1) then
+		self.angle = -45
+	elseif (self.dx == 1) and (self.dy == 0) then
+		self.angle = -90
+	elseif (self.dx == 1) and (self.dy == 1) then
+		self.angle = -135
+	elseif (self.dx == 0) and (self.dy == -1) then
+		self.angle = 0
+	elseif (self.dx == 0) and (self.dy == 1) then
+		self.angle = 180
+	end
 end
 
 function mt:draw()
@@ -57,6 +73,8 @@ function mt:draw()
 	love.graphics.draw(self.tileSet, quad, 0 - RADIUS, 0 - RADIUS, 0, RADIUS * 2 / 50, RADIUS * 2 / 50)
 	
 	love.graphics.pop()
+	
+	love.graphics.print(self.dx.." "..self.dy, 100, 100)
 end
 
 function mt:isDead()
