@@ -32,7 +32,9 @@ function newArena()
 	arena.tiles = {}
 	arena.publicTimer = 0
 	arena.hasLeftDoor = true
-	arenahasRightDoor = true
+	arena.hasRightDoor = true
+	arena.boxes = {}
+	
 	for i = 1, ARENA_WIDTH do
 		arena.tiles[i] = {}
 		for j = 1, ARENA_HEIGHT do
@@ -74,6 +76,20 @@ function newArena()
 			end
 			
 			arena.tiles[i][j] = tile;
+		end
+	end
+	
+	for i, t in ipairs(arena.tiles) do
+		arena.boxes[i] = {}
+		for j, tile in ipairs(t) do
+			if (tile ~= center) then
+				arena.boxes[i][j] = {
+					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE + TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE + TILE_SIZE}
+				}
+			end
 		end
 	end
 	
@@ -151,34 +167,14 @@ end
 
 -- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
 function arena_mt:getValidQuad(lastQuad, newQuad)
-	local x = newQuad.x
-	local y = newQuad.y
-	local w = newQuad.w
-	local h = newQuad.h
-	
-	
-	local i = x / TILE_SIZE
-	local j = y / TILE_SIZE
-	
-	if (i <= 1) or (i >= ARENA_WIDTH - 2) then
-		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 1) * TILE_SIZE - w)
+	for j, t in ipairs(self.boxes) do
+		for i, box in ipairs(t) do
+			if (rectCollision(self.box, lastQuad)) then
+				return lastQuad
+			end
+		end
 	end
-	local x2 = x + newQuad.w
-	i = x2 / TILE_SIZE
-	if (i == 1) or (i >= (ARENA_WIDTH - 2)) then
-		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 1) * TILE_SIZE - w)
-	end
-			
-	if (j <= 1) or (j >= (ARENA_HEIGHT - 2)) then
-		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 1) * TILE_SIZE - h)
-	end
-	local y2 = y + newQuad.h
-	j = y2 / TILE_SIZE
-	if (j <= 1) or (i >= (ARENA_HEIGHT - 2)) then
-		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 1) * TILE_SIZE - h)
-	end
-	
-	return {x = x, y = y, w = w, h = h}
+	return newQuad
 end
 
 function arena_mt:getWidth()

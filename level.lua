@@ -58,6 +58,21 @@ function newLevel()
 	local level = {}
 	
 	level.tileSet = love.graphics.newImage("tileset.png")
+	
+	level.boxes = {}
+	for j, t in ipairs(LEVEL_MAP) do
+		level.boxes[j] = {}
+		for i, tileID in ipairs(t) do
+			if (tileID ~= 0) then
+				level.boxes[j][i] = {
+					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE + TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE + TILE_SIZE}
+				}
+			end
+		end
+	end
 
 	return setmetatable(level, level_mt)
 end
@@ -99,4 +114,16 @@ end
 
 function level_mt:getHeight()
 	return TILE_SIZE * LEVEL_HEIGHT
+end
+
+-- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
+function level_mt:getValidQuad(lastQuad, newQuad)
+	for j, t in ipairs(self.boxes) do
+		for i, box in ipairs(t) do
+			if (rectCollision(self.box, lastQuad)) then
+				return lastQuad
+			end
+		end
+	end
+	return newQuad
 end
