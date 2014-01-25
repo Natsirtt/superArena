@@ -4,6 +4,10 @@ love.filesystem.load("controllers/controller.lua")()
 love.filesystem.load("controllers/controllersManager.lua")()
 love.filesystem.load("players/player.lua")()
 love.filesystem.load("gameManager.lua")()
+love.filesystem.load("maths/point.lua")()
+love.filesystem.load("maths/vector.lua")()
+love.filesystem.load("maths/segment.lua")()
+love.filesystem.load("maths/collisions.lua")()
 
 local gameManager
 
@@ -30,4 +34,15 @@ end
 
 function love.draw()
     gameManager:draw()
+    local quad1 = {{x = 100, y = 100}, {x = 100, y = 120}, {x = 120, y = 120}, {x = 120, y = 100},}
+    local quad2 = {{x = 90, y = 90}, {x = 90, y = 120}, {x = 120, y = 120}, {x = 120, y = 90},}
+    print("DEBUG : " .. tableString(rectCollision(quad1, quad2)))
+end
+
+function tableString(table)
+    local res = "{"
+    for i,v in ipairs(table) do
+        res = res .. i.."= {"..v:debugInfo().."}, "
+    end
+    return res .. "}"
 end

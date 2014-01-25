@@ -1,34 +1,33 @@
 -- returns the segment that contains all of those points (points are aligned)
-local function getSegment(pointsTable)
-	local p1 = pointsTable[1]
-	local p2 = pointsTable[2]
-	local p3 = pointsTable[3]
-	local p4 = pointsTable[4]
-
-	if p1:getX() == p2:getX() then
-		-- all 4 are aligned
-		local seg = getSegment(newPoint(p1:getY(), p1:getX()),
-				   newPoint(p2:getY(), p2:getX()),
-				   newPoint(p3:getY(), p3:getX()),
-				   newPoint(p4:getY(), p4:getX()),
-		)
-		return newSegment(seg:getY(), seg:getX())
-	end
-
-	-- we keep the min and max points related to their X composant
-	local pmax = p1
-	local pmin = p1
-	
-	pmax = p2:max(pmax)
-	pmax = p3:max(pmax)
-	pmax = p4:max(pmax)
-
-	pmin = p2:min(pmin)
-	pmin = p3:min(pmin)
-	pmin = p4:min(pmin)
-
-	return newSegment(pmin, pmax)
-end
+--function getSegment(pointsTable)
+--	local p1 = pointsTable[1]
+--	local p2 = pointsTable[2]
+--	local p3 = pointsTable[3]
+--	local p4 = pointsTable[4]
+--
+--	if p1:getX() == p2:getX() then
+--		-- all 4 are aligned
+--		local seg = getSegment(newPoint(p1:getY(), p1:getX()),
+--				   newPoint(p2:getY(), p2:getX()),
+--				   newPoint(p3:getY(), p3:getX()),
+--				   newPoint(p4:getY(), p4:getX()))
+--		return newSegment(seg:getY(), seg:getX())
+--	end
+--
+--	-- we keep the min and max points related to their X composant
+--	local pmax = p1
+--	local pmin = p1
+--	
+--	pmax = p2:max(pmax)
+--	pmax = p3:max(pmax)
+--	pmax = p4:max(pmax)
+--
+--	pmin = p2:min(pmin)
+--	pmin = p3:min(pmin)
+--	pmin = p4:min(pmin)
+--
+--	return newSegment(pmin, pmax)
+--end
 
 local function getMiddlePoint(p1, p2)
 	return {x = (p1.x - p2.x) / 2 + p1.x,
@@ -60,27 +59,83 @@ function rectCollision(quad1, quad2)
 			origin = origins[2]
 		end
 
-		-- fisrt quad
-		local q1projs = {}
-		for j, p in quad1 do
-			q1projs[j] = newPoint(p.x, p.y):projectOnLone(origin, axis)
-		end
-
-		--we get the related segment
-		local seg1 = getSegment(q1projs)
-
 		-- second quad
-		local q2projs = {}
-		for j, p in quad2 do
-			q2projs[j] = newPoint(p.x, p.y):projectOnLine(origin, axis)
-		end
+		
+		--for j, p in ipairs(quad2) do
+		--	q2projs[k] = newPoint(p.x, p.y):projectOnLine(origin, axis)
+		--end
+
+		local pointsTable = {
+			newPoint(quad2[1].x, quad2[1].y):projectOnLine(origin, axis),
+			newPoint(quad2[2].x, quad2[2].y):projectOnLine(origin, axis),
+			newPoint(quad2[3].x, quad2[3].y):projectOnLine(origin, axis),
+			newPoint(quad2[4].x, quad2[4].y):projectOnLine(origin, axis),
+		}
+
+		--if true then
+		--	return q2projs
+		--end
 
 		--we get the second segment
-		local seg2 = getSegment(q2projs)
+		-- local seg2 = getSegment(q2projs)
+		local p1 = pointsTable[1]
+		local p2 = pointsTable[2]
+		local p3 = pointsTable[3]
+		local p4 = pointsTable[4]
+
+		-- we keep the min and max points related to their X composant
+		local pmax = p1
+		local pmin = p1
+	
+		pmax = p2:max(pmax)
+		pmax = p3:max(pmax)
+		pmax = p4:max(pmax)
+
+		pmin = p2:min(pmin)
+		pmin = p3:min(pmin)
+		pmin = p4:min(pmin)
+
+		local seg2 = newSegment(pmin, pmax)
+
+		-- first quad
+		--local q1projs = {}
+		
+		--for _, p in ipairs(quad1) do
+		--	table.insert(q1projs, newPoint(p.x, p.y):projectOnLine(origin, axis))
+		--end
+
+		pointsTable = {
+			newPoint(quad1[1].x, quad1[1].y):projectOnLine(origin, axis),
+			newPoint(quad1[2].x, quad1[2].y):projectOnLine(origin, axis),
+			newPoint(quad1[3].x, quad1[3].y):projectOnLine(origin, axis),
+			newPoint(quad1[4].x, quad1[4].y):projectOnLine(origin, axis),
+		}
+
+		--we get the related segment
+		--local seg1 = getSegment(q1projs)
+		local p1 = pointsTable[1]
+		local p2 = pointsTable[2]
+		local p3 = pointsTable[3]
+		local p4 = pointsTable[4]
+
+		-- we keep the min and max points related to their X composant
+		local pmax = p1
+		local pmin = p1
+	
+		pmax = p2:max(pmax)
+		pmax = p3:max(pmax)
+		pmax = p4:max(pmax)
+
+		pmin = p2:min(pmin)
+		pmin = p3:min(pmin)
+		pmin = p4:min(pmin)
+
+		local seg1 = newSegment(pmin, pmax)
 
 		--we test if they overlaps. If not, there's no collision
 		if not seg1:overlaps(seg2) then
 			return false
+		end
 	end
 
 	--they all overlaps, there is a collision
@@ -90,8 +145,8 @@ end
 -- returns two tables, one for each axis, with a point (the origin of the vector) and a vector
 function rectGetAxes(quad)
 	local res = {}
-	local m1 = getMiddlePoint(quad.p1, quad.p3)
-	local m2 = getMiddlePoint(quad.p2, quad.p4)
+	local m1 = getMiddlePoint(quad[1], quad[3])
+	local m2 = getMiddlePoint(quad[2], quad[4])
 
 	local origin = getMiddlePoint(m1, m2)
 	res["origin"] = newPoint(origin.x, origin.y)
