@@ -31,7 +31,8 @@ function newArena()
 	arena.tileSet = love.graphics.newImage("tileset.png")
 	arena.tiles = {}
 	arena.publicTimer = 0
-	
+	arena.hasLeftDoor = true
+	arenahasRightDoor = true
 	for i = 1, ARENA_WIDTH do
 		arena.tiles[i] = {}
 		for j = 1, ARENA_HEIGHT do
@@ -134,10 +135,12 @@ end
 
 function arena_mt:destroyLeftDoor()
 	self.tiles[self.porteGauche.x][self.porteGauche.y] = porteGaucheDetruite
+	self.hasLeftDoor = false
 end
 
 function arena_mt:destroyRightDoor()
 	self.tiles[self.porteDroite.x][self.porteDroite.y] = porteGaucheDetruite
+	self.hasRightDoor = false
 end
 
 -- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
@@ -147,7 +150,10 @@ function arena_mt:getValidQuad(lastQuad, newQuad)
 	local w = newQuad.w
 	local h = newQuad.h
 	
+	
 	local i = x / TILE_SIZE
+	local j = y / TILE_SIZE
+	
 	if (i <= 1) or (i >= ARENA_WIDTH - 2) then
 		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 1) * TILE_SIZE - w)
 	end
@@ -156,8 +162,7 @@ function arena_mt:getValidQuad(lastQuad, newQuad)
 	if (i == 1) or (i >= (ARENA_WIDTH - 2)) then
 		x = math.min(math.max(TILE_SIZE, x), (ARENA_WIDTH - 1) * TILE_SIZE - w)
 	end
-	
-	local j = y / TILE_SIZE
+			
 	if (j <= 1) or (j >= (ARENA_HEIGHT - 2)) then
 		y = math.min(math.max(TILE_SIZE, y), (ARENA_HEIGHT - 1) * TILE_SIZE - h)
 	end
@@ -168,4 +173,12 @@ function arena_mt:getValidQuad(lastQuad, newQuad)
 	end
 	
 	return {x = x, y = y, w = w, h = h}
+end
+
+function arena_mt:getWidth()
+	return TILE_SIZE * ARENA_WIDTH
+end
+
+function arena_mt:getHeight()
+	return TILE_SIZE * ARENA_HEIGHT
 end
