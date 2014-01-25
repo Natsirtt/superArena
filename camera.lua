@@ -6,7 +6,7 @@ local SHAKE_AMPLITUDE = 25.0
 local SHAKE_PER_SECOND = 20.0
 
 local BLINK_LIMIT = 0.2
-local BLINK_PER_SECOND = 15.0
+local BLINK_PER_SECOND = 20.0
 
 function newCamera()
     local this = {}

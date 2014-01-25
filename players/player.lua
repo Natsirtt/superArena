@@ -188,7 +188,8 @@ function newPlayer(gameManager, playerNo)
 	
 	this.deathTimer = 0
 	this.deathParticleSystem = nil
-	
+	this.hitTimer = 0
+	this.hitParticleSystem = nil
 	
     
     --if this.controller == nil then
@@ -379,6 +380,10 @@ function mt:update(dt)
 		--self.deathTimer = self.deathTimer + dt
 		--self.deathParticleSystem:update(dt)
 	end
+	if (self.hitParticleSystem ~= nil) then
+		self.hitTimer = self.hitTimer + dt
+		self.hitParticleSystem:update(dt)
+	end
 end
 
 function mt:draw()
@@ -398,6 +403,9 @@ function mt:draw()
 	--love.graphics.rotate(math.rad(-self.angle))
 	if (self:isDead()) then
 		-- love.graphics.draw(self.deathParticleSystem)
+	end
+	if (self.hitParticleSystem ~= nil) then
+		love.graphics.draw(self.hitParticleSystem)
 	end
 
 	local tex = self.assets[self.assetsX][self.assetsY + 1]
@@ -419,6 +427,8 @@ function mt:hit(lifePoints)
     if self:isDead() then
     	self.assetsX = "die"
     end
+	self.gameManager.camera:shake()
+	self:blink({r = 255, g = 20, b = 20})
 	if false then --(self:isDead()) then
 		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
 		p:setEmissionRate(100)
@@ -435,6 +445,20 @@ function mt:hit(lifePoints)
 		p:start()
 		
 		self.deathSound:play()
+	else
+		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
+		p:setEmissionRate(20)
+		p:setSpeed(300, 400)
+		p:setPosition(self.x, self.y)
+		p:setEmitterLifetime(0.3)
+		p:setParticleLifetime(0.3)
+		p:setDirection(0)
+		p:setSpread(360)
+		p:setRadialAcceleration(-3000)
+		p:setTangentialAcceleration(1000)
+		p:stop()
+		self.hitParticleSystem = p
+		p:start()
 	end
 end
 
