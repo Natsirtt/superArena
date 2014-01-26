@@ -6,8 +6,8 @@ local YHudDist = 25
 
 function mt:drawAsset(asset, x, y)
 	local x2, y2 = self:getDistances(x, y)
-	local xOffset = (x2 == x)
-	local yOffset = (y2 == y)
+	local xOffset = (x2 ~= x)
+	local yOffset = (y2 ~= y)
 	getAssetsManager():drawUIAsset(self.player, asset, x2, y2, false, xOffset, yOffset)
 end
 
