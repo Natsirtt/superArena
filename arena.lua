@@ -29,7 +29,8 @@ function newArena()
 	arena.tileSet = love.graphics.newImage("assets/tileset.png")
 	arena.tiles = {}
 	arena.publicTimer = 0
-	arena.hasDoor = true
+	arena.hasLeftDoor = true
+	arena.hasRightDoor = true
 	arena.boxes = {}
 	
 	for i = 1, ARENA_WIDTH do
@@ -42,10 +43,14 @@ function newArena()
 			elseif (i == 1) and (j == ARENA_HEIGHT) then
 				-- Partie bas gauche
 				tile = bottomLeft
-			elseif (i == ARENA_WIDTH / 2) and (j == 1) then
-				-- Porte
-				tile = porte
-				arena.porte = {x = i, y = j}
+			elseif (j == ARENA_HEIGHT / 2) and (i == 1) then
+				-- Porte gauche
+				tile = porteGauche
+				arena.porteGauche = {x = i, y = j}
+			elseif (j == ARENA_HEIGHT / 2) and (i == ARENA_WIDTH) then
+				-- Porte droite
+				tile = porteDroite
+				arena.porteDroite = {x = i, y = j}
 			elseif (i == 1) then
 				-- Partie gauche
 				tile = left
@@ -76,22 +81,12 @@ function newArena()
 		arena.boxes[i] = {}
 		for j, tile in ipairs(t) do
 			if (tile ~= center) then
-				-- arena.boxes[i][j] = {
-					-- {x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE},
-					-- {x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE},
-					-- {x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE + TILE_SIZE},
-					-- {x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE + TILE_SIZE}
-				-- }
-				local body = love.physics.newBody(world, 0, 0, "static")
-				body:setMassData(0, 0, 10, 0)
-				local shape = love.physics.newPolygonShape(-TILE_SIZE / 2, -TILE_SIZE / 2,
-														TILE_SIZE / 2, -TILE_SIZE / 2,
-														TILE_SIZE / 2, TILE_SIZE / 2,
-														-TILE_SIZE / 2, TILE_SIZE / 2)
-				local fixture = love.physics.newFixture(body, shape, 1)
-				fixture:setFriction(10000)
-				arena.boxes[i][j] = fixture
-				body:setPosition((i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+				arena.boxes[i][j] = {
+					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE + TILE_SIZE, y = (j - 1) * TILE_SIZE + TILE_SIZE},
+					{x = (i - 1) * TILE_SIZE,             y = (j - 1) * TILE_SIZE + TILE_SIZE}
+				}
 			end
 		end
 	end
@@ -154,33 +149,20 @@ function arena_mt:draw()
 			end
 		end
 	end
-	-- Debug
-	-- for j, t in ipairs(self.boxes) do
-		-- for i, box in ipairs(t) do
-			-- if (box ~= nil) then
-				-- local topLeftX, topLeftY, bottomRightX, bottomRightY = box:getBoundingBox()
-				-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
-			-- end
-		-- end
-	-- end
 	love.graphics.push()
 	love.graphics.translate(self.lvl:getWidth() / 2, -self.lvl:getHeight())
 	self.lvl:draw()
 	love.graphics.pop()
 end
 
-function arena_mt:destroyDoor()
-	if (self.hasDoor) then
-		self.tiles[self.porte.x][self.porte.y] = porteDetruite
-		self.boxes[self.porte.x][self.porte.y]:destroy()
-		self.boxes[self.porte.x][self.porte.y] = nil
-		
-		self.boxes[self.porte.x + 1][self.porte.y]:destroy()
-		self.boxes[self.porte.x + 1][self.porte.y] = nil
-		self.boxes[self.porte.x - 1][self.porte.y]:destroy()
-		self.boxes[self.porte.x - 1][self.porte.y] = nil
-		self.hasDoor = false
-	end
+function arena_mt:destroyLeftDoor()
+	self.tiles[self.porteGauche.x][self.porteGauche.y] = porteGaucheDetruite
+	self.hasLeftDoor = false
+end
+
+function arena_mt:destroyRightDoor()
+	self.tiles[self.porteDroite.x][self.porteDroite.y] = porteGaucheDetruite
+	self.hasRightDoor = false
 end
 
 -- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)

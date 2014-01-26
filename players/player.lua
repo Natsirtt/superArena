@@ -37,6 +37,9 @@ function newPlayer(gameManager, playerNo)
 	this.assets["shieldRight"] = {}
 	this.assets["victory"] = {}
 	this.assets["die"] = {}
+	this.assets["idleUp"] = {}
+	this.assets["idleLeft"] = {}
+	this.assets["idleRight"] = {}
 
 	this.assetsX = "idle"
 	this.assetsY = 0
@@ -171,6 +174,33 @@ function newPlayer(gameManager, playerNo)
 	nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
 	table.insert(this.assets["die"], love.graphics.newImage(nid))
 
+	j = j + 1
+
+	-- idle right
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idleRight"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	-- idle left
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idleLeft"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	-- idle up
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idleUp"], love.graphics.newImage(nid))
+	end
+
 	this.deathSound = love.audio.newSource("death.wav", "static")
 
 	this.gameManager = gameManager
@@ -183,6 +213,7 @@ function newPlayer(gameManager, playerNo)
 	this.w = 30 -- taille de la boundingBox
 	this.h = 30 -- taille de la boundingBox
     this.isDefendingBool = false
+    this.isAttackingBool = false
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
     this.hitbox = {}
@@ -257,25 +288,31 @@ function mt:canAttack()
 	return not self:isDefending()
 end
 
-function mt:switchAttackAsset()
+function mt:switchAttackAsset(attackAction)
 	local str = self.assetsX
-	if str == "walkUp" then
+	local attacking = true
+	if str == "walkUp" or str == "idleUp" then
 		self.assetsX = "attackUp"
-	elseif (str == "walkDown") or (str == "idle") then
+	elseif str == "walkDown" or str == "idle" then
 		self.assetsX = "attackDown"
-	elseif str == "walkLeft" then
+	elseif str == "walkLeft" or str == "idleLeft" then
 		self.assetsX = "attackLeft"
-	elseif str == "walkRight" then
+	elseif str == "walkRight" or str == "idleRight" then
 		self.assetsX = "attackRight"
-	elseif str == "attackUp" then
-		self.assetsX = "walkUp"
-	elseif str == "attackDown" then
-		self.assetsX = "walkDown"
-	elseif str == "attackRight" then
-		self.assetsX = "walkRight"
-	else
-		self.assetsX = "walkLeft"
+	elseif not attackAction and str == "attackUp" and self.temporaryRemainingFrame == 0 then
+		self.assetsX = "idleUp"
+		attacking = false
+	elseif not attackAction and str == "attackDown" and self.temporaryRemainingFrame == 0 then
+		self.assetsX = "idle"
+		attacking = false
+	elseif not attackAction and str == "attackRight" and self.temporaryRemainingFrame == 0 then
+		self.assetsX = "idleRight"
+		attacking = false
+	elseif not attackAction and str == "attackLeft" and self.temporaryRemainingFrame == 0 then
+		self.assetsX = "idleLeft"
+		attacking = false
 	end
+	return attacking
 end
 
 function mt:attack()
@@ -284,19 +321,30 @@ function mt:attack()
 	end
 end
 
+function mt:isAttacking()
+	return self.isAttackingBool
+end
+
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
 	if (not self:isDead()) then
 		-- position checking
-		self.dx, self.dy = self.controller:getAxes()
+		if self.isDefendingBool or self.isAttackingBool then
+			self.dx = 0
+			self.dy = 0
+		else
+			self.dx, self.dy = self.controller:getAxes()
+		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 		if (self.controller:isDown(13)) then
-			if not self.temporaryAsset then
+			--if not self.temporaryAsset then
+			self.isAttackingBool = self:switchAttackAsset(true)
+			if self.isAttackingBool then
 				self:attack()
-				self:switchAttackAsset()
 				self.temporaryRemainingFrame = 4
 				self.temporaryAsset = true
 			end
+			--end
 		end
 		if (self.controller:isDown(11)) then
 			self:hit(self.life)
@@ -349,7 +397,15 @@ function mt:update(dt)
 
 		if (self.dx == 0) and (self.dy == 0) then
 			if not self.temporaryAsset then
-				self.assetsX = "idle"
+				if self.angle == 0 or math.abs(self.angle) == 45 then
+					self.assetsX = "idleUp"
+				elseif self.angle == 180 or math.abs(self.angle) == 135 then
+					self.assetsX = "idle"
+				elseif self.angle == 90 then
+					self.assetsX = "idleLeft"
+				elseif self.angle == -90 then
+					self.assetsX = "idleRight"
+				end
 			end
 		end
 
@@ -371,6 +427,7 @@ function mt:update(dt)
 				if self.temporaryRemainingFrame <= 0 then
 					self:switchAttackAsset()
 					self.temporaryAsset = false
+					self.isAttackingBool = false
 				else
 					self.temporaryRemainingFrame = self.temporaryRemainingFrame - 1
 				end
@@ -441,6 +498,9 @@ function mt:hit(lifePoints)
     self.life = self.life - lifePoints
     if self:isDead() then
     	self.assetsX = "die"
+    	self.dx = 0
+    	self.dy = 0
+    	self.body:setLinearVelocity(0, 0)
     end
 	self.gameManager.camera:shake()
 	self:blink({r = 255, g = 20, b = 20})
