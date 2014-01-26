@@ -4,7 +4,7 @@ mt.__index = mt
 local init = false
 local instance = {}
 
-local TILE_SIZE = 50
+local TILE_SIZE = 51
 
 function getAssetsManager()
     if not init then
@@ -115,6 +115,10 @@ function mt:drawAsset(asset, x, y)
 		local tex = self.assets[asset + 1]
 		love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
 	end
+end
+
+function drawAsset(asset, x, y)
+	getAssetsManager():drawAsset(asset, x, y)
 end
 
 function mt:debugAssets()

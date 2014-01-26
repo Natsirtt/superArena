@@ -135,23 +135,7 @@ function mt:getAlivePlayers()
 end
 
 function mt:playerAttack(player)
-	-- la longueur de la hitbox (de l'épée)
-	local length = 80
-	-- l'amplitude de l'épée
-	local amp = 30
-	
-	local dx = math.cos(math.rad(player.angle))
-	local dy = math.cos(math.rad(player.angle))
-	
-	local dx2 = math.cos(math.rad(player.angle + 90))
-	local dy2 = math.cos(math.rad(player.angle + 90))
-	
-	local hitBox = {
-		{x = player.x + dx2 / 2,      y = player.y + dx2 / 2},
-		{x = player.x + dx2 / 2 + dx, y = player.y + dx2 / 2 + dy},
-		{x = player.x - dx2 / 2 + dx, y = player.y - dx2 / 2 + dy},
-		{x = player.x - dx2 / 2,      y = player.y - dx2 / 2},
-	}
+	local hitBox = player:getSwordHitBox()
 	for _, p in ipairs(self:getAlivePlayers()) do
 		if (p ~= player) then
 			if (rectCollision(hitBox, p:getQuad())) then

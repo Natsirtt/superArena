@@ -180,8 +180,8 @@ function newPlayer(gameManager, playerNo)
     this.y = 400
     this.dx = 0
     this.dy = 0
-	this.w = 40 -- taille de la boundingBox
-	this.h = 40 -- taille de la boundingBox
+	this.w = 30 -- taille de la boundingBox
+	this.h = 30 -- taille de la boundingBox
     this.isDefendingBool = false
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
@@ -410,9 +410,6 @@ function mt:draw()
 		love.graphics.setColor(255, 255, 255)
 	end
 	
-	love.graphics.push()
-	--love.graphics.translate(self.x, self.y)
-	--love.graphics.rotate(math.rad(-self.angle))
 	if (self:isDead()) then
 		-- love.graphics.draw(self.deathParticleSystem)
 	end
@@ -428,7 +425,8 @@ function mt:draw()
 	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
 	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	
-	love.graphics.pop()
+	drawBox(self:getSwordHitBox())
+	
 end
 
 function mt:isDead()
@@ -484,6 +482,45 @@ function mt:heal(lifePoints)
     if self.life > MAX_LIFE then
         self.life = MAX_LIFE
     end
+end
+
+function mt:getSwordHitBox()
+	-- la longueur de la hitbox (de l'épée)
+	local length = 100
+	-- l'amplitude de l'épée
+	local amp = 30
+	
+	local dx = math.cos(math.rad(self.angle))
+	local dy = math.sin(math.rad(self.angle))
+	local l = math.sqrt(dx * dx + dy * dy)
+	dx = (dx / l) * length
+	dy = (dy / l) * length
+	
+	local dx2 = math.cos(math.rad(self.angle + 90))
+	local dy2 = math.sin(math.rad(self.angle + 90))
+	l = math.sqrt(dx2 * dx2 + dy2 * dy2)
+	dx2 = (dx / l) * amp
+	dy2 = (dy / l) * amp
+	
+	return {
+		{x = self.x + dx2 / 2,      y = self.y + dy2 / 2},
+		{x = self.x + dx2 / 2 + dx, y = self.y + dy2 / 2 + dy},
+		{x = self.x - dx2 / 2 + dx, y = self.y - dy2 / 2 + dy},
+		{x = self.x - dx2 / 2,      y = self.y - dy2 / 2}
+	}
+end
+
+function drawBox(box)
+	love.graphics.print(math.floor(box[1].x).." "..math.floor(box[1].y).." "..
+						math.floor(box[2].x).." "..math.floor(box[2].y).." "..
+						math.floor(box[3].x).." "..math.floor(box[3].y).." "..
+						math.floor(box[4].x).." "..math.floor(box[4].y).." ",
+						100, 100)
+	love.graphics.polygon("fill", box[1].x, box[1].y, 
+								box[4].x, box[4].y,
+								box[3].x, box[3].y,
+								box[2].x, box[2].y
+								)
 end
 
 function mt:debugSprites(state)
