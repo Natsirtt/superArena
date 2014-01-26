@@ -15,6 +15,8 @@ local BLINK_PER_SECOND = 15.0
 
 function newPlayer(gameManager, playerNo)
     local this = {}
+
+    this.ui = newUI(self, playerNo)
 	
 	local tileSet = love.graphics.newImage("assets/player"..playerNo..".png")
 	

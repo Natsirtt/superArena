@@ -101,6 +101,32 @@ function getAssetsManager()
 			table.insert(self.assets, love.graphics.newImage(nid))
 		end
 
+		-- UI / HUD
+
+		self.uiAssets = {}
+
+		self.uiAssets["attackButton"] = love.graphics.newImage("btn_attack.png")
+		self.uiAssets["attackButtonP1"] = love.graphics.newImage("P1_btn_attack_use.png")
+		self.uiAssets["attackButtonP2"] = love.graphics.newImage("P2_btn_attack_use.png")
+		self.uiAssets["attackButtonP3"] = love.graphics.newImage("P3_btn_attack_use.png")
+		self.uiAssets["attackButtonP4"] = love.graphics.newImage("P4_btn_attack_use.png")
+
+		self.uiAssets["defenseButton"] = love.graphics.newImage("btn_defense.png")
+		self.uiAssets["defenseButtonP1"] = love.graphics.newImage("P1_btn_defense_use.png")
+		self.uiAssets["defenseButtonP2"] = love.graphics.newImage("P2_btn_defense_use.png")
+		self.uiAssets["defenseButtonP3"] = love.graphics.newImage("P3_btn_defense_use.png")
+		self.uiAssets["defenseButtonP4"] = love.graphics.newImage("P4_btn_defense_use.png")
+
+		self.uiAssets["life"] = love.graphics.newImage("life.png")
+		self.uiAssets["hudP1"] = love.graphics.newImage("P1_HUD.png")
+		self.uiAssets["hudP2"] = love.graphics.newImage("P2_HUD.png")
+		self.uiAssets["hudP3"] = love.graphics.newImage("P3_HUD.png")
+		self.uiAssets["hudP4"] = love.graphics.newImage("P4_HUD.png")
+		self.uiAssets["hudDeadP1"] = love.graphics.newImage("P1_HUD_dead.png")
+		self.uiAssets["hudDeadP2"] = love.graphics.newImage("P2_HUD_dead.png")
+		self.uiAssets["hudDeadP3"] = love.graphics.newImage("P3_HUD_dead.png")
+		self.uiAssets["hudDeadP4"] = love.graphics.newImage("P4_HUD_dead.png")
+
         instance = setmetatable(self, mt)
         init = true
     end
@@ -115,6 +141,15 @@ function mt:drawAsset(asset, x, y)
 		local tex = self.assets[asset + 1]
 		love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
 	end
+end
+
+function drawUIAsset(player, asset, x, y)
+	local playerStr = ""
+	if player ~= nil then
+		playerStr = "P" .. player
+	end
+	local tex = self.uiAssets[asset..playerStr]
+	love.graphics.draw(tex, x, y)
 end
 
 function drawAsset(asset, x, y)

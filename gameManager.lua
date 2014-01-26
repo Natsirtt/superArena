@@ -118,6 +118,9 @@ function arenaPhaseDraw(self)
 		player:draw()
 		--player:debugSprites("shield")
 	end
+
+	self.ui:draw()
+
 	love.graphics.pop()
 	
 	love.graphics.setColor(255, 0, 0)
