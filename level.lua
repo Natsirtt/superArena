@@ -57,7 +57,7 @@ local publicDown2         = {x = 315, y = 15, width = 15, height = 15}
 function newLevel()
 	local level = {}
 	
-	level.tileSet = love.graphics.newImage("tileset.png")
+	level.tileSet = love.graphics.newImage("assets/tileset.png")
 	
 	local dx = TILE_SIZE * LEVEL_WIDTH / 2
 	local dy = -TILE_SIZE * LEVEL_HEIGHT
