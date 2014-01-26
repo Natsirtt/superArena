@@ -72,9 +72,7 @@ function arenaPhase(self, dt)
 	self.camera:update(dt)
 
 	love.graphics.setNewFont(24)
-	if (love.keyboard.isDown("a")) then
-        self.arena:destroyDoor()
-    end
+	self.arena:update(dt)
 
 	for _, player in ipairs(self.players) do
 		local lastQuad = player:getQuad()
@@ -146,6 +144,7 @@ function mt:playerAttack(player)
 			end
 		end
 	end
+	self.arena:hitDoor(hitBox)
 end
 
 function mt:debugInfo()

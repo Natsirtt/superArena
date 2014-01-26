@@ -63,7 +63,7 @@ function newLevel()
 				local fixture = love.physics.newFixture(body, shape, 1)
 				fixture:setFriction(10000)
 				level.boxes[j][i] = fixture
-				body:setPosition((i - 1) * TILE_SIZE + dx + TILE_SIZE / 2, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2)
+				body:setPosition((i - 1) * TILE_SIZE + dx + TILE_SIZE / 2, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
 			end
 		end
 	end

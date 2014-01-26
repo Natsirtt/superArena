@@ -1,6 +1,9 @@
 local mt = {}
 mt.__index = mt
 
+local SWORD_LENGTH = 75
+local SWORD_AMPLITUDE = 45
+
 local MAX_LIFE = 10
 local SPEED_BASE = 500
 local RADIUS = 20
@@ -446,7 +449,7 @@ end
 
 function mt:draw()
 	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 360.0)))
-	if (blinkTimer ~= 0) then
+	if (self.blinkTimer ~= 0) then
 		percent = math.abs(percent)
 		local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)
 		local g = self.blinkColor.g + (255 - self.blinkColor.g) * (1 - percent)
@@ -476,7 +479,7 @@ function mt:draw()
 	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
 	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	
-	drawBox(self:getSwordHitBox())
+	--drawBox(self:getSwordHitBox())
 	
 end
 
@@ -540,21 +543,21 @@ end
 
 function mt:getSwordHitBox()
 	-- la longueur de la hitbox (de l'épée)
-	local length = 100
+	local length = SWORD_LENGTH
 	-- l'amplitude de l'épée
-	local amp = 30
+	local amp = SWORD_AMPLITUDE
 	
-	local dx = math.cos(math.rad(self.angle))
-	local dy = math.sin(math.rad(self.angle))
+	local dx = math.cos(math.rad(self.angle + 90))
+	local dy = -math.sin(math.rad(self.angle + 90))
 	local l = math.sqrt(dx * dx + dy * dy)
 	dx = (dx / l) * length
 	dy = (dy / l) * length
 	
-	local dx2 = math.cos(math.rad(self.angle + 90))
-	local dy2 = math.sin(math.rad(self.angle + 90))
+	local dx2 = math.cos(math.rad(self.angle + 180))
+	local dy2 = -math.sin(math.rad(self.angle + 180))
 	l = math.sqrt(dx2 * dx2 + dy2 * dy2)
-	dx2 = (dx / l) * amp
-	dy2 = (dy / l) * amp
+	dx2 = (dx2 / l) * amp
+	dy2 = (dy2 / l) * amp
 	
 	return {
 		{x = self.x + dx2 / 2,      y = self.y + dy2 / 2},
