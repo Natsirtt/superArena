@@ -7,7 +7,6 @@ local RADIUS = 20
 local DEFENDING_MAX_TIME = 5
 local ANIMATION_RATE = 0.1
 local DIE_ANIMATION_FRAME_NB = 18
-local ATTACK_RELOAD = 0.2
 
 PLAYER_DAMAGE = 1
 
@@ -214,11 +213,11 @@ function newPlayer(gameManager, playerNo)
 	this.w = 40 -- taille de la boundingBox
 	this.h = 40 -- taille de la boundingBox
     this.isDefendingBool = false
+    this.isAttackingBool = false
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
     this.hitbox = {}
     this.controller = getControllersManager():getUnusedController()
-    this.lastAttackTime = love.timer.getTime()
 	
 	this.deathTimer = 0
 	this.deathParticleSystem = nil
@@ -286,11 +285,12 @@ function mt:isDefending()
 end
 
 function mt:canAttack()
-	return not self:isDefending() and love.timer.getTime() - self.lastAttackTime >= ATTACK_RELOAD
+	return not self:isDefending()
 end
 
-function mt:switchAttackAsset()
+function mt:switchAttackAsset(attackAction)
 	local str = self.assetsX
+	local attacking = true
 	if str == "walkUp" or str == "idleUp" then
 		self.assetsX = "attackUp"
 	elseif str == "walkDown" or str == "idle" then
@@ -299,37 +299,52 @@ function mt:switchAttackAsset()
 		self.assetsX = "attackLeft"
 	elseif str == "walkRight" or str == "idleRight" then
 		self.assetsX = "attackRight"
-	elseif str == "attackUp" then
+	elseif not attackAction and str == "attackUp" and self.temporaryRemainingFrame == 0 then
 		self.assetsX = "idleUp"
-	elseif str == "attackDown" then
+		attacking = false
+	elseif not attackAction and str == "attackDown" and self.temporaryRemainingFrame == 0 then
 		self.assetsX = "idle"
-	elseif str == "attackRight" then
+		attacking = false
+	elseif not attackAction and str == "attackRight" and self.temporaryRemainingFrame == 0 then
 		self.assetsX = "idleRight"
-	else
+		attacking = false
+	elseif not attackAction and str == "attackLeft" and self.temporaryRemainingFrame == 0 then
 		self.assetsX = "idleLeft"
+		attacking = false
 	end
+	return attacking
 end
 
 function mt:attack()
 	if self:canAttack() then
 		self.gameManager:playerAttack(self)
-		self.lastAttackTime = love.timer.getTime()
 	end
+end
+
+function mt:isAttacking()
+	return self.isAttackingBool
 end
 
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
 	if (not self:isDead()) then
 		-- position checking
-		self.dx, self.dy = self.controller:getAxes()
+		if self.isDefendingBool or self.isAttackingBool then
+			self.dx = 0
+			self.dy = 0
+		else
+			self.dx, self.dy = self.controller:getAxes()
+		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 		if (self.controller:isDown(13)) then
-			if not self.temporaryAsset then
+			--if not self.temporaryAsset then
+			self.isAttackingBool = self:switchAttackAsset(true)
+			if self.isAttackingBool then
 				self:attack()
-				self:switchAttackAsset()
 				self.temporaryRemainingFrame = 4
 				self.temporaryAsset = true
 			end
+			--end
 		end
 		if (self.controller:isDown(11)) then
 			self:hit(self.life)
@@ -412,6 +427,7 @@ function mt:update(dt)
 				if self.temporaryRemainingFrame <= 0 then
 					self:switchAttackAsset()
 					self.temporaryAsset = false
+					self.isAttackingBool = false
 				else
 					self.temporaryRemainingFrame = self.temporaryRemainingFrame - 1
 				end
