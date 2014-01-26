@@ -16,6 +16,8 @@ function newGameManager()
 	
 	self.globalTimer = 60 -- En secondes (à modifier)
 	self.camera = nil
+	
+	world = love.physics.newWorld(0, 0, true)
 
 	return setmetatable(self, mt)
 end
@@ -70,7 +72,7 @@ function arenaPhase(self, dt)
 
 	love.graphics.setNewFont(24)
 	if (love.keyboard.isDown("a")) then
-        self.arena:destroyLeftDoor()
+        self.arena:destroyDoor()
     end
 
 	for _, player in ipairs(self.players) do
@@ -78,9 +80,11 @@ function arenaPhase(self, dt)
 		player:update(dt)
 
 		-- arena hitbox
-		local quad = self.arena:getValidQuad(lastQuad, player:getQuad(), player.dx * player.speed * dt, player.dy * player.speed * dt)
-        player:setPositionFromQuad(quad)
+		--local quad = self.arena:getValidQuad(lastQuad, player:getQuad(), player.dx * player.speed * dt, player.dy * player.speed * dt)
+        --player:setPositionFromQuad(quad)
     end
+	
+	world:update(dt)
 end
 
 function arenaPhaseDraw(self)

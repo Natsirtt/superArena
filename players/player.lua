@@ -180,6 +180,8 @@ function newPlayer(gameManager, playerNo)
     this.y = 400
     this.dx = 0
     this.dy = 0
+	this.w = 40 -- taille de la boundingBox
+	this.h = 40 -- taille de la boundingBox
     this.isDefendingBool = false
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
@@ -191,6 +193,15 @@ function newPlayer(gameManager, playerNo)
 	this.hitTimer = 0
 	this.hitParticleSystem = nil
 	
+	this.body = love.physics.newBody(world, 0, 0, "dynamic")
+	this.body:setMassData(0, 0, 10, 0)
+	this.shape = love.physics.newPolygonShape(- this.w / 2, - this.h / 2,
+											 this.w / 2, - this.h / 2,
+											 this.w / 2, this.h / 2,
+											 - this.w / 2, this.h / 2)
+	this.fixture = love.physics.newFixture(this.body, this.shape, 1)
+	this.fixture:setFriction(10000)
+	this.body:setPosition(this.x, this.y)
     
     --if this.controller == nil then
         -- should not happen if we use stuff correctly
@@ -278,6 +289,7 @@ function mt:update(dt)
 	if (not self:isDead()) then
 		-- position checking
 		self.dx, self.dy = self.controller:getAxes()
+		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 		if (self.controller:isDown(13)) then
 			if not self.temporaryAsset then
 				self:attack()
@@ -289,9 +301,9 @@ function mt:update(dt)
 		if (self.controller:isDown(11)) then
 			self:hit(self.life)
 		end
-		
-		self.x = self.x + dt * self.dx * self.speed
-		self.y = self.y + dt * self.dy * self.speed
+		local x, y = self.body:getPosition()
+		self.x = x
+		self.y = y
 		
 		if (self.dx == -1) and (self.dy == -1) then
 			self.angle = 45
@@ -409,7 +421,12 @@ function mt:draw()
 	end
 
 	local tex = self.assets[self.assetsX][self.assetsY + 1]
-	love.graphics.draw(tex, self.x - tex:getWidth() / 2, self.y - tex:getHeight() / 2)
+	local x, y = self.body:getPosition()
+	love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
+	
+	-- Affichage de la bounding box (debug)
+	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
+	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	
 	love.graphics.pop()
 end

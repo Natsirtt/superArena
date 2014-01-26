@@ -67,12 +67,22 @@ function newLevel()
 		level.boxes[j] = {}
 		for i, tileID in ipairs(t) do
 			if (tileID ~= 0) then
-				level.boxes[j][i] = {
-					{x = (i - 1) * TILE_SIZE + dx,             y = (j - 1) * TILE_SIZE + dy},
-					{x = (i - 1) * TILE_SIZE + dx + TILE_SIZE, y = (j - 1) * TILE_SIZE + dy},
-					{x = (i - 1) * TILE_SIZE + dx + TILE_SIZE, y = (j - 1) * TILE_SIZE + dy + TILE_SIZE},
-					{x = (i - 1) * TILE_SIZE + dx,             y = (j - 1) * TILE_SIZE + dy + TILE_SIZE}
-				}
+				-- level.boxes[j][i] = {
+					-- {x = (i - 1) * TILE_SIZE + dx,             y = (j - 1) * TILE_SIZE + dy},
+					-- {x = (i - 1) * TILE_SIZE + dx + TILE_SIZE, y = (j - 1) * TILE_SIZE + dy},
+					-- {x = (i - 1) * TILE_SIZE + dx + TILE_SIZE, y = (j - 1) * TILE_SIZE + dy + TILE_SIZE},
+					-- {x = (i - 1) * TILE_SIZE + dx,             y = (j - 1) * TILE_SIZE + dy + TILE_SIZE}
+				-- }
+				local body = love.physics.newBody(world, 0, 0, "static")
+				body:setMassData(0, 0, 10, 0)
+				local shape = love.physics.newPolygonShape(-TILE_SIZE / 2, -TILE_SIZE / 2,
+														TILE_SIZE / 2, -TILE_SIZE / 2,
+														TILE_SIZE / 2, TILE_SIZE / 2,
+														-TILE_SIZE / 2, TILE_SIZE / 2)
+				local fixture = love.physics.newFixture(body, shape, 1)
+				fixture:setFriction(10000)
+				level.boxes[j][i] = fixture
+				body:setPosition((i - 1) * TILE_SIZE + dx + TILE_SIZE / 2, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2)
 			end
 		end
 	end
@@ -109,6 +119,13 @@ function level_mt:draw()
 			end
 		end
 	end
+	-- Debug
+	-- for j, t in ipairs(self.boxes) do
+		-- for i, box in ipairs(t) do
+			-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.boxes[j][i]:getBoundingBox()
+			-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
+		-- end
+	-- end
 end
 
 function level_mt:getWidth()
