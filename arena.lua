@@ -6,6 +6,9 @@ local ARENA_HEIGHT = 20
 
 local TILE_SIZE = 50
 
+local BLINK_LIMIT = 0.5
+local BLINK_PER_SECOND = 20.0
+
 --                  id de l'asset
 local left          = 12
 local right         = 13
@@ -29,8 +32,14 @@ function newArena()
 	arena.tileSet = love.graphics.newImage("assets/tileset.png")
 	arena.tiles = {}
 	arena.publicTimer = 0
+	arena.doorLife = 100
 	arena.hasDoor = true
 	arena.boxes = {}
+	
+	arena.blinkTimer = 0.0
+	arena.blinkColor = {r = 255, g = 0, b = 255}	
+	arena.hitTimer = 0
+	arena.hitParticleSystem = nil
 	
 	for i = 1, ARENA_WIDTH do
 		arena.tiles[i] = {}
@@ -96,6 +105,11 @@ function newArena()
 end
 
 function arena_mt:update(dt)
+	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
+	if (self.hitParticleSystem ~= nil) then
+		self.hitTimer = self.hitTimer + dt
+		self.hitParticleSystem:update(dt)
+	end
 	self.lvl:update(dt)
 end
 
@@ -116,6 +130,26 @@ function arena_mt:draw()
 	for i, t in ipairs(self.tiles) do
 		for j, tile in ipairs(t) do
 			if (tile ~= -1) then
+				if (tile == porte) then
+					love.graphics.print("Porte", -100, -100)
+					local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 360.0)))
+						love.graphics.print("Blink "..self.blinkTimer, -100, -50)
+					if (self.blinkTimer ~= 0) then
+						percent = math.abs(percent)
+						local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)
+						local g = self.blinkColor.g + (255 - self.blinkColor.g) * (1 - percent)
+						local b = self.blinkColor.b + (255 - self.blinkColor.b) * (1 - percent)
+						love.graphics.setColor(r, g, b)
+					else
+						love.graphics.setColor(255, 255, 255)
+					end
+					if (self.hitParticleSystem ~= nil) then
+						love.graphics.draw(self.hitParticleSystem)
+					end
+				else
+					love.graphics.setColor(255, 255, 255)
+				end
+				
 				drawAsset(tile, (i) * TILE_SIZE + TILE_SIZE / 2, (j) * TILE_SIZE + TILE_SIZE / 2)
 				
 				-- Dessin du public du haut
@@ -148,6 +182,8 @@ function arena_mt:draw()
 			end
 		end
 	end
+	--drawBox(self:getDoorHitBox())
+
 	love.graphics.push()
 	love.graphics.translate(self.lvl:getWidth() / 2, -self.lvl:getHeight())
 	self.lvl:draw()
@@ -220,11 +256,11 @@ end
 -- end
 
 function arena_mt:getDoorHitBox()
-	local x1 = self.porte.x - 1 * TILE_SIZE
-	local y1 = self.porte.x - 1 * TILE_SIZE
+	local x1 = (self.porte.x - 1) * TILE_SIZE
+	local y1 = (self.porte.y - 1) * TILE_SIZE
 	return {
 		{x = x1, y = y1},
-		{x = x1 + TILE_SIZE, y = y1},
+		{x = x1, y = y1 + TILE_SIZE},
 		{x = x1 + TILE_SIZE, y = y1 + TILE_SIZE},
 		{x = x1 + TILE_SIZE, y = y1}
 	}
@@ -235,11 +271,36 @@ function arena_mt:hitDoor(box)
 	if (self.hasDoor) then
 		local dbox = self:getDoorHitBox()
 		if (rectCollision(box, dbox)) then
-			self:destroyDoor()
+			self.doorLife = math.max(0, self.doorLife - 1)
+			self:blink({r = 255, g = 20, b = 20})
+			local m = getQuadCenter(dbox)
+			local p = love.graphics.newParticleSystem(getAssetsManager().assets[24 + 1], 1000)
+			p:setEmissionRate(20)
+			p:setSpeed(300, 400)
+			p:setPosition(m.x, m.y)
+			p:setEmitterLifetime(0.3)
+			p:setParticleLifetime(0.3)
+			p:setDirection(0)
+			p:setSpread(360)
+			p:setRadialAcceleration(-3000)
+			p:setTangentialAcceleration(1000)
+			p:stop()
+			self.hitParticleSystem = p
+			p:start()
+			
+			if (self.doorLife == 0) then
+				self:destroyDoor()
+			end
 		end
 	end
 end
 
+function arena_mt:blink(color)
+	if (self.blinkTimer == 0) then
+		self.blinkTimer = BLINK_LIMIT
+		self.blinkColor = color
+	end
+end
 
 function arena_mt:getWidth()
 	return TILE_SIZE * ARENA_WIDTH
