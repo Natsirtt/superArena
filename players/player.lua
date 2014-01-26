@@ -202,6 +202,7 @@ function newPlayer(gameManager, playerNo)
 	end
 
 	this.deathSound = love.audio.newSource("death.wav", "static")
+	this.attackSound = love.audio.newSource("attack2.wav", "static")
 
 	this.gameManager = gameManager
     
@@ -218,6 +219,9 @@ function newPlayer(gameManager, playerNo)
     this.speed = SPEED_BASE
     this.hitbox = {}
     this.controller = getControllersManager():getUnusedController()
+    this.attackAssetsX = "attackDown"
+    this.attackAssetsY = -1
+    this.attackAnimationProcessing = false
 	
 	this.deathTimer = 0
 	this.deathParticleSystem = nil
@@ -285,51 +289,46 @@ function mt:isDefending()
 end
 
 function mt:canAttack()
-	return not self:isDefending()
-end
-
-function mt:switchAttackAsset(attackAction)
-	local str = self.assetsX
-	local attacking = true
-	if str == "walkUp" or str == "idleUp" then
-		self.assetsX = "attackUp"
-	elseif str == "walkDown" or str == "idle" then
-		self.assetsX = "attackDown"
-	elseif str == "walkLeft" or str == "idleLeft" then
-		self.assetsX = "attackLeft"
-	elseif str == "walkRight" or str == "idleRight" then
-		self.assetsX = "attackRight"
-	elseif not attackAction and str == "attackUp" and self.temporaryRemainingFrame == 0 then
-		self.assetsX = "idleUp"
-		attacking = false
-	elseif not attackAction and str == "attackDown" and self.temporaryRemainingFrame == 0 then
-		self.assetsX = "idle"
-		attacking = false
-	elseif not attackAction and str == "attackRight" and self.temporaryRemainingFrame == 0 then
-		self.assetsX = "idleRight"
-		attacking = false
-	elseif not attackAction and str == "attackLeft" and self.temporaryRemainingFrame == 0 then
-		self.assetsX = "idleLeft"
-		attacking = false
-	end
-	return attacking
+	return not self:isDefending() and not self.attackAnimationProcessing
 end
 
 function mt:attack()
 	if self:canAttack() then
 		self.gameManager:playerAttack(self)
+		self.attackSound:play()
+		self:beginAttackAnimation()
 	end
 end
 
-function mt:isAttacking()
-	return self.isAttackingBool
+function mt:beginAttackAnimation()
+	self.attackAnimationProcessing = true
+	self.attackAssetsY = -1
+	if self.angle == 90 then
+		self.attackAssetsX = "attackLeft"
+	elseif self.angle == -90 then
+		self.attackAssetsX = "attackRight"
+	elseif self.angle == 180 or math.abs(self.angle) == 135 then
+		self.attackAssetsX = "attackDown"
+	elseif self.angle == 0 or math.abs(self.angle) == 45 then
+		self.attackAssetsX = "attackUp"
+	end
+	-- we make sure we change the asset right now
+	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
+end
+
+function mt:processAttackAnimation()
+	self.attackAssetsY = self.attackAssetsY + 1
+	print("attack assets y = " .. self.attackAssetsY)
+	if self.attackAssetsY >= 4 then
+		self.attackAnimationProcessing = false
+	end
 end
 
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
 	if (not self:isDead()) then
 		-- position checking
-		if self.isDefendingBool or self.isAttackingBool then
+		if self.isDefendingBool then --or self.isAttackingBool then
 			self.dx = 0
 			self.dy = 0
 		else
@@ -337,14 +336,7 @@ function mt:update(dt)
 		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 		if (self.controller:isDown(13)) then
-			--if not self.temporaryAsset then
-			self.isAttackingBool = self:switchAttackAsset(true)
-			if self.isAttackingBool then
-				self:attack()
-				self.temporaryRemainingFrame = 4
-				self.temporaryAsset = true
-			end
-			--end
+			self:attack()
 		end
 		if (self.controller:isDown(11)) then
 			self:hit(self.life)
@@ -422,15 +414,10 @@ function mt:update(dt)
 		--animation
 		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
 			self.assestsLastChange = love.timer.getTime()
-			self.assetsY = (self.assetsY + 1) % self.assetsMod
-			if self.temporaryAsset then
-				if self.temporaryRemainingFrame <= 0 then
-					self:switchAttackAsset()
-					self.temporaryAsset = false
-					self.isAttackingBool = false
-				else
-					self.temporaryRemainingFrame = self.temporaryRemainingFrame - 1
-				end
+			if self.attackAnimationProcessing then
+				self:processAttackAnimation()
+			else
+				self.assetsY = (self.assetsY + 1) % self.assetsMod
 			end
 		end
 	else
@@ -474,7 +461,12 @@ function mt:draw()
 		love.graphics.draw(self.hitParticleSystem)
 	end
 
-	local tex = self.assets[self.assetsX][self.assetsY + 1]
+	local tex = nil
+	if self.attackAnimationProcessing then
+		tex = self.assets[self.attackAssetsX][self.attackAssetsY + 1]
+	else
+		tex = self.assets[self.assetsX][self.assetsY + 1]
+	end
 	local x, y = self.body:getPosition()
 	love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
 	
