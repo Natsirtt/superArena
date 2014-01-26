@@ -20,7 +20,8 @@ local topRight      = 11
 local bottomRight   = 16
 local center        = 4
 local porte         = 24
-local porteDetruite = -1
+local porteDetruite = 4
+local arche         = 21
 
 local publicCenter  = 30
 local publicCenter2 = 45
@@ -182,7 +183,6 @@ function arena_mt:update(dt)
 end
 
 function arena_mt:draw()
-
 	if (not self.hasDoor) then
 		love.graphics.push()
 		love.graphics.translate(self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
@@ -223,41 +223,18 @@ function arena_mt:draw()
 				if (tileToDraw >= 26) and (tileToDraw <= 34) and not publicDown then
 					tileToDraw = tileToDraw + 12
 				end
-				
+				if (tileToDraw == arche) then
+					tileToDraw = center
+				end
 				drawAsset(tileToDraw, (i) * TILE_SIZE + TILE_SIZE / 2, (j) * TILE_SIZE + TILE_SIZE / 2)
-				
-				-- Dessin du public du haut
-				-- if (j == 1) and (i ~= 1) and (i < ARENA_WIDTH) then
-					-- for ip = 1, TILE_SIZE / p1.width do
-						-- for jp = 1, TILE_SIZE / ((p1.height/2) + 1) do
-							-- local quad = love.graphics.newQuad(p1.x, p1.y, p1.width, p1.height, self.tileSet:getWidth(), self.tileSet:getHeight())
-							-- local off = 0
-							-- if (jp % 2) == 0 then
-								-- off = 7
-							-- end
-							-- love.graphics.draw(self.tileSet, quad, (i - 1) * TILE_SIZE + (ip - 1) * p1.width + off, (jp - 1) * p1.height / 2)
-						-- end
-					-- end
-				-- end
-				-- Dessin du public du bas
-				-- if (j == ARENA_HEIGHT) and (i ~= 1) and (i < ARENA_WIDTH) then
-					-- for ip = 1, TILE_SIZE / p2.width do
-						-- for jp = 1, TILE_SIZE / ((p2.height/2) + 1) do
-							-- local quad = love.graphics.newQuad(p2.x, p2.y, p2.width, p2.height, self.tileSet:getWidth(), self.tileSet:getHeight())
-							-- local off = 0
-							-- if (jp % 2) == 0 then
-								-- off = 7
-							-- end
-							-- love.graphics.draw(self.tileSet, quad, (i - 1) * TILE_SIZE + (ip - 1) * p2.width + off,
-																	-- (j - 1) * TILE_SIZE + (jp - 1) * p2.height / 2)
-						-- end
-					-- end
-				-- end
 			end
 		end
 	end
 	--drawBox(self:getDoorHitBox())
+end
 
+function arena_mt:postPlayerDraw()
+	drawAsset(arche, (self.porte.x) * TILE_SIZE + TILE_SIZE / 2, (self.porte.y - 1) * TILE_SIZE + TILE_SIZE / 2)
 	if (self.hitParticleSystem ~= nil) then
 		love.graphics.draw(self.hitParticleSystem)
 	end

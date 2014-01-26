@@ -2,8 +2,8 @@ local mt = {}
 mt.__index = mt
 
 local SHAKE_LIMIT = 0.2
-local SHAKE_AMPLITUDE = 25.0
-local SHAKE_PER_SECOND = 20.0
+local SHAKE_AMPLITUDE = 15.0
+local SHAKE_PER_SECOND = 10.0
 
 local BLINK_LIMIT = 0.2
 local BLINK_PER_SECOND = 20.0
