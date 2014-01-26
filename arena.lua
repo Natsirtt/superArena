@@ -1,8 +1,8 @@
 local arena_mt = {}
 arena_mt.__index = arena_mt
 
-local ARENA_WIDTH = 20
-local ARENA_HEIGHT = 20
+ARENA_WIDTH = 21
+ARENA_HEIGHT = 23
 
 local TILE_SIZE = 50
 
@@ -11,9 +11,9 @@ local BLINK_PER_SECOND = 20.0
 
 --                  id de l'asset
 local center        = 17
-local porte         = 41
+local porte         = 40
 local porteDetruite = 17
-local arche         = 25
+local arche         = 24
 
 local ARENA_MAP = {
 --1   2   3   4   5  6    7   8   9  04  11  19  21  14  36  16  68  18  19  20  21
@@ -172,12 +172,12 @@ function arena_mt:update(dt)
 end
 
 function arena_mt:draw()
-	if (not self.hasDoor) then
+	--if (not self.hasDoor) then
 		love.graphics.push()
-		love.graphics.translate(self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
+		love.graphics.translate(self:getWidth() / 2 - self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
 		self.lvl:draw()
 		love.graphics.pop()
-	end
+	--end
 
 	local publicDown = true
 	if (self.publicTimer < 04) then
@@ -209,13 +209,15 @@ function arena_mt:draw()
 				end
 				
 				local tileToDraw = tile
-				if (tileToDraw >= 26) and (tileToDraw <= 34) and not publicDown then
-					tileToDraw = tileToDraw + 19
+				if not publicDown and ((tileToDraw >= 51) and (tileToDraw <= 53) or
+										(tileToDraw >= 67) and (tileToDraw <= 69) or
+										(tileToDraw >= 83) and (tileToDraw <= 85)) then
+					tileToDraw = tileToDraw + 4
 				end
 				if (tileToDraw == arche) then
 					tileToDraw = center
 				end
-				drawAsset(tileToDraw, (i) * TILE_SIZE + TILE_SIZE / 2, (j) * TILE_SIZE + TILE_SIZE / 2)
+				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
 		end
 	end
