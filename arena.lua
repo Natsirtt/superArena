@@ -10,49 +10,38 @@ local BLINK_LIMIT = 0.5
 local BLINK_PER_SECOND = 20.0
 
 --                  id de l'asset
-local left          = 12
-local right         = 13
-local top           = 10
-local bottom        = 15
-local topLeft       = 9
-local bottomLeft    = 14
-local topRight      = 11
-local bottomRight   = 16
-local center        = 4
-local porte         = 24
-local porteDetruite = 4
-local arche         = 21
-
-local publicCenter  = 30
-local publicCenter2 = 45
+local center        = 17
+local porte         = 41
+local porteDetruite = 17
+local arche         = 25
 
 local ARENA_MAP = {
---1   2   3   4   5  6    7   8   9  10  11  12  13  14  15  16  30  18  19  20  21
-{26, 27, 27, 27, 27, 27, 27, 27, 18, -1, 19, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28},
-{29, 30, 30, 30, 30, 30, 30, 30, 20, 21, 22, 30, 30, 30, 30, 30, 30, 30, 30, 30, 31},
-{29, 30, 30, 09, 10, 10, 10, 10, 23, 24, 25, 10, 10, 10, 10, 10, 10, 11, 30, 30, 31},
+--1   2   3   4   5  6    7   8   9  04  11  19  21  14  36  16  68  18  19  20  21
+{51, 52, 52, 52, 52, 52, 52, 52, 52, 7, -1, 9, 52, 52, 52, 52, 52, 52, 52, 52, 53},
+{67, 68, 68, 68, 68, 68, 68, 68, 68, 23, 24, 25, 68, 68, 68, 68, 68, 68, 68, 68, 69},
+{67, 68, 68, 03, 04, 04, 04, 04, 04, 39, 40, 41, 04, 04, 04, 04, 04, 05, 68, 68, 69},
 
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 12, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 04, 13, 30, 30, 31},
-{29, 30, 30, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 16, 30, 30, 31},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 19, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 21, 68, 68, 69},
+{67, 68, 68, 35, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 37, 68, 68, 69},
 
-{29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 31},
-{29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 31},
-{32, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34}
+{67, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 69},
+{67, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 68, 69},
+{83, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 85}
 }
 
 function newArena()
@@ -61,7 +50,7 @@ function newArena()
 	arena.tileSet = love.graphics.newImage("assets/tileset.png")
 	arena.tiles = {}
 	arena.publicTimer = 0
-	arena.doorLife = 10
+	arena.doorLife = 04
 	arena.hasDoor = true
 	arena.boxes = {}
 	
@@ -77,7 +66,7 @@ function newArena()
 			-- PUBLIC
 			-- if (i == 1) and (j == 1) then
 				-- Partie haute
-				-- tile = 29
+				-- tile = 67
 			-- elseif (i == 1) and (j == ARENA_HEIGHT) then
 				-- Partie bas gauche
 				-- tile = 37
@@ -85,22 +74,22 @@ function newArena()
 				-- tile = 21
 			-- elseif (i == 1) then
 				-- Partie gauche
-				-- tile = 30
+				-- tile = 68
 			-- elseif (j == 1) and (i == ARENA_WIDTH) then
 				-- Partie haute droite
-				-- tile = 31
+				-- tile = 69
 			-- elseif (j == 1)  then
 				-- Public haut
 				-- tile = publicCenter
 			-- elseif (i == ARENA_WIDTH) and (j == ARENA_HEIGHT) then
 				-- PARTIE bas droite
-				-- tile = 30
+				-- tile = 68
 			-- elseif (i == ARENA_WIDTH) then
 				-- PARTIE droite
-				-- tile = 30
+				-- tile = 68
 			-- elseif (j == ARENA_HEIGHT) then
 				-- PARTIE bas
-				-- tile = 30
+				-- tile = 68
 			---- MURS
 			-- elseif (i == 2) and (j == 2) then
 				-- Partie haute gauche
@@ -155,13 +144,13 @@ function newArena()
 		for j, tile in ipairs(t) do
 			if (tile ~= center) then
 				local body = love.physics.newBody(world, 0, 0, "static")
-				body:setMassData(0, 0, 10, 0)
+				body:setMassData(0, 0, 04, 0)
 				local shape = love.physics.newPolygonShape(-TILE_SIZE / 2, -TILE_SIZE / 2,
 														TILE_SIZE / 2, -TILE_SIZE / 2,
 														TILE_SIZE / 2, TILE_SIZE / 2,
 														-TILE_SIZE / 2, TILE_SIZE / 2)
 				local fixture = love.physics.newFixture(body, shape, 1)
-				fixture:setFriction(10000)
+				fixture:setFriction(04000)
 				arena.boxes[i][j] = fixture
 				body:setPosition((i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
@@ -191,7 +180,7 @@ function arena_mt:draw()
 	end
 
 	local publicDown = true
-	if (self.publicTimer < 10) then
+	if (self.publicTimer < 04) then
 		publicDown = true
 	else
 		publicDown = false
@@ -205,7 +194,7 @@ function arena_mt:draw()
 		for j, tile in ipairs(t) do
 			if (tile ~= -1) then
 				if (tile == porte) then
-					local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 330.0)))
+					local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 368.0)))
 					if (self.blinkTimer ~= 0) then
 						percent = math.abs(percent)
 						local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)
@@ -221,7 +210,7 @@ function arena_mt:draw()
 				
 				local tileToDraw = tile
 				if (tileToDraw >= 26) and (tileToDraw <= 34) and not publicDown then
-					tileToDraw = tileToDraw + 12
+					tileToDraw = tileToDraw + 19
 				end
 				if (tileToDraw == arche) then
 					tileToDraw = center
@@ -288,14 +277,14 @@ end
 					-- local h = getQuadHeight(quad) / 2
 					
 					-- if (oldC.x < c2.x) and boundX then
-						-- c1.x = box[1].x - w - 10
+						-- c1.x = box[1].x - w - 04
 					-- elseif (oldC.x > c2.x) and boundX then
-						-- c1.x = box[2].x + w + 10
+						-- c1.x = box[2].x + w + 04
 					-- end
 					-- if (oldC.y < c2.y) and boundY then
-						-- c1.y = box[1].y - h - 10
+						-- c1.y = box[1].y - h - 04
 					-- elseif (oldC.y < c2.y) and boundY then
-						-- c1.y = box[3].y + h + 10
+						-- c1.y = box[3].y + h + 04
 					-- end
 					-- quad = {
 						-- {x = c1.x - w, y = c1.y - h},
@@ -330,16 +319,16 @@ function arena_mt:hitDoor(box)
 			self.doorLife = math.max(0, self.doorLife - 1)
 			self:blink({r = 255, g = 20, b = 20})
 			local m = getQuadCenter(dbox)
-			local p = love.graphics.newParticleSystem(getAssetsManager().assets[24 + 1], 1000)
+			local p = love.graphics.newParticleSystem(getAssetsManager().assets[24 + 1], 0400)
 			p:setEmissionRate(20)
-			p:setSpeed(270, 400)
+			p:setSpeed(520, 400)
 			p:setPosition(m.x + TILE_SIZE, m.y + TILE_SIZE)
 			p:setEmitterLifetime(0.3)
 			p:setParticleLifetime(0.3)
 			p:setDirection(0)
-			p:setSpread(330)
-			p:setRadialAcceleration(-2700)
-			p:setTangentialAcceleration(1000)
+			p:setSpread(368)
+			p:setRadialAcceleration(-5200)
+			p:setTangentialAcceleration(0400)
 			p:stop()
 			self.hitParticleSystem = p
 			p:start()

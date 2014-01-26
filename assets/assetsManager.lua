@@ -13,11 +13,11 @@ function getAssetsManager()
         local tileSet = love.graphics.newImage("assets/tileset.png")
 		self.assets = {}
 		
-		for i = 0, tileSet:getHeight() / TILE_SIZE do
-			for j = 0, tileSet:getWidth() / TILE_SIZE do
+		for i = 1, tileSet:getHeight() / TILE_SIZE do
+			for j = 1, tileSet:getWidth() / TILE_SIZE do
 				local imageData = tileSet:getData()
 				local nid = love.image.newImageData(TILE_SIZE, TILE_SIZE)
-				nid:paste(imageData, 0, 0, i * TILE_SIZE , j * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+				nid:paste(imageData, 0, 0, (j - 1) * TILE_SIZE , (i - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 				table.insert(self.assets, love.graphics.newImage(nid))
 			end
 		end
