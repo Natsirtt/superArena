@@ -7,6 +7,7 @@ local RADIUS = 20
 local DEFENDING_MAX_TIME = 5
 local ANIMATION_RATE = 0.1
 local DIE_ANIMATION_FRAME_NB = 18
+local ATTACK_RELOAD = 0.2
 
 PLAYER_DAMAGE = 1
 
@@ -37,6 +38,9 @@ function newPlayer(gameManager, playerNo)
 	this.assets["shieldRight"] = {}
 	this.assets["victory"] = {}
 	this.assets["die"] = {}
+	this.assets["idleUp"] = {}
+	this.assets["idleLeft"] = {}
+	this.assets["idleRight"] = {}
 
 	this.assetsX = "idle"
 	this.assetsY = 0
@@ -171,6 +175,33 @@ function newPlayer(gameManager, playerNo)
 	nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
 	table.insert(this.assets["die"], love.graphics.newImage(nid))
 
+	j = j + 1
+
+	-- idle right
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idleRight"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	-- idle left
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idleLeft"], love.graphics.newImage(nid))
+	end
+
+	j = j + 1
+
+	-- idle up
+
+	for i = 1, 4 do
+		nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+		table.insert(this.assets["idleUp"], love.graphics.newImage(nid))
+	end
+
 	this.deathSound = love.audio.newSource("death.wav", "static")
 
 	this.gameManager = gameManager
@@ -187,6 +218,7 @@ function newPlayer(gameManager, playerNo)
     this.speed = SPEED_BASE
     this.hitbox = {}
     this.controller = getControllersManager():getUnusedController()
+    this.lastAttackTime = love.timer.getTime()
 	
 	this.deathTimer = 0
 	this.deathParticleSystem = nil
@@ -254,33 +286,34 @@ function mt:isDefending()
 end
 
 function mt:canAttack()
-	return not self:isDefending()
+	return not self:isDefending() and love.timer.getTime() - self.lastAttackTime >= ATTACK_RELOAD
 end
 
 function mt:switchAttackAsset()
 	local str = self.assetsX
-	if str == "walkUp" then
+	if str == "walkUp" or str == "idleUp" then
 		self.assetsX = "attackUp"
-	elseif (str == "walkDown") or (str == "idle") then
+	elseif str == "walkDown" or str == "idle" then
 		self.assetsX = "attackDown"
-	elseif str == "walkLeft" then
+	elseif str == "walkLeft" or str == "idleLeft" then
 		self.assetsX = "attackLeft"
-	elseif str == "walkRight" then
+	elseif str == "walkRight" or str == "idleRight" then
 		self.assetsX = "attackRight"
 	elseif str == "attackUp" then
-		self.assetsX = "walkUp"
+		self.assetsX = "idleUp"
 	elseif str == "attackDown" then
-		self.assetsX = "walkDown"
+		self.assetsX = "idle"
 	elseif str == "attackRight" then
-		self.assetsX = "walkRight"
+		self.assetsX = "idleRight"
 	else
-		self.assetsX = "walkLeft"
+		self.assetsX = "idleLeft"
 	end
 end
 
 function mt:attack()
 	if self:canAttack() then
 		self.gameManager:playerAttack(self)
+		self.lastAttackTime = love.timer.getTime()
 	end
 end
 
@@ -349,7 +382,15 @@ function mt:update(dt)
 
 		if (self.dx == 0) and (self.dy == 0) then
 			if not self.temporaryAsset then
-				self.assetsX = "idle"
+				if self.angle == 0 or math.abs(self.angle) == 45 then
+					self.assetsX = "idleUp"
+				elseif self.angle == 180 or math.abs(self.angle) == 135 then
+					self.assetsX = "idle"
+				elseif self.angle == 90 then
+					self.assetsX = "idleLeft"
+				elseif self.angle == -90 then
+					self.assetsX = "idleRight"
+				end
 			end
 		end
 
@@ -443,6 +484,9 @@ function mt:hit(lifePoints)
     self.life = self.life - lifePoints
     if self:isDead() then
     	self.assetsX = "die"
+    	self.dx = 0
+    	self.dy = 0
+    	self.body:setLinearVelocity(0, 0)
     end
 	self.gameManager.camera:shake()
 	self:blink({r = 255, g = 20, b = 20})
