@@ -9,6 +9,7 @@ love.filesystem.load("maths/vector.lua")()
 love.filesystem.load("maths/segment.lua")()
 love.filesystem.load("maths/collisions.lua")()
 love.filesystem.load("assets/assetsManager.lua")()
+love.filesystem.load("assets/UI.lua")()
 
 local gameManager
 

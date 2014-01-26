@@ -9,11 +9,12 @@ function mt:drawAsset(asset, x, y)
 end
 
 function mt:getDistances(x, y)
-	if self.playerNo = 1 then
+	if self.playerNo == 1 then
 		return x, y
 	end
-	if self.playerNo = 2 then
-		local res = 
+	if self.playerNo == 2 then
+		--local res = 
+	end
 end
 
 function newUI(player, playerNo)
@@ -27,5 +28,4 @@ end
 
 function mt:draw()
 	-- hud
-
 end
