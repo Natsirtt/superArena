@@ -125,7 +125,7 @@ function arenaPhaseDraw(self)
 	end
 	
 	love.graphics.setColor(255, 0, 0)
-	love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
+	--love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
 end
 
 function mt:getAlivePlayers()

@@ -367,6 +367,7 @@ function mt:processDefenseAnimation()
 	self.defenseAssetsY = self.defenseAssetsY + 1
 	print("defense assets y = " .. self.defenseAssetsY)
 	if self.defenseAssetsY >= 1 then
+		self.defenseAssetsY = 1
 		self.defenseAnimationProcessing = false
 	end
 end
