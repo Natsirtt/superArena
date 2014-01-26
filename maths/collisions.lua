@@ -188,3 +188,12 @@ function getCollisionSide(box, quad, dx, dy)
 
 end
 
+function getTranslatedQuad(quad, dx, dy)
+	return {
+		{x = quad[1].x + dx, y = quad[1].y + dy},
+		{x = quad[2].x + dx, y = quad[2].y + dy},
+		{x = quad[3].x + dx, y = quad[3].y + dy},
+		{x = quad[4].x + dx, y = quad[4].y + dy}
+	}
+end
+

@@ -173,39 +173,38 @@ function arena_mt:getValidQuad(lastQuad, newQuad, dx, dy)
 			if (box ~= nil) and (quad ~= nil) then
 				if (rectCollision(box, quad)) then
 					local c1 = getQuadCenter(quad)
+					local oldC = getQuadCenter(lastQuad)
+					local c2 = getQuadCenter(box)
+					local boundX = false
+					local boundY = false
 					local newDX = dx
 					local newDY = dy
-					if ((c1.x >= box[1].x) and (c1.x <= box[2].x) and
-						(c1.y >= box[1].y) and (c1.y <= box[3].y))then
-						newDY = 0
-						newDX = 0
-					elseif (c1.x >= box[1].x) and (c1.x <= box[2].x) then
-						newDY = 0
-					elseif (c1.y >= box[1].y) and (c1.y <= box[3].y) then
-						newDX = 0
-					else
-						newDY = 0
-						newDX = 0
+					if (rectCollision(box, getTranslatedQuad(lastQuad, dx, 0))) then
+						boundX = true
 					end
+					if (rectCollision(box, getTranslatedQuad(lastQuad, 0, dy))) then
+						boundY = true
+					end
+					local w = getQuadWidth(quad) / 2
+					local h = getQuadHeight(quad) / 2
 					
-					local x = lastQuad[1].x + newDX
-					-- if (dx > 0) and (newDX == 0) then
-						-- x = box[1].x - getQuadWidth(quad) - 1
-					-- elseif (dx < 0) and (newDX == 0) then
-						-- x = box[2].x + 1
-					-- end
-					local y = lastQuad[1].y + newDY
-					-- if (dy > 0) and (newDY == 0) then
-						-- y = box[1].y - getQuadHeight(quad) - 1
-					-- elseif (dy < 0) and (newDY == 0) then
-						-- y = box[3].y + 1
-					-- end
+					if (oldC.x < c2.x) and boundX then
+						c1.x = box[1].x - w - 10
+					elseif (oldC.x > c2.x) and boundX then
+						c1.x = box[2].x + w + 10
+					end
+					if (oldC.y < c2.y) and boundY then
+						c1.y = box[1].y - h - 10
+					elseif (oldC.y < c2.y) and boundY then
+						c1.y = box[3].y + h + 10
+					end
 					quad = {
-						{x = x,                      y = y},
-						{x = x + getQuadWidth(quad), y = y},
-						{x = x + getQuadWidth(quad), y = y + getQuadHeight(quad)},
-						{x = x,                      y = y + getQuadHeight(quad)}
+						{x = c1.x - w, y = c1.y - h},
+						{x = c1.x + w, y = c1.y - h},
+						{x = c1.x + w, y = c1.y + h},
+						{x = c1.x - w, y = c1.y + h}
 					}
+					return quad
 				end
 			end
 		end
