@@ -1,8 +1,8 @@
 local arena_mt = {}
 arena_mt.__index = arena_mt
 
-local ARENA_WIDTH = 20
-local ARENA_HEIGHT = 20
+ARENA_WIDTH = 21
+ARENA_HEIGHT = 23
 
 local TILE_SIZE = 50
 
@@ -11,9 +11,9 @@ local BLINK_PER_SECOND = 20.0
 
 --                  id de l'asset
 local center        = 17
-local porte         = 41
+local porte         = 40
 local porteDetruite = 17
-local arche         = 25
+local arche         = 24
 
 local ARENA_MAP = {
 --1   2   3   4   5  6    7   8   9  04  11  19  21  14  36  16  68  18  19  20  21
@@ -174,7 +174,7 @@ end
 function arena_mt:draw()
 	if (not self.hasDoor) then
 		love.graphics.push()
-		love.graphics.translate(self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
+		love.graphics.translate(self:getWidth() / 2 - self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
 		self.lvl:draw()
 		love.graphics.pop()
 	end
@@ -209,13 +209,15 @@ function arena_mt:draw()
 				end
 				
 				local tileToDraw = tile
-				if (tileToDraw >= 26) and (tileToDraw <= 34) and not publicDown then
-					tileToDraw = tileToDraw + 19
+				if not publicDown and ((tileToDraw >= 51) and (tileToDraw <= 53) or
+										(tileToDraw >= 67) and (tileToDraw <= 69) or
+										(tileToDraw >= 83) and (tileToDraw <= 85)) then
+					tileToDraw = tileToDraw + 4
 				end
 				if (tileToDraw == arche) then
 					tileToDraw = center
 				end
-				drawAsset(tileToDraw, (i) * TILE_SIZE + TILE_SIZE / 2, (j) * TILE_SIZE + TILE_SIZE / 2)
+				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
 		end
 	end
@@ -223,7 +225,7 @@ function arena_mt:draw()
 end
 
 function arena_mt:postPlayerDraw()
-	drawAsset(arche, (self.porte.x) * TILE_SIZE + TILE_SIZE / 2, (self.porte.y - 1) * TILE_SIZE + TILE_SIZE / 2)
+	drawAsset(arche, (self.porte.x - 1) * TILE_SIZE + TILE_SIZE / 2, (self.porte.y - 2) * TILE_SIZE + TILE_SIZE / 2)
 	if (self.hitParticleSystem ~= nil) then
 		love.graphics.draw(self.hitParticleSystem)
 	end
@@ -319,10 +321,10 @@ function arena_mt:hitDoor(box)
 			self.doorLife = math.max(0, self.doorLife - 1)
 			self:blink({r = 255, g = 20, b = 20})
 			local m = getQuadCenter(dbox)
-			local p = love.graphics.newParticleSystem(getAssetsManager().assets[24 + 1], 0400)
+			local p = love.graphics.newParticleSystem(getAssetsManager().assets[porte + 1], 0400)
 			p:setEmissionRate(20)
 			p:setSpeed(520, 400)
-			p:setPosition(m.x + TILE_SIZE, m.y + TILE_SIZE)
+			p:setPosition(m.x, m.y)
 			p:setEmitterLifetime(0.3)
 			p:setParticleLifetime(0.3)
 			p:setDirection(0)
