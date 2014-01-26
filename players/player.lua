@@ -1,6 +1,9 @@
 local mt = {}
 mt.__index = mt
 
+local SWORD_LENGTH = 75
+local SWORD_AMPLITUDE = 45
+
 local MAX_LIFE = 10
 local SPEED_BASE = 500
 local RADIUS = 20
@@ -538,9 +541,9 @@ end
 
 function mt:getSwordHitBox()
 	-- la longueur de la hitbox (de l'épée)
-	local length = 40
+	local length = SWORD_LENGTH
 	-- l'amplitude de l'épée
-	local amp = 30
+	local amp = SWORD_AMPLITUDE
 	
 	local dx = math.cos(math.rad(self.angle + 90))
 	local dy = -math.sin(math.rad(self.angle + 90))

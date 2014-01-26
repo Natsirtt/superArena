@@ -4,7 +4,7 @@ mt.__index = mt
 local init = false
 local instance = {}
 
-local TILE_SIZE = 51
+local TILE_SIZE = 50
 
 function getAssetsManager()
     if not init then
@@ -107,13 +107,18 @@ function getAssetsManager()
     return instance
 end
 
+function round(num, idp)
+  local mult = 10^(idp or 0)
+  return math.floor(num * mult + 0.5) / mult
+end
+
 function mt:drawAsset(asset, x, y)
 	if 0 <= asset and asset < #self.assets then
 		if asset == 21 then -- some sand underneath the top of the door
 			self:drawAsset(4 + 1, x, y)
 		end
 		local tex = self.assets[asset + 1]
-		love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
+		love.graphics.draw(tex, round(x - tex:getWidth() / 2, 5), round(y - tex:getHeight() / 2, 5))
 	end
 end
 
