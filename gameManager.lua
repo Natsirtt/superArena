@@ -18,6 +18,7 @@ function newGameManager()
 	self.camera = nil
 	
 	world = love.physics.newWorld(0, 0, true)
+	self.cameraPlayers = {}
 
 	return setmetatable(self, mt)
 end
@@ -98,11 +99,21 @@ function arenaPhaseDraw(self)
 	local h = self.arena.getHeight()
 	
 	--love.graphics.translate(love.window.getWidth() / 2 - w / 2, love.window.getHeight() / 2 - h / 2)
-	local x, y = self.camera:getBestPosition(self:getAlivePlayers())
+
+	-- keeping our own table of players to be focused by the camera
+	-- allow us to keep following the last one even when he dies
+	local cameraPlayers = self:getAlivePlayers()
+	if #cameraPlayers ~= 0 then
+		self.cameraPlayers = cameraPlayers
+	end
+	local x, y = self.camera:getBestPosition(self.cameraPlayers)
 	love.graphics.translate(love.window.getWidth() / 2 - x, love.window.getHeight() / 2 - y)
 	
 	self.camera:draw()
 	self.arena:draw()
+	-- self.arena:drawDebug()
+	-- getAssetsManager():drawAsset(24, 200, 200)
+	-- getAssetsManager():debugAssets()
 	for _, player in ipairs(self.players) do
 		player:draw()
 		--player:debugSprites("shield")

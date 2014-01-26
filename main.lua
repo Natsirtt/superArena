@@ -8,11 +8,12 @@ love.filesystem.load("maths/point.lua")()
 love.filesystem.load("maths/vector.lua")()
 love.filesystem.load("maths/segment.lua")()
 love.filesystem.load("maths/collisions.lua")()
+love.filesystem.load("assets/assetsManager.lua")()
 
 local gameManager
 
 function love.load(arg)
-	love.window.setTitle("Bugfree Happiness")
+	love.window.setTitle("Super ARENA ultimate frenzy saga deluxe - GOTY edition")
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
     love.window.setMode(w, h, {

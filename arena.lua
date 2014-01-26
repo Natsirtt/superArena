@@ -26,7 +26,7 @@ local publicDown2         = {x = 315, y = 15, width = 15, height = 15}
 function newArena()
 	local arena = {}
 	
-	arena.tileSet = love.graphics.newImage("tileset.png")
+	arena.tileSet = love.graphics.newImage("assets/tileset.png")
 	arena.tiles = {}
 	arena.publicTimer = 0
 	arena.hasDoor = true
