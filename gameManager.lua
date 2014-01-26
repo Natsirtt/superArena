@@ -117,6 +117,7 @@ function arenaPhaseDraw(self)
 		--player:debugSprites("shield")
 	end
 	self.arena:postPlayerDraw()
+	
 	love.graphics.pop()
 	
 	love.graphics.setColor(255, 0, 0)
@@ -134,15 +135,19 @@ function mt:getAlivePlayers()
 end
 
 function mt:playerAttack(player)
-	local hitBox = player:getSwordHitBox()
+	local sword = player:getSwordHitBox()
+	
 	for _, p in ipairs(self:getAlivePlayers()) do
 		if (p ~= player) then
-			if (rectCollision(hitBox, p:getQuad())) then
-				p:hit(PLAYER_DAMAGE)
+			local shield = p:getShieldHitBox()
+			if (rectCollision(sword, p:getQuad())) then
+				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
+					p:hit(PLAYER_DAMAGE)
+				end
 			end
 		end
 	end
-	self.arena:hitDoor(hitBox)
+	self.arena:hitDoor(sword)
 end
 
 function mt:debugInfo()

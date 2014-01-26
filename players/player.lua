@@ -4,10 +4,13 @@ mt.__index = mt
 local SWORD_LENGTH = 75
 local SWORD_AMPLITUDE = 45
 
+local SHIELD_LENGTH = 25
+local SHIELD_AMPLITUDE = 50
+
 local MAX_LIFE = 10
 local SPEED_BASE = 500
 local RADIUS = 20
-local DEFENDING_MAX_TIME = 5
+local DEFENDING_MAX_TIME = 3
 local ANIMATION_RATE = 0.1
 local DIE_ANIMATION_FRAME_NB = 18
 
@@ -18,6 +21,8 @@ local BLINK_PER_SECOND = 15.0
 
 function newPlayer(gameManager, playerNo)
     local this = {}
+
+    this.ui = newUI(self, playerNo)
 	
 	local tileSet = love.graphics.newImage("assets/player"..playerNo..".png")
 	
@@ -217,6 +222,7 @@ function newPlayer(gameManager, playerNo)
 	this.w = 30 -- taille de la boundingBox
 	this.h = 30 -- taille de la boundingBox
     this.isDefendingBool = false
+	this.canDefend = true
     this.isAttackingBool = false
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
@@ -225,6 +231,9 @@ function newPlayer(gameManager, playerNo)
     this.attackAssetsX = "attackDown"
     this.attackAssetsY = -1
     this.attackAnimationProcessing = false
+    this.defenseAssetsX = "shieldDown"
+    this.defenseAssetsY = -1
+    this.defenseAnimationProcessing = false
 	
 	this.deathTimer = 0
 	this.deathParticleSystem = nil
@@ -284,7 +293,11 @@ function mt:setPositionFromQuad(quad)
 end
 
 function mt:setDefending(isDefending)
-	self.isDefendingBool = isDefending
+	self.isDefendingBool = isDefending and self.canDefend
+	self.defenseAnimationProcessing = false
+	if (self.isDefendingBool) then
+		self:beginDefenseAnimation()
+	end
 end
 
 function mt:isDefending()
@@ -319,11 +332,35 @@ function mt:beginAttackAnimation()
 	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
 end
 
+function mt:beginDefenseAnimation()
+	self.defenseAnimationProcessing = true
+	self.defenseAssetsY = -1
+	if self.angle == 90 then
+		self.defenseAssetsX = "shieldLeft"
+	elseif self.angle == -90 then
+		self.defenseAssetsX = "shieldRight"
+	elseif self.angle == 180 or math.abs(self.angle) == 135 then
+		self.defenseAssetsX = "shieldDown"
+	elseif self.angle == 0 or math.abs(self.angle) == 45 then
+		self.defenseAssetsX = "shieldUp"
+	end
+	-- we make sure we change the asset right now
+	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
+end
+
 function mt:processAttackAnimation()
 	self.attackAssetsY = self.attackAssetsY + 1
 	print("attack assets y = " .. self.attackAssetsY)
 	if self.attackAssetsY >= 4 then
 		self.attackAnimationProcessing = false
+	end
+end
+
+function mt:processDefenseAnimation()
+	self.defenseAssetsY = self.defenseAssetsY + 1
+	print("defense assets y = " .. self.defenseAssetsY)
+	if self.defenseAssetsY >= 1 then
+		self.defenseAnimationProcessing = false
 	end
 end
 
@@ -338,10 +375,16 @@ function mt:update(dt)
 			self.dx, self.dy = self.controller:getAxes()
 		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
-		if (self.controller:isDown(13)) then
-			self:attack()
-		end
 		if (self.controller:isDown(11)) then
+			self:setDefending(true)
+		else
+			self:setDefending(false)
+			if (self.controller:isDown(10)) then
+				self:attack()
+			end
+		end
+
+		if (self.controller:isDown(13)) then
 			self:hit(self.life)
 		end
 		local x, y = self.body:getPosition()
@@ -409,9 +452,13 @@ function mt:update(dt)
 			self.defendingTimeLeft = self.defendingTimeLeft - dt
 			if self.defendingTimeLeft <= 0 then
 				self:setDefending(false)
+				self.canDefend = false
 			end
 		else
-
+			self.defendingTimeLeft = math.min(self.defendingTimeLeft + dt, DEFENDING_MAX_TIME)
+			if (self.defendingTimeLeft >= DEFENDING_MAX_TIME) then
+				self.canDefend = true
+			end
 		end
 
 		--animation
@@ -419,6 +466,8 @@ function mt:update(dt)
 			self.assestsLastChange = love.timer.getTime()
 			if self.attackAnimationProcessing then
 				self:processAttackAnimation()
+			elseif self.defenseAnimationProcessing then
+				self:processDefenseAnimation()
 			else
 				self.assetsY = (self.assetsY + 1) % self.assetsMod
 			end
@@ -467,6 +516,8 @@ function mt:draw()
 	local tex = nil
 	if self.attackAnimationProcessing then
 		tex = self.assets[self.attackAssetsX][self.attackAssetsY + 1]
+	elseif self.defenseAnimationProcessing then
+		tex = self.assets[self.defenseAssetsX][self.defenseAssetsY + 1]
 	else
 		tex = self.assets[self.assetsX][self.assetsY + 1]
 	end
@@ -477,7 +528,7 @@ function mt:draw()
 	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
 	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	
-	--drawBox(self:getSwordHitBox())
+	--drawBox(self:getShieldHitBox())
 	
 end
 
@@ -562,6 +613,32 @@ function mt:getSwordHitBox()
 		{x = self.x + dx2 / 2 + dx, y = self.y + dy2 / 2 + dy},
 		{x = self.x - dx2 / 2 + dx, y = self.y - dy2 / 2 + dy},
 		{x = self.x - dx2 / 2,      y = self.y - dy2 / 2}
+	}
+end
+
+function mt:getShieldHitBox()
+	-- la longueur de la hitbox (de l'épée)
+	local length = SHIELD_LENGTH
+	-- l'amplitude de l'épée
+	local amp = SHIELD_AMPLITUDE
+	
+	local dx = math.cos(math.rad(self.angle + 90))
+	local dy = -math.sin(math.rad(self.angle + 90))
+	local l = math.sqrt(dx * dx + dy * dy)
+	dx = (dx / l) * length
+	dy = (dy / l) * length
+	
+	local dx2 = math.cos(math.rad(self.angle + 180))
+	local dy2 = -math.sin(math.rad(self.angle + 180))
+	l = math.sqrt(dx2 * dx2 + dy2 * dy2)
+	dx2 = (dx2 / l) * amp
+	dy2 = (dy2 / l) * amp
+	
+	return {
+		{x = self.x + dx2 / 2 + dx / 2,      y = self.y + dy2 / 2 + dy / 2},
+		{x = self.x + dx2 / 2 + dx,          y = self.y + dy2 / 2 + dy},
+		{x = self.x - dx2 / 2 + dx,          y = self.y - dy2 / 2 + dy},
+		{x = self.x - dx2 / 2 + dx / 2,      y = self.y - dy2 / 2 + dy / 2}
 	}
 end
 
