@@ -21,8 +21,6 @@ local BLINK_PER_SECOND = 15.0
 
 function newPlayer(gameManager, playerNo)
     local this = {}
-
-    this.ui = newUI(self, playerNo)
 	
 	local tileSet = love.graphics.newImage("assets/player"..playerNo..".png")
 	
@@ -249,14 +247,19 @@ function newPlayer(gameManager, playerNo)
 	this.fixture = love.physics.newFixture(this.body, this.shape, 1)
 	this.fixture:setFriction(10000)
 	this.body:setPosition(this.x, this.y)
+	this.playerNo = playerNo
     
     --if this.controller == nil then
         -- should not happen if we use stuff correctly
     --end
     
     this.life = MAX_LIFE
+    this.ui = nil
     
-    return setmetatable(this, mt)
+    local instance = setmetatable(this, mt)
+    instance.ui = newUI(instance, playerNo)
+
+    return instance
 end
 
 function mt:blink(color)
@@ -264,6 +267,10 @@ function mt:blink(color)
 		self.blinkTimer = BLINK_LIMIT
 		self.blinkColor = color
 	end
+end
+
+function mt:getNumber()
+	return self.playerNo
 end
 
 function mt:getQuad()
@@ -523,13 +530,17 @@ function mt:draw()
 	end
 	local x, y = self.body:getPosition()
 	love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
-	
+
 	-- Affichage de la bounding box (debug)
 	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
 	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	
 	--drawBox(self:getShieldHitBox())
 	
+end
+
+function mt:drawUI()
+	self.ui:draw()
 end
 
 function mt:isDead()
@@ -543,6 +554,7 @@ end
 function mt:hit(lifePoints)
     self.life = self.life - lifePoints
     if self:isDead() then
+    	self.attackAnimationProcessing = false
     	self.assetsX = "die"
     	self.dx = 0
     	self.dy = 0

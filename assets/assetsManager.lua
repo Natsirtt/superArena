@@ -146,13 +146,23 @@ function mt:drawAsset(asset, x, y)
 	end
 end
 
-function drawUIAsset(player, asset, x, y)
-	local playerStr = ""
-	if player ~= nil then
-		playerStr = "P" .. player
+function mt:drawUIAsset(player, asset, x, y, general, xOffset, yOffset)
+	local playerStr = "P" .. player:getNumber()
+	local assetStr = asset
+	if not general then
+		assetStr = assetStr .. playerStr
 	end
-	local tex = self.uiAssets[asset..playerStr]
-	love.graphics.draw(tex, x, y)
+	print(assetStr)
+	local tex = self.uiAssets[assetStr]
+	local x2 = x
+	local y2 = y
+	if (xOffset) then
+		x2 = x - tex:getWidth()
+	end
+	if (yOffset) then
+		y2 = y - tex:getHeight()
+	end
+	love.graphics.draw(tex, x2, y2)
 end
 
 function drawAsset(asset, x, y)

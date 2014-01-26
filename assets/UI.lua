@@ -1,11 +1,14 @@
 local mt = {}
 mt.__index = mt
 
-local XHudDist = 20
-local YHudDist = 20
+local XHudDist = 10
+local YHudDist = 25
 
 function mt:drawAsset(asset, x, y)
-	getAssetsManager():drawUIAsset(self.player, asset, x, y)
+	local x2, y2 = self:getDistances(x, y)
+	local xOffset = (x2 == x)
+	local yOffset = (y2 == y)
+	getAssetsManager():drawUIAsset(self.player, asset, x2, y2, false, xOffset, yOffset)
 end
 
 function mt:getDistances(x, y)
@@ -13,8 +16,15 @@ function mt:getDistances(x, y)
 		return x, y
 	end
 	if self.playerNo == 2 then
-		--local res = 
+		return love.window.getWidth() - x, y
 	end
+	if self.playerNo == 3 then
+		return x, love.window.getHeight() - y
+	end
+	if self.playerNo == 4 then
+		return love.window.getWidth() - x, love.window.getHeight() -y
+	end
+	return -100000000, -100000000
 end
 
 function newUI(player, playerNo)
@@ -23,9 +33,15 @@ function newUI(player, playerNo)
 	self.player = player
 	self.playerNo = playerNo
 
-	setmetatable(self, mt)
+	return setmetatable(self, mt)
 end
 
 function mt:draw()
 	-- hud
+	if self.player:isDead() then
+		self:drawAsset("hudDead", XHudDist, YHudDist)
+	else
+		self:drawAsset("hud", XHudDist, YHudDist)
+
+	end
 end
