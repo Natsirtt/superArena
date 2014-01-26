@@ -12,94 +12,16 @@ function getAssetsManager()
 
         local tileSet = love.graphics.newImage("assets/tileset.png")
 		self.assets = {}
-
-		local imageData = tileSet:getData()
-		local nid = love.image.newImageData(150, 150)
 		
-		-- sable
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, TILE_SIZE * ((i - 1) % 3), 0, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, TILE_SIZE * ((i - 1) % 3), TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, TILE_SIZE * ((i - 1) % 3), 2 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
+		for i = 0, tileSet:getHeight() / TILE_SIZE do
+			for j = 0, tileSet:getWidth() / TILE_SIZE do
+				local imageData = tileSet:getData()
+				local nid = love.image.newImageData(TILE_SIZE, TILE_SIZE)
+				nid:paste(imageData, 0, 0, i * TILE_SIZE , j * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+				table.insert(self.assets, love.graphics.newImage(nid))
+			end
 		end
 
-		-- mur
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 3 * TILE_SIZE + TILE_SIZE * ((i - 1) % 3), 0, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		nid:paste(imageData, 0, 0, 3 * TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_SIZE)
-		table.insert(self.assets, love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 3 * TILE_SIZE + 2 * TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_SIZE)
-		table.insert(self.assets, love.graphics.newImage(nid))
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 3 * TILE_SIZE + TILE_SIZE * ((i - 1) % 3), 2 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-
-		-- public
-		nid:paste(imageData, 0, 0, 6 * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
-		table.insert(self.assets, love.graphics.newImage(nid))
-
-		--porte et son public
-		nid:paste(imageData, 0, 0, 7 * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
-		table.insert(self.assets, love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 7 * TILE_SIZE + 2 * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
-		table.insert(self.assets, love.graphics.newImage(nid))
-
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 7 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 7 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 2 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-
-		-- public 2 animé
-		-- état 1
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 3 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 3 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 3 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 4 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 3 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 5 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 3 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 6 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-
-		-- état 2
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 7 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 3 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 7 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 4 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 7 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 5 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
-		for i = 1, 3 do
-			nid:paste(imageData, 0, 0, 7 * TILE_SIZE + ((i - 1) % 3) * TILE_SIZE, 6 * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-			table.insert(self.assets, love.graphics.newImage(nid))
-		end
 
 		-- UI / HUD
 
