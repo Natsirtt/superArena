@@ -4,11 +4,11 @@ mt.__index = mt
 local XHudDist = 10
 local YHudDist = 25
 
-function mt:drawAsset(asset, x, y)
+function mt:drawAsset(asset, x, y, general)
 	local x2, y2 = self:getDistances(x, y)
 	local xOffset = (x2 ~= x)
 	local yOffset = (y2 ~= y)
-	getAssetsManager():drawUIAsset(self.player, asset, x2, y2, false, xOffset, yOffset)
+	getAssetsManager():drawUIAsset(self.player, asset, x2, y2, general, xOffset, yOffset)
 end
 
 function mt:getDistances(x, y)
@@ -39,9 +39,9 @@ end
 function mt:draw()
 	-- hud
 	if self.player:isDead() then
-		self:drawAsset("hudDead", XHudDist, YHudDist)
+		self:drawAsset("hudDead", XHudDist, YHudDist, false)
 	else
-		self:drawAsset("hud", XHudDist, YHudDist)
-
+		local x2, y2 = self:getDistances(XHudDist, YHudDist)
+		getAssetsManager():drawHUD(self.player, x2, y2)
 	end
 end
