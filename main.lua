@@ -13,6 +13,7 @@ love.filesystem.load("assets/assetsManager.lua")()
 local gameManager
 
 function love.load(arg)
+	love.graphics.setDefaultFilter("linear", "linear", 1)
 	love.window.setTitle("Super ARENA ultimate frenzy saga deluxe - GOTY edition")
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
