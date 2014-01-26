@@ -172,12 +172,12 @@ function arena_mt:update(dt)
 end
 
 function arena_mt:draw()
-	--if (not self.hasDoor) then
+	if (not self.hasDoor) then
 		love.graphics.push()
 		love.graphics.translate(self:getWidth() / 2 - self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
 		self.lvl:draw()
 		love.graphics.pop()
-	--end
+	end
 
 	local publicDown = true
 	if (self.publicTimer < 04) then
@@ -225,7 +225,7 @@ function arena_mt:draw()
 end
 
 function arena_mt:postPlayerDraw()
-	drawAsset(arche, (self.porte.x) * TILE_SIZE + TILE_SIZE / 2, (self.porte.y - 1) * TILE_SIZE + TILE_SIZE / 2)
+	drawAsset(arche, (self.porte.x - 1) * TILE_SIZE + TILE_SIZE / 2, (self.porte.y - 2) * TILE_SIZE + TILE_SIZE / 2)
 	if (self.hitParticleSystem ~= nil) then
 		love.graphics.draw(self.hitParticleSystem)
 	end
@@ -321,10 +321,10 @@ function arena_mt:hitDoor(box)
 			self.doorLife = math.max(0, self.doorLife - 1)
 			self:blink({r = 255, g = 20, b = 20})
 			local m = getQuadCenter(dbox)
-			local p = love.graphics.newParticleSystem(getAssetsManager().assets[24 + 1], 0400)
+			local p = love.graphics.newParticleSystem(getAssetsManager().assets[porte + 1], 0400)
 			p:setEmissionRate(20)
 			p:setSpeed(520, 400)
-			p:setPosition(m.x + TILE_SIZE, m.y + TILE_SIZE)
+			p:setPosition(m.x, m.y)
 			p:setEmitterLifetime(0.3)
 			p:setParticleLifetime(0.3)
 			p:setDirection(0)
