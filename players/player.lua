@@ -225,7 +225,6 @@ function newPlayer(gameManager, playerNo)
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
     this.hitbox = {}
-    this.controller = getControllersManager():getUnusedController()
     this.attackAssetsX = "attackDown"
     this.attackAssetsY = -1
     this.attackAnimationProcessing = false
@@ -248,10 +247,6 @@ function newPlayer(gameManager, playerNo)
 	this.fixture:setFriction(10000)
 	this.body:setPosition(this.x, this.y)
 	this.playerNo = playerNo
-    
-    --if this.controller == nil then
-        -- should not happen if we use stuff correctly
-    --end
     
     this.life = MAX_LIFE
     this.ui = nil
@@ -379,22 +374,8 @@ function mt:update(dt)
 		if self.isDefendingBool then --or self.isAttackingBool then
 			self.dx = 0
 			self.dy = 0
-		else
-			self.dx, self.dy = self.controller:getAxes()
 		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
-		if (self.controller:isDown(11)) then
-			self:setDefending(true)
-		else
-			self:setDefending(false)
-			if (self.controller:isDown(10)) then
-				self:attack()
-			end
-		end
-
-		if (self.controller:isDown(13)) then
-			self:hit(self.life)
-		end
 		local x, y = self.body:getPosition()
 		self.x = x
 		self.y = y

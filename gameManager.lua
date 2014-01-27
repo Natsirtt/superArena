@@ -47,11 +47,12 @@ function addingPlayersPhase(self, dt)
 	if added then
 		local p = newPlayer(self, #self.players + 1)
 		self.players[#self.players + 1] = p
+		getControllersManager():getUnusedController():bind(p)
 		-- a little idle time to let the player some time
 		-- to release the button, or the first test of this
 		-- function will be true
 		time = love.timer.getTime()
-		while love.timer.getTime() - time < 0.3 do
+		while (love.timer.getTime() - time) < 0.1 do
 		end
 	end
 end
@@ -73,6 +74,8 @@ function arenaPhase(self, dt)
 
 	love.graphics.setNewFont(24)
 	self.arena:update(dt)
+	
+	getControllersManager():updateAll(dt)
 
 	for _, player in ipairs(self.players) do
 		local lastQuad = player:getQuad()

@@ -1,6 +1,7 @@
 love.filesystem.load("level.lua")()
 love.filesystem.load("arena.lua")()
-love.filesystem.load("controllers/controller.lua")()
+love.filesystem.load("controllers/gamepadController.lua")()
+love.filesystem.load("controllers/keyboardController.lua")()
 love.filesystem.load("controllers/controllersManager.lua")()
 love.filesystem.load("players/player.lua")()
 love.filesystem.load("gameManager.lua")()

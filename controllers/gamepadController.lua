@@ -1,10 +1,12 @@
 local mt = {}
 mt.__index = mt
 
-function newController(joystick)
+function newGamepadController(joystick)
     local this = {}
     
     this.joystick = joystick
+	
+	this.player = nil
     
     return setmetatable(this, mt)
 end
@@ -68,4 +70,29 @@ end
 function mt:getY()
     local _, y = self:getAxes()
     return y
+end
+
+function mt:bind(player)
+	self.player = player
+end
+
+function mt:update(dt)
+	if (self.player ~= nil) then
+		local dx, dy = self:getAxes()
+		self.player.dx = dx
+		self.player.dy = dy
+		
+		if (self:isDown(11)) then
+			self.player:setDefending(true)
+		else
+			self.player:setDefending(false)
+			if (self:isDown(10)) then
+				self.player:attack()
+			end
+		end
+
+		if (self:isDown(13)) then
+			self.player:hit(self.player.life)
+		end
+	end
 end

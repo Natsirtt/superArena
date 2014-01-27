@@ -13,8 +13,9 @@ function getControllersManager()
         this.unusedControllers = {}
         
         for i, j in ipairs(love.joystick.getJoysticks()) do
-            this.unbindedControllers[#this.unbindedControllers + 1] = newController(j)
+            this.unbindedControllers[#this.unbindedControllers + 1] = newGamepadController(j)
         end
+		this.unbindedControllers[#this.unbindedControllers + 1] = newKeyboardController()
     
         instance = setmetatable(this, mt)
         init = true
@@ -80,4 +81,10 @@ function mt:debugInfo()
     end
     res = res .. "}"
     return res
+end
+
+function mt:updateAll(dt)
+	for _,c in ipairs(self.bindedControllers) do
+		c:update(dt)
+	end
 end
