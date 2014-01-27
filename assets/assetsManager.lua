@@ -91,7 +91,7 @@ function mt:drawHUD(player, x, y)
 		for i = 1, player:getLife() do
 			self:drawUIAsset(player, texStr, x2 - ((i-1)*(tex:getWidth()-6)), y2, true)
 		end
-		print("Life = " .. x2 .. " - " .. y2 .. " hud height = " .. hudHeight)
+		-- print("Life = " .. x2 .. " - " .. y2 .. " hud height = " .. hudHeight)
 	else
 		-- ici du début
 	end
@@ -103,7 +103,7 @@ function mt:drawUIAsset(player, asset, x, y, general, xOffset, yOffset)
 	if not general then
 		assetStr = assetStr .. playerStr
 	end
-	print(assetStr)
+	-- print(assetStr)
 	local tex = self.uiAssets[assetStr]
 	local x2 = x
 	local y2 = y
@@ -113,7 +113,7 @@ function mt:drawUIAsset(player, asset, x, y, general, xOffset, yOffset)
 	if (yOffset) then
 		y2 = y - tex:getHeight()
 	end
-	print("x2="..x2.."y2="..y2)
+	-- print("x2="..x2.."y2="..y2)
 	love.graphics.draw(tex, x2, y2)
 end
 

@@ -300,7 +300,7 @@ function mt:setPositionFromQuad(quad)
 end
 
 function mt:setDefending(isDefending)
-	self.isDefendingBool = isDefending and self.canDefend
+	self.isDefendingBool = isDefending and self.canDefend and not self.attackAnimationProcessing
 	self.defenseAnimationProcessing = false
 	if (self.isDefendingBool) then
 		self:beginDefenseAnimation()
@@ -357,7 +357,7 @@ end
 
 function mt:processAttackAnimation()
 	self.attackAssetsY = self.attackAssetsY + 1
-	print("attack assets y = " .. self.attackAssetsY)
+	-- print("attack assets y = " .. self.attackAssetsY)
 	if self.attackAssetsY >= 4 then
 		self.attackAnimationProcessing = false
 	end
@@ -365,7 +365,7 @@ end
 
 function mt:processDefenseAnimation()
 	self.defenseAssetsY = self.defenseAssetsY + 1
-	print("defense assets y = " .. self.defenseAssetsY)
+	-- print("defense assets y = " .. self.defenseAssetsY)
 	if self.defenseAssetsY >= 1 then
 		self.defenseAssetsY = 1
 		self.defenseAnimationProcessing = false

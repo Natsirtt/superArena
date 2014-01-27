@@ -6,6 +6,8 @@ ARENA_HEIGHT = 23
 
 local TILE_SIZE = 50
 
+local PUBLIC_FRAME_TIME = 0.4
+
 local BLINK_LIMIT = 0.5
 local BLINK_PER_SECOND = 20.0
 
@@ -168,6 +170,12 @@ function arena_mt:update(dt)
 		self.hitTimer = self.hitTimer + dt
 		self.hitParticleSystem:update(dt)
 	end
+
+	-- public animation
+	self.publicTimer = (self.publicTimer + dt) % (2 * PUBLIC_FRAME_TIME)
+	self.publicDown = self.publicTimer <= PUBLIC_FRAME_TIME
+	print(self.publicDown)
+
 	self.lvl:update(dt)
 end
 
@@ -178,17 +186,6 @@ function arena_mt:draw()
 		self.lvl:draw()
 		love.graphics.pop()
 	end
-
-	local publicDown = true
-	if (self.publicTimer < 04) then
-		publicDown = true
-	else
-		publicDown = false
-		if (self.publicTimer >= 20) then
-			self.publicTimer = 0
-		end
-	end
-	self.publicTimer = self.publicTimer + 1
 	
 	for i, t in ipairs(self.tiles) do
 		for j, tile in ipairs(t) do
@@ -209,7 +206,7 @@ function arena_mt:draw()
 				end
 				
 				local tileToDraw = tile
-				if not publicDown and ((tileToDraw >= 51) and (tileToDraw <= 53) or
+				if not self.publicDown and ((tileToDraw >= 51) and (tileToDraw <= 53) or
 										(tileToDraw >= 67) and (tileToDraw <= 69) or
 										(tileToDraw >= 83) and (tileToDraw <= 85)) then
 					tileToDraw = tileToDraw + 4
