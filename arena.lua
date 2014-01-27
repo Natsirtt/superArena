@@ -61,74 +61,6 @@ function newArena()
 	arena.hitTimer = 0
 	arena.hitParticleSystem = nil
 	
-	-- for i = 1, ARENA_WIDTH do
-		-- arena.tiles[i] = {}
-		-- for j = 1, ARENA_HEIGHT do
-			-- local tile = nil
-			-- PUBLIC
-			-- if (i == 1) and (j == 1) then
-				-- Partie haute
-				-- tile = 67
-			-- elseif (i == 1) and (j == ARENA_HEIGHT) then
-				-- Partie bas gauche
-				-- tile = 37
-			-- elseif (i == ARENA_WIDTH / 2) and (j == 1) then
-				-- tile = 21
-			-- elseif (i == 1) then
-				-- Partie gauche
-				-- tile = 68
-			-- elseif (j == 1) and (i == ARENA_WIDTH) then
-				-- Partie haute droite
-				-- tile = 69
-			-- elseif (j == 1)  then
-				-- Public haut
-				-- tile = publicCenter
-			-- elseif (i == ARENA_WIDTH) and (j == ARENA_HEIGHT) then
-				-- PARTIE bas droite
-				-- tile = 68
-			-- elseif (i == ARENA_WIDTH) then
-				-- PARTIE droite
-				-- tile = 68
-			-- elseif (j == ARENA_HEIGHT) then
-				-- PARTIE bas
-				-- tile = 68
-			---- MURS
-			-- elseif (i == 2) and (j == 2) then
-				-- Partie haute gauche
-				-- tile = topLeft
-			-- elseif (i == 2) and (j == ARENA_HEIGHT -1) then
-				-- Partie bas gauche
-				-- tile = bottomLeft
-			-- elseif (i == ARENA_WIDTH / 2) and (j == 2) then
-				-- Porte gauche
-				-- tile = porte
-				-- arena.porte = {x = i, y = j}
-			-- elseif (i == 2) then
-				-- Partie gauche
-				-- tile = left
-			-- elseif (j == 2) and (i == ARENA_WIDTH - 1) then
-				-- Partie haute droite
-				-- tile = topRight
-			-- elseif (j == 2)  then
-				-- Partie haute
-				-- tile = top
-			-- elseif (i == ARENA_WIDTH - 1) and (j == ARENA_HEIGHT - 1) then
-				-- PARTIE bas droite
-				-- tile = bottomRight
-			-- elseif (i == ARENA_WIDTH - 1) then
-				-- PARTIE droite
-				-- tile = right
-			-- elseif (j == ARENA_HEIGHT - 1) then
-				-- PARTIE bas
-				-- tile = bottom
-			-- else
-				-- tile = center
-			-- end
-			
-			-- arena.tiles[i][j] = tile;
-		-- end
-	-- end
-	
 	for i, t in ipairs(ARENA_MAP) do
 		for j, tile in ipairs(t) do
 			if (arena.tiles[j] == nil) then
@@ -249,55 +181,6 @@ function arena_mt:destroyDoor()
 		self.hasDoor = false
 	end
 end
-
-
--- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
--- Marche Pas......
--- function arena_mt:getValidQuad(lastQuad, newQuad, dx, dy)
-	-- local quad = newQuad
-	-- for j, t in ipairs(self.boxes) do
-		-- for i, box in ipairs(t) do
-			-- if (box ~= nil) and (quad ~= nil) then
-				-- if (rectCollision(box, quad)) then
-					-- local c1 = getQuadCenter(quad)
-					-- local oldC = getQuadCenter(lastQuad)
-					-- local c2 = getQuadCenter(box)
-					-- local boundX = false
-					-- local boundY = false
-					-- local newDX = dx
-					-- local newDY = dy
-					-- if (rectCollision(box, getTranslatedQuad(lastQuad, dx, 0))) then
-						-- boundX = true
-					-- end
-					-- if (rectCollision(box, getTranslatedQuad(lastQuad, 0, dy))) then
-						-- boundY = true
-					-- end
-					-- local w = getQuadWidth(quad) / 2
-					-- local h = getQuadHeight(quad) / 2
-					
-					-- if (oldC.x < c2.x) and boundX then
-						-- c1.x = box[1].x - w - 04
-					-- elseif (oldC.x > c2.x) and boundX then
-						-- c1.x = box[2].x + w + 04
-					-- end
-					-- if (oldC.y < c2.y) and boundY then
-						-- c1.y = box[1].y - h - 04
-					-- elseif (oldC.y < c2.y) and boundY then
-						-- c1.y = box[3].y + h + 04
-					-- end
-					-- quad = {
-						-- {x = c1.x - w, y = c1.y - h},
-						-- {x = c1.x + w, y = c1.y - h},
-						-- {x = c1.x + w, y = c1.y + h},
-						-- {x = c1.x - w, y = c1.y + h}
-					-- }
-					-- return quad
-				-- end
-			-- end
-		-- end
-	-- end
-	-- return self.lvl:getValidQuad(lastQuad, quad, dx, dy)
--- end
 
 function arena_mt:getDoorHitBox()
 	local x1 = (self.porte.x - 1) * TILE_SIZE

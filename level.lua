@@ -4,7 +4,7 @@ level_mt.__index = level_mt
 
 local LEVEL_MAP = {
 {-1, -1, 19, 42, 42, 42, 42, 42, 05},
-{-1, 03, 19, 65, 65, 65, 42, 42, 21},
+{-1, 03, 178, 65, 65, 65, 42, 42, 21},
 {-1, 19, 65, 65, 65, 65, 65, 65, 21},
 {-1, 19, 42, 65, 65, 65, 75, 42, 21},
 {-1, 19, 42, 65, 65, 65, 42, 75, 21},
@@ -97,54 +97,4 @@ end
 function level_mt:getHeight()
 	return TILE_SIZE * LEVEL_HEIGHT
 end
-
--- Renvoie une position valide pour un deplacement de lastQuad vers newQuad (lastQuad est supposé valide)
--- MARCHE PAS
--- function level_mt:getValidQuad(lastQuad, newQuad, dx, dy)
-	-- local quad = newQuad
-	-- for j, t in ipairs(self.boxes) do
-		-- for i, box in ipairs(t) do
-			-- if (box ~= nil) and (quad ~= nil) then
-				-- if (rectCollision(box, quad)) then
-					-- local c1 = getQuadCenter(quad)
-					-- local oldC = getQuadCenter(lastQuad)
-					-- local c2 = getQuadCenter(box)
-					-- local boundX = false
-					-- local boundY = false
-					-- local newDX = dx
-					-- local newDY = dy
-					-- if (rectCollision(box, getTranslatedQuad(lastQuad, dx, 0))) then
-						-- boundX = true
-					-- end
-					-- if (rectCollision(box, getTranslatedQuad(lastQuad, 0, dy))) then
-						-- boundY = true
-					-- end
-					-- local w = getQuadWidth(quad) / 2
-					-- local h = getQuadHeight(quad) / 2
-					
-					-- if (oldC.x < c2.x) and boundX then
-						-- c1.x = box[1].x - w - 10
-					-- elseif (oldC.x > c2.x) and boundX then
-						-- c1.x = box[2].x + w + 10
-					-- end
-					-- if (oldC.y < c2.y) and boundY then
-						-- c1.y = box[1].y - h - 10
-					-- elseif (oldC.y < c2.y) and boundY then
-						-- c1.y = box[3].y + h + 10
-					-- end
-					-- quad = {
-						-- {x = c1.x - w, y = c1.y - h},
-						-- {x = c1.x + w, y = c1.y - h},
-						-- {x = c1.x + w, y = c1.y + h},
-						-- {x = c1.x - w, y = c1.y + h}
-					-- }
-					-- return quad
-				-- end
-			-- end
-		-- end
-	-- end
-	-- return quad
--- end
-
-
 
