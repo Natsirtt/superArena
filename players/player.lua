@@ -238,13 +238,14 @@ function newPlayer(gameManager, playerNo)
 	this.hitParticleSystem = nil
 	
 	this.body = love.physics.newBody(world, 0, 0, "dynamic")
-	this.body:setMassData(0, 0, 10, 0)
+	this.body:setMassData(0, 0, 10, 10000)
 	this.shape = love.physics.newPolygonShape(- this.w / 2, - this.h / 2,
 											 this.w / 2, - this.h / 2,
 											 this.w / 2, this.h / 2,
 											 - this.w / 2, this.h / 2)
 	this.fixture = love.physics.newFixture(this.body, this.shape, 1)
 	this.fixture:setFriction(10000)
+	this.fixture:setRestitution(0)
 	this.body:setPosition(this.x, this.y)
 	this.playerNo = playerNo
     
@@ -367,13 +368,23 @@ function mt:processDefenseAnimation()
 	end
 end
 
+function mt:setDirection(dx, dy)
+	self.dx = dx
+	self.dy = dy
+	self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+end
+
+function mt:getDirection()
+	return self.dx, self.dy
+end
+
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
+	
 	if (not self:isDead()) then
 		-- position checking
 		if self.isDefendingBool then --or self.isAttackingBool then
-			self.dx = 0
-			self.dy = 0
+			self:setDirection(0, 0)
 		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 		local x, y = self.body:getPosition()
@@ -512,6 +523,8 @@ function mt:draw()
 	end
 	local x, y = self.body:getPosition()
 	love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
+	
+	love.graphics.setColor(255, 255, 255)
 
 	-- Affichage de la bounding box (debug)
 	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
@@ -541,6 +554,10 @@ function mt:hit(lifePoints)
     	self.dx = 0
     	self.dy = 0
     	self.body:setLinearVelocity(0, 0)
+	else
+		local dx = math.cos(math.rad(self.angle + 180)) * 100
+		local dy = -math.sin(math.rad(self.angle + 180)) * 100
+		self.body:applyLinearImpulse(dx, dy)
     end
 	self.gameManager.camera:shake()
 	self:blink({r = 255, g = 20, b = 20})

@@ -79,8 +79,10 @@ end
 function mt:update(dt)
 	if (self.player ~= nil) then
 		local dx, dy = self:getAxes()
-		self.player.dx = dx
-		self.player.dy = dy
+		local oldDX, oldDY = self.player:getDirection()
+		if (dx ~= oldDX) or (dy ~= oldDY) then
+			self.player:setDirection(dx, dy)
+		end
 		
 		if (self:isDown(11)) then
 			self.player:setDefending(true)

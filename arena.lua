@@ -78,13 +78,14 @@ function newArena()
 		for j, tile in ipairs(t) do
 			if (tile ~= center) then
 				local body = love.physics.newBody(world, 0, 0, "static")
-				body:setMassData(0, 0, 04, 0)
+				body:setMassData(0, 0, 10, 0)
 				local shape = love.physics.newPolygonShape(-TILE_SIZE / 2, -TILE_SIZE / 2,
 														TILE_SIZE / 2, -TILE_SIZE / 2,
 														TILE_SIZE / 2, TILE_SIZE / 2,
 														-TILE_SIZE / 2, TILE_SIZE / 2)
 				local fixture = love.physics.newFixture(body, shape, 1)
-				fixture:setFriction(04000)
+				fixture:setFriction(10000)
+				fixture:setRestitution(0)
 				arena.boxes[i][j] = fixture
 				body:setPosition((i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
