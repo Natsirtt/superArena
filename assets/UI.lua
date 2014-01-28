@@ -1,47 +1,35 @@
-local mt = {}
-mt.__index = mt
-
 local XHudDist = 10
 local YHudDist = 25
 
-function mt:drawAsset(asset, x, y, general)
+local function drawAsset(asset, x, y, general)
 	local x2, y2 = self:getDistances(x, y)
 	local xOffset = (x2 ~= x)
 	local yOffset = (y2 ~= y)
 	getAssetsManager():drawUIAsset(self.player, asset, x2, y2, general, xOffset, yOffset)
 end
 
-function mt:getDistances(x, y)
-	if self.playerNo == 1 then
+local function getDistances(playerNo, x, y)
+	if playerNo == 1 then
 		return x, y
 	end
-	if self.playerNo == 2 then
+	if playerNo == 2 then
 		return love.window.getWidth() - x, y
 	end
-	if self.playerNo == 3 then
+	if playerNo == 3 then
 		return x, love.window.getHeight() - y
 	end
-	if self.playerNo == 4 then
+	if playerNo == 4 then
 		return love.window.getWidth() - x, love.window.getHeight() -y
 	end
 	return -100000000, -100000000
 end
 
-function newUI(player, playerNo)
-	local self = {}
-
-	self.player = player
-	self.playerNo = playerNo
-
-	return setmetatable(self, mt)
-end
-
-function mt:draw()
+function drawUI(player)
 	-- hud
-	if self.player:isDead() then
-		self:drawAsset("hudDead", XHudDist, YHudDist, false)
+	if player:isDead() then
+		drawAsset("hudDead", XHudDist, YHudDist, false)
 	else
-		local x2, y2 = self:getDistances(XHudDist, YHudDist)
-		getAssetsManager():drawHUD(self.player, x2, y2)
+		local x2, y2 = getDistances(player:getNumber(), XHudDist, YHudDist)
+		getAssetsManager():drawHUD(player, x2, y2)
 	end
 end

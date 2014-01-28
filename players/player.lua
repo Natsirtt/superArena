@@ -252,10 +252,7 @@ function newPlayer(gameManager, playerNo)
     this.life = MAX_LIFE
     this.ui = nil
     
-    local instance = setmetatable(this, mt)
-    instance.ui = newUI(instance, playerNo)
-
-    return instance
+    return setmetatable(this, mt)
 end
 
 function mt:blink(color)
@@ -532,10 +529,6 @@ function mt:draw()
 	
 	--drawBox(self:getShieldHitBox())
 	
-end
-
-function mt:drawUI()
-	self.ui:draw()
 end
 
 function mt:isDead()

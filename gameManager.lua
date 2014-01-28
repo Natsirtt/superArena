@@ -123,8 +123,10 @@ function arenaPhaseDraw(self)
 	
 	love.graphics.pop()
 
+
+	-- UI
 	for _, player in ipairs(self.players) do
-		player:drawUI()
+		drawUI(player)
 	end
 	
 	love.graphics.setColor(255, 0, 0)
