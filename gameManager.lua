@@ -38,23 +38,27 @@ function addingPlayersPhase(self, dt)
 	for _, controller in ipairs(getControllersManager():getBindedControllers()) do
 		if controller:isAnyDown() then
 			self.task = arenaPhase
-			self.drawTask = arenaPhaseDraw
 			return
 		end
 	end
 	-- adding a new player
-	local added = getControllersManager():tryBindingNewController()
-	if added then
-		local p = newPlayer(self, #self.players + 1)
-		self.players[#self.players + 1] = p
-		getControllersManager():getUnusedController():bind(p)
+	--local added = getControllersManager():tryBindingNewController()
+	--if added then
+	--	local p = newPlayer(self, #self.players + 1)
+	--	self.players[#self.players + 1] = p
+	--	getControllersManager():getUnusedController():bind(p)
 		-- a little idle time to let the player some time
 		-- to release the button, or the first test of this
 		-- function will be true
-		time = love.timer.getTime()
-		while (love.timer.getTime() - time) < 0.1 do
-		end
-	end
+	--	time = love.timer.getTime()
+	--	while (love.timer.getTime() - time) < 0.1 do
+	--	end
+	--end
+	self.players = {newPlayer(self, 1),
+					newPlayer(self, 2),
+					newPlayer(self, 3),
+					newPlayer(self, 4)}
+	self.task = arenaPhase
 end
 
 function addingPlayersPhaseDraw(self)
@@ -63,6 +67,7 @@ end
 
 function arenaPhase(self, dt)
 	self.globalTimer = math.max(0, self.globalTimer - dt)
+	self.drawTask = arenaPhaseDraw
 
 	if not self.phaseInitialized then
 		self.arena = newArena()
