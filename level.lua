@@ -39,12 +39,20 @@ function newLevel()
 	local level = {}
 	
 	level.tileSet = love.graphics.newImage("assets/tileset.png")
+	level.width = 0
+	level.height = 0
+	level.map = nil
+	
+	local m, w, h = generateLevel()
+	level.width = w
+	level.height = h
+	level.map = m
 	
 	local dx = TILE_SIZE * LEVEL_WIDTH / 2
     local dy = -TILE_SIZE * LEVEL_HEIGHT
 	
 	level.boxes = {}
-	for j, t in ipairs(LEVEL_MAP) do
+	for j, t in ipairs(level.map) do
 		level.boxes[j] = {}
 		for i, tileID in ipairs(t) do
 			if (tileID ~= 65) then
@@ -70,7 +78,7 @@ function level_mt:update(dt)
 end
 
 function level_mt:draw()
-	for j, t in ipairs(LEVEL_MAP) do
+	for j, t in ipairs(self.map) do
 		for i, tileID in ipairs(t) do
 			if (tileID ~= nil) and (tileID ~= -1) then
 				drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
@@ -91,10 +99,35 @@ function level_mt:draw()
 end
 
 function level_mt:getWidth()
-	return TILE_SIZE * LEVEL_WIDTH
+	return TILE_SIZE * self.width
 end
 
 function level_mt:getHeight()
-	return TILE_SIZE * LEVEL_HEIGHT
+	return TILE_SIZE * self.height
 end
 
+
+function generateLevel()
+	local level = {}
+	local minWidth = 10
+	local maxWidth = 25
+	local minHeight = 10
+	local maxHeight = 25
+	
+	local actualWidth = love.math.random(minWidth, maxWidth)
+	local actualHeight = love.math.random(minHeight, maxHeight)
+	
+	for j = 1, actualHeight do
+		level[j] = {}
+		for i = 1, actualWidth do
+			local p = love.math.random(0, 1)
+			if (p > 0.5) then
+				level[j][i] = 65
+			else
+				level[j][i] = 42
+			end
+		end
+	end
+	
+	return level, actualWidth, actualHeight
+end
