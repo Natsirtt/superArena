@@ -293,6 +293,10 @@ function mt:setPositionFromQuad(quad)
 end
 
 function mt:setDefending(isDefending)
+	if self:isDead() then
+		return
+	end
+	
 	self.isDefendingBool = isDefending and self.canDefend and not self.attackAnimationProcessing
 	self.defenseAnimationProcessing = false
 	if (self.isDefendingBool) then
@@ -305,7 +309,7 @@ function mt:isDefending()
 end
 
 function mt:canAttack()
-	return not self:isDefending() and not self.attackAnimationProcessing
+	return not self:isDead() and not self:isDefending() and not self.attackAnimationProcessing
 end
 
 function mt:attack()
