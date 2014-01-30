@@ -41,7 +41,7 @@ function getAssetsManager()
 		self.uiAssets["defenseButtonP4"] = love.graphics.newImage(prefix.."P4_btn_defense_use.png")
 
 		self.uiAssets["life"] = love.graphics.newImage(prefix.."life.png")
-		self.uiAssets["life2"] = self.uiAssets["life"]
+		self.uiAssets["life2"] = love.graphics.newImage(prefix.."life2.png")
 		self.uiAssets["hudP1"] = love.graphics.newImage(prefix.."P1_HUD.png")
 		self.uiAssets["hudP2"] = love.graphics.newImage(prefix.."P2_HUD.png")
 		self.uiAssets["hudP3"] = love.graphics.newImage(prefix.."P3_HUD.png")
@@ -70,51 +70,31 @@ function mt:drawAsset(asset, x, y)
 end
 
 function mt:drawHUD(player, x, y)
-	local tex = self.uiAssets["hudP"..player:getNumber()]
-	local hudWidth = tex:getWidth()
-	local hudHeight = tex:getHeight()
-
-	self:drawUIAsset(player, "hud", x, y, false, player:getNumber() == 2 or player:getNumber() == 4, player:getNumber() == 3 or player:getNumber() == 4)
-
-	texStr = ""
 	if player:getNumber() == 1 or player:getNumber() == 4 then
 		texStr = "life"
 	else
 		texStr = "life2"
 	end
 
-	if player:getNumber() == 1 or player:getNumber() == 3 then
-		-- la vie commence de la "fin" de la texture
-		local x2 = x + hudWidth - hudWidth / 5
+	if player:getNumber() == 1 then
+		-- la vie commence à gauche de la jauge
+		-- local x2 = x + hudWidth - hudWidth / 5 -- valeur pour commencer à droite
+		local x2 = x + 105
 		local y2 = y + 48
 		tex = self.uiAssets[texStr]
 		for i = 1, player:getLife() do
-			self:drawUIAsset(player, texStr, x2 - ((i-1)*(tex:getWidth()-6)), y2, true)
+			-- self:drawUIAsset(player, texStr, x2 - ((i-1)*(tex:getWidth()-6)), y2, true) -- commencer à droite
+			self:drawUIAsset(player, texStr, x2 + ((i-1)*(tex:getWidth()-6)), y2, true)
 		end
 		-- print("Life = " .. x2 .. " - " .. y2 .. " hud height = " .. hudHeight)
-	else
-		-- ici du début
+	elseif player:getNumber() == 3 then
+		-- la vie commence à gauche de la jauge
+		
 	end
 end
 
-function mt:drawUIAsset(player, asset, x, y, general, xOffset, yOffset)
-	local playerStr = "P" .. player:getNumber()
-	local assetStr = asset
-	if not general then
-		assetStr = assetStr .. playerStr
-	end
-	-- print(assetStr)
-	local tex = self.uiAssets[assetStr]
-	local x2 = x
-	local y2 = y
-	if (xOffset) then
-		x2 = x - tex:getWidth()
-	end
-	if (yOffset) then
-		y2 = y - tex:getHeight()
-	end
-	-- print("x2="..x2.."y2="..y2)
-	love.graphics.draw(tex, x2, y2)
+function mt:drawUIAsset(asset, x, y)
+	love.graphics.draw(self.uiAssets[asset], x, y)
 end
 
 function drawAsset(asset, x, y)
