@@ -46,8 +46,10 @@ local ARENA_MAP = {
 {83, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 84, 85}
 }
 
-function newArena()
+function newArena(gameManager)
 	local arena = {}
+	
+	arena.gameManager = gameManager
 	
 	arena.tileSet = love.graphics.newImage("assets/tileset.png")
 	arena.tiles = {}
@@ -92,7 +94,7 @@ function newArena()
 		end
 	end
 	
-	arena.lvl = newLevel()
+	arena.lvl = newLevel(arena.gameManager)
 
 	return setmetatable(arena, arena_mt)
 end
@@ -108,8 +110,9 @@ function arena_mt:update(dt)
 	self.publicTimer = (self.publicTimer + dt) % (2 * PUBLIC_FRAME_TIME)
 	self.publicDown = self.publicTimer <= PUBLIC_FRAME_TIME
 	print(self.publicDown)
-
-	self.lvl:update(dt)
+	if (not self.hasdoor) then
+		self.lvl:update(dt)
+	end
 end
 
 function arena_mt:draw()
@@ -246,3 +249,4 @@ end
 function arena_mt:getHeight()
 	return TILE_SIZE * ARENA_HEIGHT
 end
+

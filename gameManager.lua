@@ -7,6 +7,8 @@ function newGameManager()
 	local self = {}
 
 	self.players = {}
+	self.iaPlayers = {}
+	
 	self.arena = nil
 
 	self.task = addingPlayersPhase
@@ -72,7 +74,7 @@ function arenaPhase(self, dt)
 	self.drawTask = arenaPhaseDraw
 
 	if not self.phaseInitialized then
-		self.arena = newArena()
+		self.arena = newArena(self)
 		self.camera = newCamera()
 		self.phaseInitialized = true
 		--ui debug
@@ -95,10 +97,10 @@ function arenaPhase(self, dt)
 		--end
 		----------
 		player:update(dt)
-
-		-- arena hitbox
-		--local quad = self.arena:getValidQuad(lastQuad, player:getQuad(), player.dx * player.speed * dt, player.dy * player.speed * dt)
-        --player:setPositionFromQuad(quad)
+    end
+	-- On met les ordis à jour
+	for _, player in ipairs(self.iaPlayers) do
+		player:update(dt)
     end
 	
 	world:update(dt)
@@ -134,6 +136,12 @@ function arenaPhaseDraw(self)
 		player:draw()
 		--player:debugSprites("shield")
 	end
+	
+	-- On dessine les ordis
+	for _, player in ipairs(self.iaPlayers) do
+		player:draw()
+    end
+	
 	self.arena:postPlayerDraw()
 	
 	love.graphics.pop()
@@ -171,7 +179,39 @@ function mt:playerAttack(player)
 			end
 		end
 	end
+	for _, p in ipairs(self.iaPlayers) do
+		if (not p:isDead()) then
+			local shield = p:getShieldHitBox()
+			if (rectCollision(sword, p:getQuad())) then
+				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
+					p:hit(PLAYER_DAMAGE)
+				end
+			end
+		end
+	end
 	self.arena:hit(sword)
+end
+
+
+function mt:getNearestPlayer(x, y) 
+	local nearest = nil
+	local distance = nil
+	
+	for _, p in ipairs(self:getAlivePlayers()) do
+		local x2 = p.x
+		local y2 = p.y
+		local d = math.sqrt((x2 - x) * (x2 - x) - (y2 - y) * (y2 - y))
+		if (distance == nil) or (d < distance) then
+			nearest = p
+			distance = d
+		end
+	end
+	
+	return nearest
+end
+
+function mt:addIAPlayer(player)
+	self.iaPlayers[#self.iaPlayers + 1] = player
 end
 
 function mt:debugInfo()

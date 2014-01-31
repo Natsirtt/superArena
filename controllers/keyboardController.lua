@@ -10,7 +10,7 @@ function newKeyboardController()
 end
 
 function mt:getID()
-    return 0
+    return -1
 end
 
 function mt:isConnected()

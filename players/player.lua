@@ -255,6 +255,12 @@ function newPlayer(gameManager, playerNo)
     return setmetatable(this, mt)
 end
 
+function mt:setPosition(x, y)
+	self.x = x
+	self.y = y
+	self.body:setPosition(x, y)
+end
+
 function mt:blink(color)
 	if (self.blinkTimer == 0) then
 		self.blinkTimer = BLINK_LIMIT
