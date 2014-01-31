@@ -238,13 +238,14 @@ function newPlayer(gameManager, playerNo)
 	this.hitParticleSystem = nil
 	
 	this.body = love.physics.newBody(world, 0, 0, "dynamic")
-	this.body:setMassData(0, 0, 10, 10000)
+	this.body:setMassData(0, 0, 1, 1)
+	--this.body:setLinearDamping(10)
 	this.shape = love.physics.newPolygonShape(- this.w / 2, - this.h / 2,
 											 this.w / 2, - this.h / 2,
 											 this.w / 2, this.h / 2,
 											 - this.w / 2, this.h / 2)
 	this.fixture = love.physics.newFixture(this.body, this.shape, 1)
-	this.fixture:setFriction(10000)
+	this.fixture:setFriction(0)
 	this.fixture:setRestitution(0)
 	this.body:setPosition(this.x, this.y)
 	this.playerNo = playerNo

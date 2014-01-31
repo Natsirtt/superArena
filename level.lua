@@ -77,6 +77,7 @@ function newLevel(gameManager)
 				if (r > 0.9) and (maxPnj > 0)  then
 					maxPnj = maxPnj - 1
 					local player = newPlayer(gameManager, 2)
+					player.life = 2
 					player:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
 					gameManager:addIAPlayer(player)
 					
