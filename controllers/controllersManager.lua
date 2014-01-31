@@ -90,7 +90,7 @@ function mt:updateAll(dt)
 end
 
 function mt:addController(controller)
-	self.bindedControllers[#self.bindedControllers + 1] = newIAController()
+	self.bindedControllers[#self.bindedControllers + 1] = controller
 end
 
 function love.joystickadded(joystick)

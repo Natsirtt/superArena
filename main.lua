@@ -21,7 +21,7 @@ function love.load(arg)
 	love.window.setTitle("Super ARENA ultimate frenzy saga deluxe - GOTY edition")
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
-    love.window.setMode(w / 3, h / 3, {
+    love.window.setMode(w, h , {
         fullscreen = false,
         fsaa = 4,
         borderless = true

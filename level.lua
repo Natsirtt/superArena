@@ -75,16 +75,11 @@ function newLevel(gameManager)
 				local r = love.math.random(0, 1)
 				if (r > 0.5) and (not b) then
 					b = true
-					local player = newPlayer(level.gameManager, 2)
-					--player:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
-					--level.gameManager:addIAPlayer(player)
-					if (player == nil) then
-						print("p nil")
-					end
+					local player = newPlayer(gameManager, 2)
+					player:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
+					gameManager:addIAPlayer(player)
+					
 					local c = newIAController(player)
-					if (c.player == nil) then
-						print("p nil 2")
-					end
 					getControllersManager():addController(c)
 				end
 			end

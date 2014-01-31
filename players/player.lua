@@ -532,7 +532,11 @@ function mt:draw()
 		tex = self.assets[self.assetsX][self.assetsY + 1]
 	end
 	local x, y = self.body:getPosition()
-	love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
+	if (tex ~= nil) then
+		love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
+	else
+		print("Erreur : Pas de texture a afficher pour le joueur "..self:getNumber())
+	end
 	
 	love.graphics.setColor(255, 255, 255)
 

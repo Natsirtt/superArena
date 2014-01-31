@@ -180,7 +180,7 @@ function mt:playerAttack(player)
 		end
 	end
 	for _, p in ipairs(self.iaPlayers) do
-		if (not p:isDead()) then
+		if (not p:isDead()) and (p ~= player) then
 			local shield = p:getShieldHitBox()
 			if (rectCollision(sword, p:getQuad())) then
 				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
