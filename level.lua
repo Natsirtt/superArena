@@ -55,8 +55,9 @@ function newLevel(gameManager)
 	local dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
     local dy = -TILE_SIZE * h
 	
+	local maxPnj = 15
+
 	level.boxes = {}
-	local b = false
 	for j, t in ipairs(level.map) do
 		level.boxes[j] = {}
 		for i, tileID in ipairs(t) do
@@ -73,8 +74,8 @@ function newLevel(gameManager)
 				body:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
 			else
 				local r = love.math.random(0, 1)
-				if (r > 0.5) and (not b) then
-					b = true
+				if (r > 0.9) and (maxPnj > 0)  then
+					maxPnj = maxPnj - 1
 					local player = newPlayer(gameManager, 2)
 					player:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
 					gameManager:addIAPlayer(player)
@@ -137,15 +138,20 @@ function generateLevel()
 	
 	local actualWidth = love.math.random(minWidth, maxWidth)
 	local actualHeight = love.math.random(minHeight, maxHeight)
-	
+		
 	for j = 1, actualHeight do
 		level[j] = {}
 		for i = 1, actualWidth do
-			local p = love.math.random(0, 1)
-			if (p > 0.5) then
-				level[j][i] = 65
+			if (i == 1) or (i == actualWidth) or (j == 0) 
+						or ((j == actualHeight) and ((i < (actualWidth / 2) - 1) or (i > (actualWidth / 2) + 2))) then
+				level[j][i] = 19
 			else
-				level[j][i] = 42
+				local p = love.math.random(0, 1)
+				if (p > 0.5) then
+					level[j][i] = 65
+				else
+					level[j][i] = 42
+				end
 			end
 		end
 	end
