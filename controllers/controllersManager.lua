@@ -88,3 +88,43 @@ function mt:updateAll(dt)
 		c:update(dt)
 	end
 end
+
+function love.joystickadded(joystick)
+	local cm = getControllersManager()
+	local exist = false
+	for _, c in ipairs(cm.bindedControllers) do
+		if (c.joystick) then
+			exist = exist or (c.joystick:getID() == joystick:getID())
+			if exist then
+				c.joystick = joystick
+				break
+			end
+		end
+	end
+	if (not exist) then
+		for _, c in ipairs(cm.unbindedControllers) do
+			if (c.joystick) then
+				exist = exist or (c.joystick:getID() == joystick:getID())
+				if exist then
+					c.joystick = joystick
+					break
+				end
+			end
+		end
+	end
+	if (not exist) then
+		for _, c in ipairs(cm.unusedControllers) do
+			if (c.joystick) then
+				exist = exist or (c.joystick:getID() == joystick:getID())
+				if exist then
+					c.joystick = joystick
+					break
+				end
+			end
+		end
+	end
+	
+	if (not exist) then
+		cm.unbindedControllers[#cm.unbindedControllers + 1] = newGamepadController(joystick)
+	end
+end

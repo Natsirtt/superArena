@@ -77,7 +77,7 @@ function mt:bind(player)
 end
 
 function mt:update(dt)
-	if (self.player ~= nil) then
+	if (self.player ~= nil) and (self.joystick:isConnected()) then
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
 		if (dx ~= oldDX) or (dy ~= oldDY) then
