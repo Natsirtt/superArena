@@ -38,7 +38,6 @@ function addingPlayersPhase(self, dt)
 	for _, controller in ipairs(getControllersManager():getBindedControllers()) do
 		if controller:isAnyDown() then
 			self.task = arenaPhase
-			self.drawTask = arenaPhaseDraw
 			return
 		end
 	end
@@ -55,6 +54,13 @@ function addingPlayersPhase(self, dt)
 		while (love.timer.getTime() - time) < 0.1 do
 		end
 	end
+
+	-- UI debug
+	--self.players = {newPlayer(self, 1),
+	--				newPlayer(self, 2),
+	--				newPlayer(self, 3),
+	--				newPlayer(self, 4)}
+	--self.task = arenaPhase
 end
 
 function addingPlayersPhaseDraw(self)
@@ -63,11 +69,15 @@ end
 
 function arenaPhase(self, dt)
 	self.globalTimer = math.max(0, self.globalTimer - dt)
+	self.drawTask = arenaPhaseDraw
 
 	if not self.phaseInitialized then
 		self.arena = newArena()
 		self.camera = newCamera()
 		self.phaseInitialized = true
+		--ui debug
+		math.randomseed(os.time())
+		----------
 	end
 
 	self.camera:update(dt)
@@ -79,6 +89,11 @@ function arenaPhase(self, dt)
 
 	for _, player in ipairs(self.players) do
 		local lastQuad = player:getQuad()
+		--ui debug
+		--if math.random(0, 100) > 99 then
+		--	player:hit(1)
+		--end
+		----------
 		player:update(dt)
 
 		-- arena hitbox

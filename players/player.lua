@@ -293,6 +293,10 @@ function mt:setPositionFromQuad(quad)
 end
 
 function mt:setDefending(isDefending)
+	if self:isDead() then
+		return
+	end
+
 	self.isDefendingBool = isDefending and self.canDefend and not self.attackAnimationProcessing
 	self.defenseAnimationProcessing = false
 	if (self.isDefendingBool) then
@@ -305,7 +309,7 @@ function mt:isDefending()
 end
 
 function mt:canAttack()
-	return not self:isDefending() and not self.attackAnimationProcessing
+	return not self:isDead() and not self:isDefending() and not self.attackAnimationProcessing
 end
 
 function mt:attack()
@@ -366,9 +370,11 @@ function mt:processDefenseAnimation()
 end
 
 function mt:setDirection(dx, dy)
-	self.dx = dx
-	self.dy = dy
-	self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+	if not self:isDead() then
+		self.dx = dx
+		self.dy = dy
+		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+	end
 end
 
 function mt:getDirection()
@@ -470,6 +476,7 @@ function mt:update(dt)
 			end
 		end
 	else
+		-- player is dead
 		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
 			self.assestsLastChange = love.timer.getTime()
 			self.assetsX = "die"
