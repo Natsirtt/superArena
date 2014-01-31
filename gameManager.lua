@@ -156,7 +156,7 @@ function mt:playerAttack(player)
 			end
 		end
 	end
-	self.arena:hitDoor(sword)
+	self.arena:hit(sword)
 end
 
 function mt:debugInfo()

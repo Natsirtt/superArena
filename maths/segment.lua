@@ -39,7 +39,8 @@ function mt:overlaps(segment)
 
 	if (self.p1.x == segment.p1.x) then
 		-- we use fake segments to verify
-		return newSegment(self.p1.y, self.p1.x):overlaps(newSegment(segment.p1.y, segment.p1.x))
+		return newSegment(newPoint(self.p1.y, -self.p1.x), newPoint(self.p2.y, -self.p2.x)):overlaps(
+						newSegment(newPoint(segment.p1.y, -segment.p1.x), newPoint(segment.p2.y, -segment.p2.x)))
 	end
 
 	-- first case : one segment totally eat the other

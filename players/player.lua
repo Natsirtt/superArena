@@ -217,8 +217,8 @@ function newPlayer(gameManager, playerNo)
     this.y = 400
     this.dx = 0
     this.dy = 0
-	this.w = 30 -- taille de la boundingBox
-	this.h = 30 -- taille de la boundingBox
+	this.w = 25 -- taille de la boundingBox
+	this.h = 25 -- taille de la boundingBox
     this.isDefendingBool = false
 	this.canDefend = true
     this.isAttackingBool = false

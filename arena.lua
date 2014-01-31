@@ -19,7 +19,7 @@ local arche         = 24
 
 local ARENA_MAP = {
 --1   2   3   4   5  6    7   8   9  04  11  19  21  14  36  16  68  18  19  20  21
-{51, 52, 52, 52, 52, 52, 52, 52, 52, 7, -1, 9, 52, 52, 52, 52, 52, 52, 52, 52, 53},
+{51, 52, 52, 52, 52, 52, 52, 52, 52, 07, -1, 09, 52, 52, 52, 52, 52, 52, 52, 52, 53},
 {67, 68, 68, 68, 68, 68, 68, 68, 68, 23, 24, 25, 68, 68, 68, 68, 68, 68, 68, 68, 69},
 {67, 68, 68, 03, 04, 04, 04, 04, 04, 39, 40, 41, 04, 04, 04, 04, 04, 05, 68, 68, 69},
 
@@ -192,6 +192,15 @@ function arena_mt:getDoorHitBox()
 		{x = x1 + TILE_SIZE, y = y1 + TILE_SIZE},
 		{x = x1 + TILE_SIZE, y = y1}
 	}
+end
+
+-- box == la hitbox de l'épée qui tape
+function arena_mt:hit(box)
+	if (self.hasDoor) then
+		self:hitDoor(box)
+	else
+		self.lvl:hit(box)
+	end
 end
 
 -- box -> la hitbox de l'épée qui tape
