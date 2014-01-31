@@ -1,12 +1,14 @@
 local mt = {}
 mt.__index = mt
 
+local ATTACK_COOLDOWN = 0.5
 
 function newIAController(player)
 	
     local this = {}
 	
 	this.player = player
+	this.attackTimer = 0
 	
 	this.nearest = nil
     
@@ -76,6 +78,7 @@ function mt:bind(player)
 end
 
 function mt:update(dt)
+	self.attackTimer = math.max(self.attackTimer - dt, 0)
 	if (self.player ~= nil) then
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
@@ -83,7 +86,7 @@ function mt:update(dt)
 			self.player:setDirection(dx, dy)
 		end
 		
-		if (self.nearest) then
+		if (self.nearest) and (self.attackTimer == 0) then
 			local x = self.player.x
 			local y = self.player.y
 			local x2 = self.nearest.x
@@ -91,6 +94,7 @@ function mt:update(dt)
 			local d = math.sqrt((x2 - x) * (x2 - x) - (y2 - y) * (y2 - y))
 			if (d < 30) then
 				self.player:attack()
+				self.attackTimer = ATTACK_COOLDOWN
 			end
 		end
 	end

@@ -76,7 +76,7 @@ function newLevel(gameManager)
 				local r = love.math.random()
 				if (r > 0.9) and (maxPnj > 0)  then
 					maxPnj = maxPnj - 1
-					local player = newPlayer(gameManager, 2)
+					local player = newPlayer(gameManager, -1)
 					player.life = 2
 					player:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
 					gameManager:addIAPlayer(player)
@@ -143,7 +143,7 @@ function generateLevel()
 	for j = 1, actualHeight do
 		level[j] = {}
 		for i = 1, actualWidth do
-			if (i == 1) or (i == actualWidth) or (j == 0) 
+			if (i == 1) or (i == actualWidth) or (j == 1) 
 						or ((j == actualHeight) and ((i < (actualWidth / 2) - 1) or (i > (actualWidth / 2) + 2))) then
 				level[j][i] = 19
 			else

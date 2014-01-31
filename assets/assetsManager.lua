@@ -108,6 +108,26 @@ function mt:debugAssets()
 	end
 end
 
+function genEnnemy()
+	local im = {}
+	im[#im + 1] = love.graphics.newImage("assets/player1.png")
+	im[#im + 1] = love.graphics.newImage("assets/player2.png")
+	im[#im + 1] = love.graphics.newImage("assets/player3.png")
+	im[#im + 1] = love.graphics.newImage("assets/player4.png")
+	
+	local canvas = love.graphics.newCanvas(800, 800)
+	love.graphics.setCanvas(canvas)
+	love.graphics.setBlendMode("additive")
+	for _, image in ipairs(im) do
+		love.graphics.draw(image)
+	end
+	love.graphics.setCanvas()
+	love.graphics.setBlendMode("alpha")
+	
+	local newImage = love.graphics.newImage(canvas:getImageData())
+	return newImage
+end
+
 function mt:getPlayerAssets(tilesetName)
 	if (self.playerAssets[tilesetName] == nil) then
 		local assets = {}
@@ -130,7 +150,12 @@ function mt:getPlayerAssets(tilesetName)
 		assets["idleLeft"] = {}
 		assets["idleRight"] = {}
 
-		local tileSet = love.graphics.newImage(tilesetName)
+		local tileSet = nil
+		if (tilesetName == "ennemy") then
+			tileSet = genEnnemy()
+		else
+			tileSet = love.graphics.newImage(tilesetName)
+		end
 		local imageData = tileSet:getData()
 		local nid = love.image.newImageData(150, 150)
 		local j = 0

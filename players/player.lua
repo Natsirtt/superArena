@@ -25,8 +25,13 @@ function newPlayer(gameManager, playerNo)
 	this.blinkTimer = 0.0
 	this.blinkColor = {r = 255, g = 0, b = 255}
 	
-	this.assets = getAssetsManager():getPlayerAssets("assets/player"..playerNo..".png")
-
+	this.assets = nil
+	if (playerNo == -1) then
+		this.assets = getAssetsManager():getPlayerAssets("ennemy")
+	else
+		this.assets = getAssetsManager():getPlayerAssets("assets/player"..playerNo..".png")
+	end
+	
 	this.assetsX = "idle"
 	this.assetsY = 0
 	this.temporaryAsset = false
