@@ -12,6 +12,7 @@ function getAssetsManager()
 
         local tileSet = love.graphics.newImage("assets/tileset.png")
 		self.assets = {}
+		self.playerAssets = {}
 		
 		for i = 1, tileSet:getHeight() / TILE_SIZE do
 			for j = 1, tileSet:getWidth() / TILE_SIZE do
@@ -105,4 +106,185 @@ function mt:debugAssets()
 	for i = 0, 49 do
 		self:drawAsset(i, (TILE_SIZE + 5) * i, 0)
 	end
+end
+
+function mt:getPlayerAssets(tilesetName)
+	if (self.playerAssets[tilesetName] == nil) then
+		local assets = {}
+		assets["idle"] = {}
+		assets["walkDown"] = {}
+		assets["walkRight"] = {}
+		assets["walkLeft"] = {}
+		assets["walkUp"] = {}
+		assets["attackRight"] = {}
+		assets["attackLeft"] = {}
+		assets["attackUp"] = {}
+		assets["attackDown"] = {}
+		assets["shieldDown"] = {}
+		assets["shieldUp"] = {}
+		assets["shieldLeft"] = {}
+		assets["shieldRight"] = {}
+		assets["victory"] = {}
+		assets["die"] = {}
+		assets["idleUp"] = {}
+		assets["idleLeft"] = {}
+		assets["idleRight"] = {}
+
+		local tileSet = love.graphics.newImage(tilesetName)
+		local imageData = tileSet:getData()
+		local nid = love.image.newImageData(150, 150)
+		local j = 0
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["idle"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["walkDown"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["walkRight"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["walkLeft"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["walkUp"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		for i = 1, 2 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["attackRight"], love.graphics.newImage(nid))
+		end
+		table.insert(assets["attackRight"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+		table.insert(assets["attackRight"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		for i = 1, 2 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["attackLeft"], love.graphics.newImage(nid))
+		end
+		table.insert(assets["attackLeft"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+		table.insert(assets["attackLeft"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		for i = 1, 2 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["attackUp"], love.graphics.newImage(nid))
+		end
+		table.insert(assets["attackUp"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+		table.insert(assets["attackUp"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		for i = 1, 2 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["attackDown"], love.graphics.newImage(nid))
+		end
+		table.insert(assets["attackDown"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
+		table.insert(assets["attackDown"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		-- shield
+
+		nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
+		table.insert(assets["shieldDown"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 150, 150 * j, 150, 150)
+		table.insert(assets["shieldRight"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 300, 150 * j, 150, 150)
+		table.insert(assets["shieldLeft"], love.graphics.newImage(nid))
+		nid:paste(imageData, 0, 0, 450, 150 * j, 150, 150)
+		table.insert(assets["shieldUp"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		-- victory
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * ((i - 1) % 2), 150 * j, 150, 150)
+			table.insert(assets["victory"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		--die animation
+
+		for i = 1, 5 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["die"], love.graphics.newImage(nid))
+		end
+		table.insert(assets["die"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["die"], love.graphics.newImage(nid))
+			table.insert(assets["die"], love.graphics.newImage(nid))
+		end
+		table.insert(assets["die"], love.graphics.newImage(nid))
+		table.insert(assets["die"], love.graphics.newImage(nid))
+		table.insert(assets["die"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
+		table.insert(assets["die"], love.graphics.newImage(nid))
+
+		j = j + 1
+
+		-- idle right
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["idleRight"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		-- idle left
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["idleLeft"], love.graphics.newImage(nid))
+		end
+
+		j = j + 1
+
+		-- idle up
+
+		for i = 1, 4 do
+			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
+			table.insert(assets["idleUp"], love.graphics.newImage(nid))
+		end
+		
+		self.playerAssets[tilesetName] = assets
+	end
+	
+	return self.playerAssets[tilesetName]
 end

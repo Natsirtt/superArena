@@ -55,7 +55,7 @@ function newLevel(gameManager)
 	local dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
     local dy = -TILE_SIZE * h
 	
-	local maxPnj = 15
+	local maxPnj = 50
 
 	level.boxes = {}
 	for j, t in ipairs(level.map) do
@@ -73,7 +73,7 @@ function newLevel(gameManager)
 				level.boxes[j][i] = fixture
 				body:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
 			else
-				local r = love.math.random(0, 1)
+				local r = love.math.random()
 				if (r > 0.9) and (maxPnj > 0)  then
 					maxPnj = maxPnj - 1
 					local player = newPlayer(gameManager, 2)
