@@ -53,6 +53,10 @@ function newArena(gameManager)
 	
 	arena.tileSet = love.graphics.newImage("assets/tileset.png")
 	arena.tiles = {}
+	arena.canvas = {}
+	arena.canvas["down"] = nil
+	arena.canvas["up"] = nil
+	
 	arena.publicTimer = 0
 	arena.doorLife = 04
 	arena.hasDoor = true
@@ -74,6 +78,8 @@ function newArena(gameManager)
 			arena.tiles[j][i] = tile
 		end
 	end
+	arena.canvas["down"] = getPublicDownCanvas(arena.canvas["down"], arena.tiles)
+	arena.canvas["up"] = getPublicUpCanvas(arena.canvas["up"], arena.tiles)
 	
 	for i, t in ipairs(arena.tiles) do
 		arena.boxes[i] = {}
@@ -122,37 +128,28 @@ function arena_mt:draw()
 		love.graphics.pop()
 	end
 	
-	for i, t in ipairs(self.tiles) do
-		for j, tile in ipairs(t) do
-			if (tile ~= -1) then
-				if (tile == porte) then
-					local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 368.0)))
-					if (self.blinkTimer ~= 0) then
-						percent = math.abs(percent)
-						local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)
-						local g = self.blinkColor.g + (255 - self.blinkColor.g) * (1 - percent)
-						local b = self.blinkColor.b + (255 - self.blinkColor.b) * (1 - percent)
-						love.graphics.setColor(r, g, b)
-					else
-						love.graphics.setColor(255, 255, 255)
-					end
-				else
-					love.graphics.setColor(255, 255, 255)
-				end
-				
-				local tileToDraw = tile
-				if not self.publicDown and ((tileToDraw >= 51) and (tileToDraw <= 53) or
-										(tileToDraw >= 67) and (tileToDraw <= 69) or
-										(tileToDraw >= 83) and (tileToDraw <= 85)) then
-					tileToDraw = tileToDraw + 4
-				end
-				if (tileToDraw == arche) then
-					tileToDraw = center
-				end
-				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
-			end
-		end
+	-- On dessine l'arene
+	if self.publicDown then
+		love.graphics.draw(self.canvas["down"])
+	else
+		love.graphics.draw(self.canvas["up"])
 	end
+	
+	-- On dessine la porte
+	local percent = math.sin(math.rad((BLINK_LIMIT - self.blinkTimer * BLINK_PER_SECOND * 368.0)))
+	if (self.blinkTimer ~= 0) then
+		percent = math.abs(percent)
+		local r = self.blinkColor.r + (255 - self.blinkColor.r) * (1 - percent)
+		local g = self.blinkColor.g + (255 - self.blinkColor.g) * (1 - percent)
+		local b = self.blinkColor.b + (255 - self.blinkColor.b) * (1 - percent)
+		love.graphics.setColor(r, g, b)
+	else
+		love.graphics.setColor(255, 255, 255)
+	end
+	local i = self.porte.x
+	local j = self.porte.y
+	drawAsset(self.tiles[i][j], (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+	
 	--drawBox(self:getDoorHitBox())
 end
 
@@ -249,3 +246,56 @@ function arena_mt:getHeight()
 	return TILE_SIZE * ARENA_HEIGHT
 end
 
+-- Renvoie un nouveau canvas 
+-- @param oldCanvas, si différent de nil, utilise l'ancien canvas
+function getPublicDownCanvas(oldCanvas, tiles)
+	local canvas = oldCanvas
+	if (canvas == nil) then
+		canvas = love.graphics.newCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
+	end
+	
+	love.graphics.setCanvas(canvas)
+	for i, t in ipairs(tiles) do
+		for j, tile in ipairs(t) do
+			if (tile ~= -1) and (tile ~= nil) then
+				local tileToDraw = tile
+				if (tileToDraw == arche) then
+					tileToDraw = center
+				end
+				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+			end
+		end
+	end
+	love.graphics.setCanvas()
+	return canvas
+end
+
+-- Renvoie un nouveau canvas 
+-- @param oldCanvas, si différent de nil, utilise l'ancien canvas
+function getPublicUpCanvas(oldCanvas, tiles)
+	local canvas = oldCanvas
+	if (canvas == nil) then
+		canvas = love.graphics.newCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
+	end
+	
+	love.graphics.setCanvas(canvas)
+	for i, t in ipairs(tiles) do
+		for j, tile in ipairs(t) do
+			if (tile ~= -1) then
+				local tileToDraw = tile
+				if ((tileToDraw >= 51) and (tileToDraw <= 53) or
+					(tileToDraw >= 67) and (tileToDraw <= 69) or
+					(tileToDraw >= 83) and (tileToDraw <= 85)) then
+					tileToDraw = tileToDraw + 4
+				end
+				if (tileToDraw == arche) then
+					tileToDraw = center
+				end
+				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+			end
+		end
+	end
+	love.graphics.setCanvas()
+	
+	return canvas
+end
