@@ -3,6 +3,9 @@ mt.__index = mt
 
 local ATTACK_COOLDOWN = 0.5
 
+local ATTACK_DISTANCE = 50
+local ENNEMY_DETECTION = 200
+
 function newIAController(player)
 	
     local this = {}
@@ -11,6 +14,9 @@ function newIAController(player)
 	this.attackTimer = 0
 	
 	this.nearest = nil
+	
+	player.life = 2
+	player.speed = player.speed / 2
     
     return setmetatable(this, mt)
 end
@@ -40,27 +46,32 @@ function mt:rumble(f)
 end
 
 function mt:getAxes()
-	local x = 0
-	local y = 0
+	local dx = 0
+	local dy = 0
 	if (self.player ~= nil) then
 		local nearest = self.player.gameManager:getNearestPlayer(self.player.x, self.player.y)
 		
 		self.nearest = nearest
 		if (nearest ~= nil) then
-			if (nearest.x > self.player.x) then
-				x = 1
-			elseif (nearest.x < self.player.x) then
-				x = -1
-			end
-			if (nearest.y > self.player.y) then
-				y = 1
-			elseif (nearest.y < self.player.y) then
-				y = -1
+			local x, y = self.player:getPosition()
+			local x2, y2 = nearest:getPosition()
+			local d = self:getDistance(x2, y2)
+			if (d < ENNEMY_DETECTION) then
+				if (x2 > x) then
+					dx = 1
+				elseif (x2 < x) then
+					dx = -1
+				end
+				if (y2 > y) then
+					dy = 1
+				elseif (y2 < y) then
+					dy = -1
+				end
 			end
 		end
 	end
     
-    return x, y
+    return dx, dy
 end
 
 function mt:getX()
@@ -86,16 +97,29 @@ function mt:update(dt)
 			self.player:setDirection(dx, dy)
 		end
 		
-		if (self.nearest) and (self.attackTimer == 0) then
-			local x = self.player.x
-			local y = self.player.y
-			local x2 = self.nearest.x
-			local y2 = self.nearest.y
-			local d = math.sqrt((x2 - x) * (x2 - x) - (y2 - y) * (y2 - y))
-			if (d < 30) then
+		if (self.nearest ~= nil) and (self.attackTimer == 0) then
+			local d = self:getTargetDistance(self.nearest)
+			if (d < ATTACK_DISTANCE) then
+				local x, y = self.player:getPosition()
+				local x2, y2 = self.nearest:getPosition()
+				print("x :"..x..", y : "..y.."  nx : "..x2..", ny : "..y2..", d : "..d)
 				self.player:attack()
 				self.attackTimer = ATTACK_COOLDOWN
 			end
 		end
 	end
+end
+
+function mt:getDistance(x2, y2)
+	local x, y = self.player:getPosition()
+	local d = math.sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y))
+	return d
+end
+
+function mt:getTargetDistance(target)
+	if (target ~= nil) then
+		local x, y = target:getPosition()
+		return self:getDistance(x, y)
+	end
+	return 0
 end

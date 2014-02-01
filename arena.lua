@@ -109,7 +109,6 @@ function arena_mt:update(dt)
 	-- public animation
 	self.publicTimer = (self.publicTimer + dt) % (2 * PUBLIC_FRAME_TIME)
 	self.publicDown = self.publicTimer <= PUBLIC_FRAME_TIME
-	print(self.publicDown)
 	if (not self.hasdoor) then
 		self.lvl:update(dt)
 	end

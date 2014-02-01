@@ -200,7 +200,7 @@ function mt:getNearestPlayer(x, y)
 	for _, p in ipairs(self:getAlivePlayers()) do
 		local x2 = p.x
 		local y2 = p.y
-		local d = math.sqrt((x2 - x) * (x2 - x) - (y2 - y) * (y2 - y))
+		local d = math.sqrt((x2 - x) * (x2 - x) + (y2 - y) * (y2 - y))
 		if (distance == nil) or (d < distance) then
 			nearest = p
 			distance = d

@@ -89,10 +89,18 @@ function newPlayer(gameManager, playerNo)
     return setmetatable(this, mt)
 end
 
+-- La position du centre
 function mt:setPosition(x, y)
 	self.x = x
 	self.y = y
 	self.body:setPosition(x, y)
+end
+
+function mt:getPosition()
+	local x, y = self.body:getPosition()
+	self.x = x
+	self.y = y
+	return self.x, self.y
 end
 
 function mt:blink(color)
@@ -230,6 +238,7 @@ function mt:update(dt)
 			self:setDirection(0, 0)
 		end
 		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+		self.body:setAngle(math.rad(0))
 		local x, y = self.body:getPosition()
 		self.x = x
 		self.y = y
@@ -378,7 +387,8 @@ function mt:draw()
 	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
 	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	
-	--drawBox(self:getShieldHitBox())
+	-- Affiche de la bounding box du bouclier
+	-- drawBox(self:getShieldHitBox())
 	
 end
 
