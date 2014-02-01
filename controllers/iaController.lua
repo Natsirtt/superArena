@@ -102,7 +102,6 @@ function mt:update(dt)
 			if (d < ATTACK_DISTANCE) then
 				local x, y = self.player:getPosition()
 				local x2, y2 = self.nearest:getPosition()
-				print("x :"..x..", y : "..y.."  nx : "..x2..", ny : "..y2..", d : "..d)
 				self.player:attack()
 				self.attackTimer = ATTACK_COOLDOWN
 			end

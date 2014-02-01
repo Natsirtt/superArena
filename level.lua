@@ -44,6 +44,7 @@ function newLevel(gameManager)
 	level.width = 0
 	level.height = 0
 	level.map = nil
+	level.canvas = nil
 	
 	level.particleEffects = {}
 	
@@ -51,6 +52,7 @@ function newLevel(gameManager)
 	level.width = w
 	level.height = h
 	level.map = m
+	level.canvas = getLevelCanvas(level.canvas, level.map, TILE_SIZE * w, TILE_SIZE * h)
 	
 	local dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
     local dy = -TILE_SIZE * h
@@ -97,13 +99,8 @@ function level_mt:update(dt)
 end
 
 function level_mt:draw()
-	for j, t in ipairs(self.map) do
-		for i, tileID in ipairs(t) do
-			if (tileID ~= nil) and (tileID ~= -1) then
-				drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
-			end
-		end
-	end
+	love.graphics.draw(self.canvas)
+	
 	for _, p in ipairs(self.particleEffects) do
 		love.graphics.draw(p)
 	end
@@ -178,16 +175,21 @@ function level_mt:breakTile(i, j)
 end
 
 function level_mt:hit(box)
+	local regen = false
 	for j, t in ipairs(self.map) do
 		for i, tileID in ipairs(t) do
 			if (tileID ~= nil) and (tileID == 42) and (self.boxes[j][i] ~= nil) then
 				local hitbox = self:getHitBox(i, j)
 				if (rectCollision(hitbox, box)) then
+					regen = true
 					self:breakTile(i, j)
 					self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 				end
 			end
 		end
+	end
+	if (regen) then
+		self.canvas = getLevelCanvas(self.canvas, self.map, TILE_SIZE * self.width, TILE_SIZE * self.height)
 	end
 end
 
@@ -206,4 +208,24 @@ function level_mt:smoke(x, y)
 	p:stop()
 	self.particleEffects[#self.particleEffects + 1] = p
 	p:start()
+end
+
+-- Renvoie un nouveau canvas 
+-- @param oldCanvas, si différent de nil, utilise l'ancien canvas
+function getLevelCanvas(oldCanvas, tiles, width, height)
+	local canvas = oldCanvas
+	if (canvas == nil) then
+		canvas = love.graphics.newCanvas(width, height)
+	end
+	love.graphics.setColor(255, 255, 255)
+	love.graphics.setCanvas(canvas)
+	for j, t in ipairs(tiles) do
+		for i, tileID in ipairs(t) do
+			if (tileID ~= nil) and (tileID ~= -1) then
+				drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+			end
+		end
+	end
+	love.graphics.setCanvas()
+	return canvas
 end
