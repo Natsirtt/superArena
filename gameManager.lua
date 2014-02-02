@@ -3,6 +3,9 @@ love.filesystem.load("camera.lua")()
 local mt = {}
 mt.__index = mt
 
+--maybe we could do something like an audioManager but for now the game song will be here
+local music = love.audio.newSource("audio/the-fight.mp3")
+
 function newGameManager()
 	local self = {}
 
@@ -77,6 +80,7 @@ function arenaPhase(self, dt)
 		self.arena = newArena(self)
 		self.camera = newCamera()
 		self.phaseInitialized = true
+		music:play() -- one play for now, no loop
 		--ui debug
 		math.randomseed(os.time())
 		----------
