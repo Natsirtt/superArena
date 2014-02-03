@@ -100,7 +100,7 @@ function newArena(gameManager)
 		end
 	end
 	
-	arena.lvl = newLevel(arena.gameManager)
+	arena.lvl = nil
 
 	return setmetatable(arena, arena_mt)
 end
@@ -115,13 +115,13 @@ function arena_mt:update(dt)
 	-- public animation
 	self.publicTimer = (self.publicTimer + dt) % (2 * PUBLIC_FRAME_TIME)
 	self.publicDown = self.publicTimer <= PUBLIC_FRAME_TIME
-	if (not self.hasdoor) then
+	if (not self.hasdoor) and (self.lvl) then
 		self.lvl:update(dt)
 	end
 end
 
 function arena_mt:draw()
-	if (not self.hasDoor) then
+	if (not self.hasDoor) and (self.lvl) then
 		love.graphics.push()
 		love.graphics.translate(self:getWidth() / 2 - self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
 		self.lvl:draw()
@@ -197,7 +197,7 @@ end
 function arena_mt:hit(box)
 	if (self.hasDoor) then
 		self:hitDoor(box)
-	else
+	elseif (self.lvl) then
 		self.lvl:hit(box)
 	end
 end
@@ -226,6 +226,7 @@ function arena_mt:hitDoor(box)
 			
 			if (self.doorLife == 0) then
 				self:destroyDoor()
+				self.lvl = newLevel(self.gameManager)
 			end
 		end
 	end
@@ -298,4 +299,14 @@ function getPublicUpCanvas(oldCanvas, tiles)
 	love.graphics.setCanvas()
 	
 	return canvas
+end
+
+local blood = love.graphics.newImage("assets/blood.png")
+
+function arena_mt:blood(x, y)
+	for _, s in ipairs({"down", "up"}) do
+		love.graphics.setCanvas(self.canvas[s])
+		love.graphics.draw(blood, x - blood:getWidth() / 2, y - blood:getHeight() / 2)
+		love.graphics.setCanvas()
+	end
 end

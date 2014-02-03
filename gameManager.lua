@@ -179,6 +179,8 @@ function mt:playerAttack(player)
 			if (rectCollision(sword, p:getQuad())) then
 				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
 					p:hit(PLAYER_DAMAGE)
+					local x, y = p:getPosition()
+					self.arena:blood(x, y)
 				end
 			end
 		end
@@ -189,6 +191,8 @@ function mt:playerAttack(player)
 			if (rectCollision(sword, p:getQuad())) then
 				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
 					p:hit(PLAYER_DAMAGE)
+					local x, y = p:getPosition()
+					self.arena:blood(x, y)
 				end
 			end
 		end
