@@ -149,6 +149,8 @@ function arenaPhaseDraw(self)
 	self.arena:postPlayerDraw()
 	
 	love.graphics.pop()
+	
+	getControllersManager():drawAll()
 
 
 	-- UI

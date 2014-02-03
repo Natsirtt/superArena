@@ -122,3 +122,7 @@ function mt:getTargetDistance(target)
 	end
 	return 0
 end
+
+function mt:draw()
+
+end

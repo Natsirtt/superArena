@@ -16,6 +16,7 @@ function getControllersManager()
             this.unbindedControllers[#this.unbindedControllers + 1] = newGamepadController(j)
         end
 		this.unbindedControllers[#this.unbindedControllers + 1] = newKeyboardController()
+		this.unbindedControllers[#this.unbindedControllers + 1] = newTouchScreenController()
     
         instance = setmetatable(this, mt)
         init = true
@@ -86,6 +87,12 @@ end
 function mt:updateAll(dt)
 	for _,c in ipairs(self.bindedControllers) do
 		c:update(dt)
+	end
+end
+
+function mt:drawAll()
+	for _,c in ipairs(self.bindedControllers) do
+		c:draw()
 	end
 end
 

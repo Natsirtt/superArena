@@ -1,5 +1,6 @@
 love.filesystem.load("controllers/gamepadController.lua")()
 love.filesystem.load("controllers/keyboardController.lua")()
+love.filesystem.load("controllers/TouchScreenController.lua")()
 love.filesystem.load("controllers/controllersManager.lua")()
 love.filesystem.load("controllers/iaController.lua")()
 love.filesystem.load("level.lua")()

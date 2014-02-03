@@ -98,3 +98,7 @@ function mt:update(dt)
 		end
 	end
 end
+
+function mt:draw()
+
+end
