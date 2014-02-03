@@ -24,7 +24,7 @@ function newGameManager()
 	
 	world = love.physics.newWorld(0, 0, true)
 	self.cameraPlayers = {}
-
+		
 	return setmetatable(self, mt)
 end
 
@@ -157,6 +157,7 @@ function arenaPhaseDraw(self)
 	end
 	
 	love.graphics.setColor(255, 0, 0)
+	
 	--love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
 end
 

@@ -115,7 +115,7 @@ function genEnnemy()
 	im[#im + 1] = love.graphics.newImage("assets/player3.png")
 	im[#im + 1] = love.graphics.newImage("assets/player4.png")
 	
-	local canvas = love.graphics.newCanvas(800, 800)
+	local canvas = love.graphics.newCanvas(800, 2550)
 	love.graphics.setCanvas(canvas)
 	love.graphics.setBlendMode("additive")
 	for _, image in ipairs(im) do

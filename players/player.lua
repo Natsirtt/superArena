@@ -508,11 +508,11 @@ function mt:getShieldHitBox()
 end
 
 function drawBox(box)
-	love.graphics.print(math.floor(box[1].x).." "..math.floor(box[1].y).." "..
-						math.floor(box[2].x).." "..math.floor(box[2].y).." "..
-						math.floor(box[3].x).." "..math.floor(box[3].y).." "..
-						math.floor(box[4].x).." "..math.floor(box[4].y).." ",
-						100, 100)
+	-- love.graphics.print(math.floor(box[1].x).." "..math.floor(box[1].y).." "..
+						-- math.floor(box[2].x).." "..math.floor(box[2].y).." "..
+						-- math.floor(box[3].x).." "..math.floor(box[3].y).." "..
+						-- math.floor(box[4].x).." "..math.floor(box[4].y).." ",
+						-- 100, 100)
 	love.graphics.polygon("fill", box[1].x, box[1].y, 
 								box[4].x, box[4].y,
 								box[3].x, box[3].y,
