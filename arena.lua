@@ -100,7 +100,7 @@ function newArena(gameManager)
 		end
 	end
 	
-	arena.lvl = nil
+	arena.lvl = newLevel(arena.gameManager)
 
 	return setmetatable(arena, arena_mt)
 end
@@ -226,7 +226,7 @@ function arena_mt:hitDoor(box)
 			
 			if (self.doorLife == 0) then
 				self:destroyDoor()
-				self.lvl = newLevel(self.gameManager)
+				self.lvl:spawn()
 			end
 		end
 	end
