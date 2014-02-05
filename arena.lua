@@ -309,4 +309,5 @@ function arena_mt:blood(x, y)
 		love.graphics.draw(blood, x - blood:getWidth() / 2, y - blood:getHeight() / 2)
 		love.graphics.setCanvas()
 	end
+	self.lvl:blood(x, y)
 end

@@ -20,6 +20,7 @@ function love.load(arg)
     io.stdout:setvbuf("no") -- useful for live print() in the console on Windows
 	love.graphics.setDefaultFilter("nearest", "nearest", 1)
 	love.window.setTitle("Super ARENA ultimate frenzy saga deluxe - GOTY edition")
+
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
     love.window.setMode(w, h, {

@@ -53,9 +53,10 @@ function newLevel(gameManager)
 	level.height = h
 	level.map = m
 	level.canvas = getLevelCanvas(level.canvas, level.map, TILE_SIZE * w, TILE_SIZE * h)
+	level.bloodCanvas = love.graphics.newCanvas(TILE_SIZE * w, TILE_SIZE * h)
 	
-	local dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
-    local dy = -TILE_SIZE * h
+	level.dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
+    level.dy = -TILE_SIZE * h
 	
 	local maxPnj = 50
 
@@ -73,13 +74,13 @@ function newLevel(gameManager)
 				local fixture = love.physics.newFixture(body, shape, 1)
 				fixture:setFriction(10000)
 				level.boxes[j][i] = fixture
-				body:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
+				body:setPosition((i - 1) * TILE_SIZE + level.dx, (j - 1) * TILE_SIZE + level.dy + TILE_SIZE / 2 + TILE_SIZE)
 			else
 				local r = love.math.random()
 				if (r > 0.9) and (maxPnj > 0)  then
 					maxPnj = maxPnj - 1
 					local player = newPlayer(gameManager, -1)
-					player:setPosition((i - 1) * TILE_SIZE + dx, (j - 1) * TILE_SIZE + dy + TILE_SIZE / 2 + TILE_SIZE)
+					player:setPosition((i - 1) * TILE_SIZE + level.dx, (j - 1) * TILE_SIZE + level.dy + TILE_SIZE / 2 + TILE_SIZE)
 					gameManager:addIAPlayer(player)
 					
 					local c = newIAController(player)
@@ -100,6 +101,7 @@ end
 
 function level_mt:draw()
 	love.graphics.draw(self.canvas)
+	love.graphics.draw(self.bloodCanvas)
 	
 	for _, p in ipairs(self.particleEffects) do
 		love.graphics.draw(p)
@@ -228,4 +230,12 @@ function getLevelCanvas(oldCanvas, tiles, width, height)
 	end
 	love.graphics.setCanvas()
 	return canvas
+end
+
+local blood = love.graphics.newImage("assets/blood.png")
+
+function level_mt:blood(x, y)
+	love.graphics.setCanvas(self.bloodCanvas)
+	love.graphics.draw(blood, -self.dx + x - blood:getWidth() / 2, -self.dy + y - blood:getHeight() / 2)
+	love.graphics.setCanvas()
 end

@@ -1,7 +1,7 @@
 local mt = {}
 mt.__index = mt
 
-local SWORD_LENGTH = 75
+SWORD_LENGTH = 75
 local SWORD_AMPLITUDE = 45
 
 local SHIELD_LENGTH = 25

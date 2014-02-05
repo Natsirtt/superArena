@@ -77,6 +77,7 @@ function arenaPhase(self, dt)
 	self.drawTask = arenaPhaseDraw
 
 	if not self.phaseInitialized then
+		love.graphics.setNewFont(24)
 		self.arena = newArena(self)
 		self.camera = newCamera()
 		self.phaseInitialized = true
@@ -87,8 +88,6 @@ function arenaPhase(self, dt)
 	end
 
 	self.camera:update(dt)
-
-	love.graphics.setNewFont(24)
 	self.arena:update(dt)
 	
 	getControllersManager():updateAll(dt)
@@ -116,11 +115,6 @@ function arenaPhaseDraw(self)
 	end
 	
 	love.graphics.push()
-	
-	local w = self.arena.getWidth()
-	local h = self.arena.getHeight()
-	
-	--love.graphics.translate(love.window.getWidth() / 2 - w / 2, love.window.getHeight() / 2 - h / 2)
 
 	-- keeping our own table of players to be focused by the camera
 	-- allow us to keep following the last one even when he dies
@@ -176,26 +170,37 @@ end
 function mt:playerAttack(player)
 	local sword = player:getSwordHitBox()
 	
+	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
+	local x, y = player:getPosition()
+	
 	for _, p in ipairs(self:getAlivePlayers()) do
 		if (p ~= player) then
-			local shield = p:getShieldHitBox()
-			if (rectCollision(sword, p:getQuad())) then
-				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
-					p:hit(PLAYER_DAMAGE)
-					local x, y = p:getPosition()
-					self.arena:blood(x, y)
+			local x2, y2 = p:getPosition()
+			local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
+			if (d <= maxDistSqr) then
+				local shield = p:getShieldHitBox()
+				if (rectCollision(sword, p:getQuad())) then
+					if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
+						p:hit(PLAYER_DAMAGE)
+						local x, y = p:getPosition()
+						self.arena:blood(x, y)
+					end
 				end
 			end
 		end
 	end
 	for _, p in ipairs(self.iaPlayers) do
 		if (not p:isDead()) and (p ~= player) then
-			local shield = p:getShieldHitBox()
-			if (rectCollision(sword, p:getQuad())) then
-				if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
-					p:hit(PLAYER_DAMAGE)
-					local x, y = p:getPosition()
-					self.arena:blood(x, y)
+			local x2, y2 = p:getPosition()
+			local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
+			if (d <= maxDistSqr) then
+				local shield = p:getShieldHitBox()
+				if (rectCollision(sword, p:getQuad())) then
+					if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
+						p:hit(PLAYER_DAMAGE)
+						local x, y = p:getPosition()
+						self.arena:blood(x, y)
+					end
 				end
 			end
 		end
