@@ -182,14 +182,23 @@ end
 
 function level_mt:hit(box)
 	local regen = false
+	
+	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
+	local m = getQuadCenter(box)
+	
 	for j, t in ipairs(self.map) do
 		for i, tileID in ipairs(t) do
 			if (tileID ~= nil) and (tileID == 42) and (self.boxes[j][i] ~= nil) then
-				local hitbox = self:getHitBox(i, j)
-				if (rectCollision(hitbox, box)) then
-					regen = true
-					self:breakTile(i, j)
-					self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+				local x2 = (i - 1) * TILE_SIZE + self.dx
+				local y2 = (j - 1) * TILE_SIZE + self.dy + TILE_SIZE / 2 + TILE_SIZE
+				local d = (m.x - x2) * (m.x - x2) + (m.y - y2) * (m.y - y2)
+				if (d <= maxDistSqr) then
+					local hitbox = self:getHitBox(i, j)
+					if (rectCollision(hitbox, box)) then
+						regen = true
+						self:breakTile(i, j)
+						self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+					end
 				end
 			end
 		end
