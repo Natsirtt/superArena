@@ -21,6 +21,8 @@ function newGameManager()
 	
 	self.globalTimer = 60 -- En secondes (à modifier)
 	self.camera = nil
+	self.cameraPosX = 0
+	self.cameraPosY = 0
 	
 	world = love.physics.newWorld(0, 0, true)
 	self.cameraPlayers = {}
@@ -124,6 +126,8 @@ function arenaPhaseDraw(self)
 	end
 	local x, y = self.camera:getBestPosition(self.cameraPlayers)
 	love.graphics.translate(love.window.getWidth() / 2 - x, love.window.getHeight() / 2 - y)
+	self.cameraPosX = love.window.getWidth() / 2 - x
+	self.cameraPosY = love.window.getHeight() / 2 - y
 	
 	self.camera:draw()
 	self.arena:draw()
