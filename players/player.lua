@@ -85,17 +85,19 @@ function newPlayer(gameManager, playerNo)
 	--------------------------------------------------
 	-- Système physique
 	--------------------------------------------------
-	this.body = love.physics.newBody(world, 0, 0, "dynamic")
-	this.body:setMassData(0, 0, 1, 1)
-	--this.body:setLinearDamping(10)
-	this.shape = love.physics.newPolygonShape(- this.w / 2, - this.h / 2,
-											 this.w / 2, - this.h / 2,
-											 this.w / 2, this.h / 2,
-											 - this.w / 2, this.h / 2)
-	this.fixture = love.physics.newFixture(this.body, this.shape, 1)
-	this.fixture:setFriction(0)
-	this.fixture:setRestitution(0)
-	this.body:setPosition(this.x, this.y)
+	if (world ~= nil) then
+		this.body = love.physics.newBody(world, 0, 0, "dynamic")
+		this.body:setMassData(0, 0, 1, 1)
+		--this.body:setLinearDamping(10)
+		this.shape = love.physics.newPolygonShape(- this.w / 2, - this.h / 2,
+												 this.w / 2, - this.h / 2,
+												 this.w / 2, this.h / 2,
+												 - this.w / 2, this.h / 2)
+		this.fixture = love.physics.newFixture(this.body, this.shape, 1)
+		this.fixture:setFriction(0)
+		this.fixture:setRestitution(0)
+		this.body:setPosition(this.x, this.y)
+	end
 	
 	
 	this.playerNo = playerNo
@@ -109,13 +111,17 @@ end
 function mt:setPosition(x, y)
 	self.x = x
 	self.y = y
-	self.body:setPosition(x, y)
+	if (world ~= nil) then
+		self.body:setPosition(x, y)
+	end
 end
 
 function mt:getPosition()
-	local x, y = self.body:getPosition()
-	self.x = x
-	self.y = y
+	if (world ~= nil) then
+		local x, y = self.body:getPosition()
+		self.x = x
+		self.y = y
+	end
 	return self.x, self.y
 end
 
@@ -178,7 +184,9 @@ end
 
 function mt:attack()
 	if self:canAttack() then
-		self.gameManager:playerAttack(self)
+		if (self.gameManager ~= nil) then
+			self.gameManager:playerAttack(self)
+		end
 		self.attackSound:play()
 		self:beginAttackAnimation()
 	end
@@ -237,7 +245,9 @@ function mt:setDirection(dx, dy)
 	if not self:isDead() then
 		self.dx = dx
 		self.dy = dy
-		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+		if (world ~= nil) then
+			self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+		end
 	end
 end
 
@@ -253,11 +263,14 @@ function mt:update(dt)
 		if self.isDefendingBool then --or self.isAttackingBool then
 			self:setDirection(0, 0)
 		end
-		self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
-		self.body:setAngle(math.rad(0))
-		local x, y = self.body:getPosition()
-		self.x = x
-		self.y = y
+		if (world ~= nil) then
+			self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+			self.body:setAngle(math.rad(0))
+			local x, y = self.body:getPosition()
+			self.x = x
+			self.y = y
+		end
+
 		
 		if (self.dx == -1) and (self.dy == -1) then
 			self.angle = 45
@@ -387,7 +400,7 @@ function mt:draw()
 		else
 			tex = self.assets[self.assetsX][self.assetsY + 1]
 		end
-		local x, y = self.body:getPosition()
+		local x, y = self:getPosition()
 		if (tex ~= nil) then
 			love.graphics.push()
 			local tx = x - tex:getWidth() / 2
@@ -447,7 +460,9 @@ function mt:hit(lifePoints)
 		local dy = -math.sin(math.rad(self.angle + 180)) * 100
 		self.body:applyLinearImpulse(dx, dy)
     end
-	self.gameManager.camera:shake()
+	if (self.gameManager ~= nil) then
+		self.gameManager.camera:shake()
+	end
 	self:blink({r = 255, g = 20, b = 20})
 	if self:isDead() then
 		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)

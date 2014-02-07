@@ -4,6 +4,7 @@ mt.__index = mt
 function newKeyboardController()
     local this = {}
 	
+	this.isKeyboard = true
 	this.player = nil
     
     return setmetatable(this, mt)

@@ -6,7 +6,7 @@ mt.__index = mt
 --maybe we could do something like an audioManager but for now the game song will be here
 local music = love.audio.newSource("audio/the-fight.mp3")
 
-function newGameManager()
+function newGameManager(controllers)
 	local self = {}
 
 	self.players = {}
@@ -14,8 +14,8 @@ function newGameManager()
 	
 	self.arena = nil
 
-	self.task = addingPlayersPhase
-	self.drawTask = addingPlayersPhaseDraw
+	self.task = arenaPhase
+	self.drawTask = arenaPhaseDraw
 
 	self.phaseInitialized = false
 	
@@ -26,6 +26,12 @@ function newGameManager()
 	
 	world = love.physics.newWorld(0, 0, true)
 	self.cameraPlayers = {}
+	
+	for i, c in ipairs(controllers) do
+		local p = newPlayer(self, #self.players + 1)
+		self.players[#self.players + 1] = p
+		c:bind(p)
+	end
 		
 	return setmetatable(self, mt)
 end
@@ -38,40 +44,6 @@ end
 
 function mt:update(dt)
 	self.task(self, dt)
-end
-
-function addingPlayersPhase(self, dt)
-	-- testing if an existing controller is pressing a key (that means we go to the next game state)
-	for _, controller in ipairs(getControllersManager():getBindedControllers()) do
-		if controller:isAnyDown() then
-			self.task = arenaPhase
-			return
-		end
-	end
-	-- adding a new player
-	local added = getControllersManager():tryBindingNewController()
-	if added then
-		local p = newPlayer(self, #self.players + 1)
-		self.players[#self.players + 1] = p
-		getControllersManager():getUnusedController():bind(p)
-		-- a little idle time to let the player some time
-		-- to release the button, or the first test of this
-		-- function will be true
-		time = love.timer.getTime()
-		while (love.timer.getTime() - time) < 0.1 do
-		end
-	end
-
-	-- UI debug
-	--self.players = {newPlayer(self, 1),
-	--				newPlayer(self, 2),
-	--				newPlayer(self, 3),
-	--				newPlayer(self, 4)}
-	--self.task = arenaPhase
-end
-
-function addingPlayersPhaseDraw(self)
-	love.graphics.print(self:debugInfo(), 100, 100)
 end
 
 function arenaPhase(self, dt)

@@ -4,11 +4,15 @@ mt.__index = mt
 function newGamepadController(joystick)
     local this = {}
     
+	this.isGamePad = true
     this.joystick = joystick
-	
 	this.player = nil
     
     return setmetatable(this, mt)
+end
+
+function mt:getStartButton()
+	return 4
 end
 
 function mt:getID()

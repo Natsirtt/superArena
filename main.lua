@@ -6,6 +6,7 @@ love.filesystem.load("controllers/iaController.lua")()
 love.filesystem.load("level.lua")()
 love.filesystem.load("arena.lua")()
 love.filesystem.load("players/player.lua")()
+love.filesystem.load("menuManager.lua")()
 love.filesystem.load("gameManager.lua")()
 love.filesystem.load("maths/point.lua")()
 love.filesystem.load("maths/vector.lua")()
@@ -13,8 +14,10 @@ love.filesystem.load("maths/segment.lua")()
 love.filesystem.load("maths/collisions.lua")()
 love.filesystem.load("assets/assetsManager.lua")()
 love.filesystem.load("assets/UI.lua")()
+love.filesystem.load("gui/playerConnectionGui.lua")()
 
-local gameManager
+local manager = nil
+world = nil
 
 function love.load(arg)
     io.stdout:setvbuf("no") -- useful for live print() in the console on Windows
@@ -28,7 +31,7 @@ function love.load(arg)
         fsaa = 4,
         borderless = true
     })
-    gameManager = newGameManager()
+    manager = newMenuManager()
 end
 
 function love.update(dt)
@@ -37,11 +40,11 @@ function love.update(dt)
         love.event.quit()
     end
     
-	gameManager:update(dt)
+	manager:update(dt)
 end
 
 function love.draw()
-    gameManager:draw()
+    manager:draw()
 end
 
 -- function tableString(table)
