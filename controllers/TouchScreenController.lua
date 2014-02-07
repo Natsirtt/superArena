@@ -18,15 +18,22 @@ function newTouchScreenController()
 	this.moveTouchNumber = -1 -- Le numéro du touch si on drag (valable pour une frame)
 	
 	this.buttonRadius = 70
-	this.attackX = love.graphics.getWidth() * 2 / 3
-	this.attackY = love.graphics.getHeight() - this.buttonRadius
-	this.shieldX = this.attackX + 2 * this.buttonRadius
-	this.shieldY = this.attackY - 2 * this.buttonRadius
+	this.shieldX = love.graphics.getWidth() - this.buttonRadius * 2
+	this.attackX = this.shieldX - this.buttonRadius * 2
+	this.attackY = love.graphics.getHeight() - this.buttonRadius * 2
+	this.shieldY = this.attackY - this.buttonRadius
+	
+	
+	this.joystick = nil
 	
 	this.attackDown = false
 	this.shieldDown = false
 	
-
+	for _, j in ipairs(love.joystick.getJoysticks()) do
+		if (j:getName() == "Android Accelerometer") then
+			this.joystick = j
+		end
+	end
 	
 	this.attackIcon = love.graphics.newImage("assets/ui/btn_attack.png")
 	this.shieldIcon = love.graphics.newImage("assets/ui/btn_defense.png")
@@ -60,7 +67,9 @@ function mt:isAnyDown()
 end
 
 function mt:rumble(f)
-
+	if self.joystick:isVibrationSupported() then
+		self.joystick:setVibration(f, f)
+	end
 end
 
 function mt:getAxes()
@@ -198,11 +207,15 @@ function mt:update(dt)
 		end
 		
 		if (self:isDown(1)) then
+			self:rumble(1.0)
 			self.player:setDefending(true)
 		else
 			self.player:setDefending(false)
 			if (self:isDown(0)) then
+				self:rumble(1.0)
 				self.player:attack()
+			else
+				self:rumble(0.0)
 			end
 		end
 	end
@@ -238,6 +251,13 @@ function mt:draw()
 	end
 	love.graphics.circle("line", self.stickX, self.stickY, self.maxStickRadius)
 	love.graphics.setColor(255, 255, 255)
+	
+	-- if (self.joystick ~= nil) then
+		-- love.graphics.print("Joystick ", 200, 200)
+		-- if (self.joystick:isVibrationSupported()) then
+			-- love.graphics.print("Joystick Vibration OK", 200, 250)
+		-- end
+	-- end
 		
 	love.graphics.pop()
 end
