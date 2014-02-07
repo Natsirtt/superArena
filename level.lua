@@ -45,7 +45,6 @@ function newLevel(gameManager)
 	level.width = 0
 	level.height = 0
 	level.map = nil
-	level.canvas = nil
 	
 	level.particleEffects = {}
 	
@@ -53,8 +52,11 @@ function newLevel(gameManager)
 	level.width = w
 	level.height = h
 	level.map = m
-	level.canvas = getLevelCanvas(level.canvas, level.map, TILE_SIZE * w, TILE_SIZE * h)
-	level.bloodCanvas = love.graphics.newCanvas(TILE_SIZE * w, TILE_SIZE * h)
+	
+	local c1, c2 = getLevelCanvas(nil, nil, level.map, TILE_SIZE * w, TILE_SIZE * h)
+	level.canvas = c1 -- Le canvas du sol
+	level.objectCanvas = c2 -- Le canvas des caisses et objets
+	level.bloodCanvas = love.graphics.newCanvas(TILE_SIZE * w, TILE_SIZE * h) -- Le canvas du sang
 	
 	level.dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
     level.dy = -TILE_SIZE * h
@@ -106,6 +108,7 @@ end
 function level_mt:draw()
 	love.graphics.draw(self.canvas)
 	love.graphics.draw(self.bloodCanvas)
+	love.graphics.draw(self.objectCanvas)
 	
 	for _, p in ipairs(self.particleEffects) do
 		love.graphics.draw(p)
@@ -178,6 +181,14 @@ function level_mt:breakTile(i, j)
 	self.map[j][i] = 65
 	self.boxes[j][i]:destroy()
 	self.boxes[j][i] = nil
+	love.graphics.setCanvas(self.objectCanvas)
+	local r, g, b, a = love.graphics.getColor()
+	love.graphics.setBlendMode("replace")
+	love.graphics.setColor(255, 255, 255, 0)
+	love.graphics.rectangle("fill", (i - 1) * TILE_SIZE - TILE_SIZE / 2, (j - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+	love.graphics.setBlendMode("alpha")
+	love.graphics.setCanvas()
+	love.graphics.setColor(r, g, b, a)
 end
 
 function level_mt:hit(box)
@@ -203,9 +214,9 @@ function level_mt:hit(box)
 			end
 		end
 	end
-	if (regen) then
-		self.canvas = getLevelCanvas(self.canvas, self.map, TILE_SIZE * self.width, TILE_SIZE * self.height)
-	end
+	-- if (regen) then
+		-- self.canvas = getLevelCanvas(self.canvas, self.map, TILE_SIZE * self.width, TILE_SIZE * self.height)
+	-- end
 end
 
 -- Créé un effet de fumé en x, y
@@ -227,22 +238,33 @@ end
 
 -- Renvoie un nouveau canvas 
 -- @param oldCanvas, si différent de nil, utilise l'ancien canvas
-function getLevelCanvas(oldCanvas, tiles, width, height)
+function getLevelCanvas(oldCanvas, oldObjectCanvas, tiles, width, height)
 	local canvas = oldCanvas
+	local objectCanvas = oldObjectCanvas
 	if (canvas == nil) then
 		canvas = love.graphics.newCanvas(width, height)
+	end
+	if (objectCanvas == nil) then
+		objectCanvas = love.graphics.newCanvas(width, height)
 	end
 	love.graphics.setColor(255, 255, 255)
 	love.graphics.setCanvas(canvas)
 	for j, t in ipairs(tiles) do
 		for i, tileID in ipairs(t) do
 			if (tileID ~= nil) and (tileID ~= -1) then
-				drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+				if (tileID == 42) then
+					love.graphics.setCanvas(objectCanvas)
+					drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+					love.graphics.setCanvas(canvas)
+					drawAsset(65, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+				else
+					drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+				end
 			end
 		end
 	end
 	love.graphics.setCanvas()
-	return canvas
+	return canvas, objectCanvas
 end
 
 local blood = love.graphics.newImage("assets/blood.png")

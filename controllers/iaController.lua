@@ -1,7 +1,7 @@
 local mt = {}
 mt.__index = mt
 
-local ATTACK_COOLDOWN = 0.5
+local ATTACK_COOLDOWN = 0.75
 
 local ATTACK_DISTANCE = 50
 local ENNEMY_DETECTION = 200
