@@ -21,10 +21,33 @@ local BLINK_PER_SECOND = 15.0
 
 function newPlayer(gameManager, playerNo)
     local this = {}
-		
-	this.blinkTimer = 0.0
-	this.blinkColor = {r = 255, g = 0, b = 255}
 	
+	this.gameManager = gameManager
+	
+	this.exploded = false
+	
+	this.angle = 0
+    this.x = 400
+    this.y = 400
+    this.dx = 0
+    this.dy = 0
+	this.w = 25 -- taille de la boundingBox
+	this.h = 25 -- taille de la boundingBox
+    this.isDefendingBool = false
+	this.canDefend = true
+    this.isAttackingBool = false
+    this.defendingTimeLeft = DEFENDING_MAX_TIME
+    this.speed = SPEED_BASE
+
+	--------------------------------------------------
+	-- Système de sons
+	--------------------------------------------------
+	this.deathSound = love.audio.newSource("death.wav", "static")
+	this.attackSound = love.audio.newSource("attack2.wav", "static")
+
+	--------------------------------------------------
+	-- Système d'animation
+	--------------------------------------------------
 	this.assets = nil
 	if (playerNo == -1) then
 		this.assets = getAssetsManager():getPlayerAssets("ennemy")
@@ -39,25 +62,7 @@ function newPlayer(gameManager, playerNo)
 	this.assetsMod = 4
 	this.assestsLastChange = love.timer.getTime()
 	this.dieAnimationStarted = false
-
-	this.deathSound = love.audio.newSource("death.wav", "static")
-	this.attackSound = love.audio.newSource("attack2.wav", "static")
-
-	this.gameManager = gameManager
-    
-	this.angle = 0
-    this.x = 400
-    this.y = 400
-    this.dx = 0
-    this.dy = 0
-	this.w = 25 -- taille de la boundingBox
-	this.h = 25 -- taille de la boundingBox
-    this.isDefendingBool = false
-	this.canDefend = true
-    this.isAttackingBool = false
-    this.defendingTimeLeft = DEFENDING_MAX_TIME
-    this.speed = SPEED_BASE
-    this.hitbox = {}
+	
     this.attackAssetsX = "attackDown"
     this.attackAssetsY = -1
     this.attackAnimationProcessing = false
@@ -65,11 +70,21 @@ function newPlayer(gameManager, playerNo)
     this.defenseAssetsY = -1
     this.defenseAnimationProcessing = false
 	
+	--------------------------------------------------
+	-- Système de particules / Effets
+	--------------------------------------------------
+	this.blinkTimer = 0.0
+	this.blinkColor = {r = 255, g = 0, b = 255}
+	
 	this.deathTimer = 0
 	this.deathParticleSystem = nil
 	this.hitTimer = 0
 	this.hitParticleSystem = nil
+	this.explosionParticleSystem = nil
 	
+	--------------------------------------------------
+	-- Système physique
+	--------------------------------------------------
 	this.body = love.physics.newBody(world, 0, 0, "dynamic")
 	this.body:setMassData(0, 0, 1, 1)
 	--this.body:setLinearDamping(10)
@@ -81,8 +96,9 @@ function newPlayer(gameManager, playerNo)
 	this.fixture:setFriction(0)
 	this.fixture:setRestitution(0)
 	this.body:setPosition(this.x, this.y)
+	
+	
 	this.playerNo = playerNo
-    
     this.life = MAX_LIFE
     this.ui = nil
     
@@ -345,6 +361,9 @@ function mt:update(dt)
 		self.hitTimer = self.hitTimer + dt
 		self.hitParticleSystem:update(dt)
 	end
+	if (self.explosionParticleSystem ~= nil) then
+		self.explosionParticleSystem:update(dt)
+	end
 end
 
 function mt:draw()
@@ -359,28 +378,32 @@ function mt:draw()
 		love.graphics.setColor(255, 255, 255)
 	end
 	
-	if (self:isDead()) then
+	if (not self.exploded) then
+		local tex = nil
+		if self.attackAnimationProcessing then
+			tex = self.assets[self.attackAssetsX][self.attackAssetsY + 1]
+		elseif self.defenseAnimationProcessing then
+			tex = self.assets[self.defenseAssetsX][self.defenseAssetsY + 1]
+		else
+			tex = self.assets[self.assetsX][self.assetsY + 1]
+		end
+		local x, y = self.body:getPosition()
+		if (tex ~= nil) then
+			love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
+		else
+			print("Erreur : Pas de texture a afficher pour le joueur "..self:getNumber())
+		end
+	end
+	
+	if (self.deathParticleSystem ~= nil) then
 		-- love.graphics.draw(self.deathParticleSystem)
 	end
 	if (self.hitParticleSystem ~= nil) then
 		love.graphics.draw(self.hitParticleSystem)
+	end	
+	if (self.explosionParticleSystem ~= nil) then
+		love.graphics.draw(self.explosionParticleSystem)
 	end
-
-	local tex = nil
-	if self.attackAnimationProcessing then
-		tex = self.assets[self.attackAssetsX][self.attackAssetsY + 1]
-	elseif self.defenseAnimationProcessing then
-		tex = self.assets[self.defenseAssetsX][self.defenseAssetsY + 1]
-	else
-		tex = self.assets[self.assetsX][self.assetsY + 1]
-	end
-	local x, y = self.body:getPosition()
-	if (tex ~= nil) then
-		love.graphics.draw(tex, x - tex:getWidth() / 2, y - tex:getHeight() / 2)
-	else
-		print("Erreur : Pas de texture a afficher pour le joueur "..self:getNumber())
-	end
-	
 	love.graphics.setColor(255, 255, 255)
 
 	-- Affichage de la bounding box (debug)
@@ -415,7 +438,7 @@ function mt:hit(lifePoints)
     end
 	self.gameManager.camera:shake()
 	self:blink({r = 255, g = 20, b = 20})
-	if false then --(self:isDead()) then
+	if self:isDead() then
 		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
 		p:setEmissionRate(100)
 		p:setSpeed(300, 400)
@@ -532,5 +555,26 @@ function mt:debugSprites(state)
 	end
 	for j, sprite in ipairs(t) do
 		love.graphics.draw(sprite, 175 * (j - 1), 200)
+	end
+end
+
+function mt:explode()
+	if (not self.exploded) then
+		self.life = 0
+		self.exploded = true
+		local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
+		p:setEmissionRate(20)
+		p:setSpeed(300, 400)
+		local x, y = self:getPosition()
+		p:setPosition(x, y)
+		p:setEmitterLifetime(0.3)
+		p:setParticleLifetime(0.3)
+		p:setDirection(0)
+		p:setSpread(360)
+		p:setRadialAcceleration(-3000)
+		p:setTangentialAcceleration(1000)
+		p:stop()
+		self.hitParticleSystem = p
+		p:start()
 	end
 end

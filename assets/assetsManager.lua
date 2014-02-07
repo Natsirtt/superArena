@@ -51,11 +51,17 @@ function getAssetsManager()
 		self.uiAssets["hudDeadP2"] = love.graphics.newImage(prefix.."P2_HUD_dead.png")
 		self.uiAssets["hudDeadP3"] = love.graphics.newImage(prefix.."P3_HUD_dead.png")
 		self.uiAssets["hudDeadP4"] = love.graphics.newImage(prefix.."P4_HUD_dead.png")
+		
+		self.smoke = love.graphics.newImage("assets/smoke.png")
 
         instance = setmetatable(self, mt)
         init = true
     end
     return instance
+end
+
+function mt:getSmoke()
+	return self.smoke
 end
 
 function round(num, idp)
@@ -313,3 +319,4 @@ function mt:getPlayerAssets(tilesetName)
 	
 	return self.playerAssets[tilesetName]
 end
+

@@ -1,6 +1,8 @@
 local mt = {}
 mt.__index = mt
 
+local EXPLOSION_TIMEOUT = 5.0 -- en secondes
+
 local ATTACK_COOLDOWN = 0.75
 
 local ATTACK_DISTANCE = 50
@@ -12,6 +14,7 @@ function newIAController(player)
 	
 	this.player = player
 	this.attackTimer = 0
+	this.deathTimer = 0
 	
 	this.nearest = nil
 	
@@ -90,7 +93,7 @@ end
 
 function mt:update(dt)
 	self.attackTimer = math.max(self.attackTimer - dt, 0)
-	if (self.player ~= nil) then
+	if (self.player ~= nil) and (not self.player:isDead()) then
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
 		if (dx ~= oldDX) or (dy ~= oldDY) then
@@ -105,6 +108,11 @@ function mt:update(dt)
 				self.player:attack()
 				self.attackTimer = ATTACK_COOLDOWN
 			end
+		end
+	elseif (self.player ~= nil) and (self.player:isDead()) then
+		self.deathTimer = self.deathTimer + dt
+		if (self.deathTimer >= EXPLOSION_TIMEOUT) then
+			self.player:explode()
 		end
 	end
 end

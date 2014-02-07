@@ -221,7 +221,7 @@ end
 
 -- Créé un effet de fumé en x, y
 function level_mt:smoke(x, y)
-	local p = love.graphics.newParticleSystem(love.graphics.newImage("assets/smoke.png"), 1000)
+	local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
 	p:setEmissionRate(20)
 	p:setSpeed(520, 400)
 	p:setPosition(x, y)
