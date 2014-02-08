@@ -406,12 +406,12 @@ function mt:draw()
 			local tx = x - tex:getWidth() / 2
 			local ty = y - tex:getHeight() / 2
 			love.graphics.translate(x, y)
-			if (self.angle == 45) or (self.angle == -45) then
-				love.graphics.rotate(math.rad(-self.angle / 2))
-			end
-			if (self.angle == 135) or (self.angle == -135) then
-				love.graphics.rotate(math.rad(self.angle / 6))
-			end
+			-- if (self.angle == 45) or (self.angle == -45) then
+				-- love.graphics.rotate(math.rad(-self.angle / 2))
+			-- end
+			-- if (self.angle == 135) or (self.angle == -135) then
+				-- love.graphics.rotate(math.rad(self.angle / 6))
+			-- end
 			love.graphics.draw(tex, -tex:getWidth() / 2, -tex:getHeight() / 2)
 			love.graphics.pop()
 		else
