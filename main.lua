@@ -16,10 +16,13 @@ love.filesystem.load("assets/assetsManager.lua")()
 love.filesystem.load("assets/UI.lua")()
 love.filesystem.load("gui/playerConnectionGui.lua")()
 
+thread = love.thread.newThread("server.lua")
+
 local manager = nil
 world = nil
 
 function love.load(arg)
+	thread:start()
     io.stdout:setvbuf("no") -- useful for live print() in the console on Windows
 	love.graphics.setDefaultFilter("nearest", "nearest", 1)
 	love.window.setTitle("Super ARENA ultimate frenzy saga deluxe - GOTY edition")
