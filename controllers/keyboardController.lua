@@ -7,11 +7,14 @@ function newKeyboardController()
 	this.isKeyboard = true
 	this.player = nil
     
+	this.id = controller_id
+	controller_id  = controller_id + 1
+	
     return setmetatable(this, mt)
 end
 
 function mt:getID()
-    return -1
+    return self.id
 end
 
 function mt:isConnected()

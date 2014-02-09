@@ -1,6 +1,8 @@
 local mt = {}
 mt.__index = mt
 
+controller_id = 0
+
 local init = false
 local instance = {}
 

@@ -20,12 +20,15 @@ function newIAController(player)
 	
 	player.life = 2
 	player.speed = player.speed / 2
+	
+	this.id = controller_id
+	controller_id  = controller_id + 1
     
     return setmetatable(this, mt)
 end
 
 function mt:getID()
-    return -1
+    return seld.id
 end
 
 function mt:isConnected()

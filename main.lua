@@ -1,6 +1,7 @@
 love.filesystem.load("controllers/gamepadController.lua")()
 love.filesystem.load("controllers/keyboardController.lua")()
 love.filesystem.load("controllers/TouchScreenController.lua")()
+love.filesystem.load("controllers/networkController.lua")()
 love.filesystem.load("controllers/controllersManager.lua")()
 love.filesystem.load("controllers/iaController.lua")()
 love.filesystem.load("level.lua")()
@@ -16,20 +17,20 @@ love.filesystem.load("assets/assetsManager.lua")()
 love.filesystem.load("assets/UI.lua")()
 love.filesystem.load("gui/playerConnectionGui.lua")()
 
-thread = love.thread.newThread("server.lua")
+server = love.thread.newThread("server.lua")
 
 local manager = nil
 world = nil
 
 function love.load(arg)
-	thread:start()
+	server:start()
     io.stdout:setvbuf("no") -- useful for live print() in the console on Windows
 	love.graphics.setDefaultFilter("nearest", "nearest", 1)
 	love.window.setTitle("Super ARENA ultimate frenzy saga deluxe - GOTY edition")
 
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
-    love.window.setMode(w, h, {
+    love.window.setMode(w / 3, h / 3, {
         fullscreen = false,
         fsaa = 4,
         borderless = true

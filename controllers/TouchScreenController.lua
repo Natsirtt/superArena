@@ -6,6 +6,9 @@ function newTouchScreenController()
     	
 	this.player = nil
 	
+	this.id = controller_id
+	controller_id  = controller_id + 1
+	
 	this.minStickRadius = 50
 	this.maxStickRadius = 150
 	this.stickX = this.maxStickRadius
@@ -42,7 +45,7 @@ function newTouchScreenController()
 end
 
 function mt:getID()
-    return -1
+    return this.id
 end
 
 function mt:isConnected()

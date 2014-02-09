@@ -7,6 +7,9 @@ function newGamepadController(joystick)
 	this.isGamePad = true
     this.joystick = joystick
 	this.player = nil
+	
+	this.id = controller_id
+	controller_id  = controller_id + 1
     
     return setmetatable(this, mt)
 end
@@ -16,7 +19,7 @@ function mt:getStartButton()
 end
 
 function mt:getID()
-    return self.joystick:getID()
+    return self.id
 end
 
 function mt:isConnected()

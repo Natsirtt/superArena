@@ -32,7 +32,9 @@ function newGameManager(controllers)
 		self.players[#self.players + 1] = p
 		c:bind(p)
 	end
-		
+	
+	self.gameChannel = love.thread.getChannel("gameManager")
+	
 	return setmetatable(self, mt)
 end
 
@@ -42,7 +44,16 @@ function mt:draw()
 	end
 end
 
+function mt:updateNetwork(dt)
+	local msg = self.gameChannel:pop()
+	while (msg ~= nil) do
+		local param, _ = msg:match("^(%S*) (.*)")
+		msg = self.gameChannel:pop()
+	end
+end
+
 function mt:update(dt)
+	self:updateNetwork(dt)
 	self.task(self, dt)
 end
 
