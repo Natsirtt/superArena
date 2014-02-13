@@ -54,6 +54,7 @@ function newPlayer(gameManager, playerNo)
 	else
 		this.assets = getAssetsManager():getPlayerAssets("assets/player"..playerNo..".png")
 	end
+	this.playerChannel = love.thread.getChannel("player"..playerNo)
 	
 	this.assetsX = "idle"
 	this.assetsY = 0
@@ -255,8 +256,52 @@ function mt:getDirection()
 	return self.dx, self.dy
 end
 
+function mt:toUpdateMessage()
+	local s = "player"..self.playerNo.." "..self.life.." "..
+				self.x.." "..self.y.." "..self.dx.." "..self.dy.." "..
+				self.angle.." "..false.." "..self:isDefending()
+	return s
+end
+
+function mt:processMessages()
+	local msg = self.playerChannel:pop()
+	while msg ~= nil do
+		if (msg == "attack") then
+			self:attack()
+		else
+			local arg1, arg2 = msg:match("^(%S*) (.*)")
+			if (arg1 == "defend") and (arg2 == "true") then
+				self:setDefending(true)
+			elseif (arg1 == "defend") and (arg2 == "false") then
+				self:setDefending(false)
+			elseif (arg1 == "dir") then
+				local dx, dy = arg2:match("^(%S*) (.*)")
+				self:setDirection(tonumber(dx), tonumber(dy))
+			elseif (arg1 == "update") then
+				local life, x, y, dx, dy, angle, attack, defense = arg2:match("^(%d*) (%d*) (%d*) (%d*) (%d*) (%d*) (%d*)")
+		
+				self.life = tonumber(life)
+				self.setPosition(tonumber(x), tonumber(y))
+				self.setDirection(tonumber(dx), tonumber(dy))
+				self.angle = tonumber(angle)
+				
+				if (tonumber(defense) == 1) then
+					self:setDefending(true)
+				else
+					self:setDefending(false)
+					if (tonumber(attack) == 1) then
+						self:attack()
+					end
+				end
+			end
+		end
+		msg = self.playerChannel:pop()
+	end
+end
+
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
+	self:processMessages()
 	
 	if (not self:isDead()) then
 		-- position checking

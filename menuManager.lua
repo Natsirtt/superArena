@@ -44,8 +44,8 @@ function mt:updateNetwork(dt)
 		if (param == "startGame") then
 			self.gameManager = newGameManager(self.controllers)
 		elseif (param == "newPlayer") then
-			local ui = self:getFirstFreeConnectionUi()
-			ui:bind(newNetworkController(nil))
+			-- local ui = self:getFirstFreeConnectionUi()
+			-- ui:bind(newNetworkController(nil))
 		end
 		msg = self.menuChannel:pop()
 	end
@@ -58,6 +58,8 @@ function mt:update(dt)
 			local added = getControllersManager():tryBindingNewController()
 			if added then
 				local c = getControllersManager():getUnusedController()
+				local ui = self:getFirstFreeConnectionUi()
+				ui:bind(c)
 				self.serverChannel:push("menuManager newPlayer")
 				self.controllers[#self.controllers + 1] = c
 				time = love.timer.getTime()
@@ -69,6 +71,7 @@ function mt:update(dt)
 			ui:update(dt)
 			if (ui:ready() and (self.gameManager == nil)) then
 				self.serverChannel:push("menuManager startGame")
+				print("j'envoie startGame")
 			end
 		end
 	else

@@ -37,7 +37,7 @@ function server()
 		-- On récupére tous les messages envoyés par en local
 		local m = serverChannel:pop()
 		while (m ~= nil) do
-			print("Message : "..m)
+			-- print("Message : "..m)
 			local channel, param = m:match("^(%S*) (.*)")
 			love.thread.getChannel(channel):push(param)
 			

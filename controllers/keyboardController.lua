@@ -10,6 +10,8 @@ function newKeyboardController()
 	this.id = controller_id
 	controller_id  = controller_id + 1
 	
+	this.serverChannel = love.thread.getChannel("serverChannel")
+	
     return setmetatable(this, mt)
 end
 
@@ -81,15 +83,18 @@ function mt:update(dt)
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
 		if (dx ~= oldDX) or (dy ~= oldDY) then
-			self.player:setDirection(dx, dy)
+			self.serverChannel:push("player"..self.player.playerNo.." dir "..dx.." "..dy)
 		end
 		
 		if (love.keyboard.isDown("lctrl")) then
-			self.player:setDefending(true)
+			self.serverChannel:push("player"..self.player.playerNo.." defend true")
 		else
-			self.player:setDefending(false)
+			if (self.player:isDefending()) then
+				self.serverChannel:push("player"..self.player.playerNo.." defend false")
+			end
 			if (love.keyboard.isDown(" ")) then
-				self.player:attack()
+				self.serverChannel:push("player"..self.player.playerNo.." attack")
+				-- self.player:attack()
 			end
 		end
 

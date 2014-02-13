@@ -41,6 +41,8 @@ function newTouchScreenController()
 	this.attackIcon = love.graphics.newImage("assets/ui/btn_attack.png")
 	this.shieldIcon = love.graphics.newImage("assets/ui/btn_defense.png")
 	
+	this.serverChannel = love.thread.getChannel("serverChannel")
+	
     return setmetatable(this, mt)
 end
 
@@ -206,17 +208,20 @@ function mt:update(dt)
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
 		if (dx ~= oldDX) or (dy ~= oldDY) then
-			self.player:setDirection(dx, dy)
+			self.serverChannel:push("player"..self.player.playerNo.." dir "..dx.." "..dy)
 		end
 		
 		if (self:isDown(1)) then
 			self:rumble(1.0)
-			self.player:setDefending(true)
+			self.serverChannel:push("player"..self.player.playerNo.." defend true")
 		else
-			self.player:setDefending(false)
+			if (self.player:isDefending()) then
+				self.serverChannel:push("player"..self.player.playerNo.." defend false")
+			end
 			if (self:isDown(0)) then
 				self:rumble(1.0)
 				self.player:attack()
+				self.serverChannel:push("player"..self.player.playerNo.." attack")
 			else
 				self:rumble(0.0)
 			end
