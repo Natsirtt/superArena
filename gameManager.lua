@@ -45,10 +45,11 @@ function mt:draw()
 end
 
 function mt:updateNetwork(dt)
-	local msg = self.gameChannel:pop()
-	while (msg ~= nil) do
+	local tmp = self.gameChannel:pop()
+	while (tmp ~= nil) do
+		local msg = tmp.message
 		local param, _ = msg:match("^(%S*) (.*)")
-		msg = self.gameChannel:pop()
+		tmp = self.gameChannel:pop()
 	end
 end
 

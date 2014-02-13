@@ -264,8 +264,9 @@ function mt:toUpdateMessage()
 end
 
 function mt:processMessages()
-	local msg = self.playerChannel:pop()
-	while msg ~= nil do
+	local tmp = self.playerChannel:pop()
+	while tmp ~= nil do
+		local msg = tmp.message
 		if (msg == "attack") then
 			self:attack()
 		else
@@ -295,7 +296,7 @@ function mt:processMessages()
 				end
 			end
 		end
-		msg = self.playerChannel:pop()
+		tmp = self.playerChannel:pop()
 	end
 end
 

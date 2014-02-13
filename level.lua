@@ -101,9 +101,9 @@ end
 
 function getLevel()
 	local channel = love.thread.getChannel("levelChannel")
-	local msg = channel:pop()
-	while (msg == nil) do
-		msg = channel:pop()
+	local tmp = channel:pop()
+	while (tmp == nil) do
+		tmp = channel:pop()
 	end
 	local level = {}
 	
@@ -111,7 +111,7 @@ function getLevel()
 	local y = 1
 	local width = 0
 	local height = 0
-	local arg1, arg2, param = msg:match("^(%S*) (%S*) (.*)")
+	local arg1, arg2, param = tmp.message:match("^(%S*) (%S*) (.*)")
 	width = tonumber(arg1)
 	height = tonumber(arg2)
 	

@@ -37,17 +37,19 @@ function mt:getFirstFreeConnectionUi()
 end
 
 function mt:updateNetwork(dt)
-	local msg = self.menuChannel:pop()
-	while (msg ~= nil) do
-		local param = msg:match("^(%S*)")
+	local tmp = self.menuChannel:pop()
+	while (tmp ~= nil) do
+		local param = tmp.message:match("^(%S*)")
 		print("Je suis le menu et je reçoie : "..param)
 		if (param == "startGame") then
 			self.gameManager = newGameManager(self.controllers)
 		elseif (param == "newPlayer") then
-			-- local ui = self:getFirstFreeConnectionUi()
-			-- ui:bind(newNetworkController(nil))
+			if (not tmp.isLocal) then
+				local ui = self:getFirstFreeConnectionUi()
+				ui:bind(newNetworkController(nil))
+			end
 		end
-		msg = self.menuChannel:pop()
+		tmp = self.menuChannel:pop()
 	end
 end
 
