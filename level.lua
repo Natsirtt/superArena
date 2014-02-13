@@ -48,7 +48,7 @@ function newLevel(gameManager)
 	
 	level.particleEffects = {}
 	
-	local m, w, h = generateLevel()
+	local m, w, h = getLevel()
 	level.width = w
 	level.height = h
 	level.map = m
@@ -99,6 +99,38 @@ function newLevel(gameManager)
 	return setmetatable(level, level_mt)
 end
 
+function getLevel()
+	local channel = love.thread.getChannel("levelChannel")
+	local msg = channel:pop()
+	while (msg == nil) do
+		msg = channel:pop()
+	end
+	local level = {}
+	
+	local x = 1
+	local y = 1
+	local width = 0
+	local height = 0
+	local arg1, arg2, param = msg:match("^(%S*) (%S*) (.*)")
+	width = tonumber(arg1)
+	height = tonumber(arg2)
+	
+	for w in string.gmatch(param, "(%S*) ") do
+		if (level[y] == nil) then
+			level[y] = {}
+		end
+		level[y][x] = tonumber(w)
+		
+		x = x + 1
+		if (x > width) then
+			x = 1
+			y = y + 1
+		end
+	end
+	 
+	return level, width, height
+end
+
 function level_mt:update(dt)
 	for _, p in ipairs(self.particleEffects) do
 		p:update(dt)
@@ -132,37 +164,6 @@ end
 
 function level_mt:getHeight()
 	return TILE_SIZE * self.height
-end
-
-
-function generateLevel()
-	local level = {}
-	local minWidth = 25
-	local maxWidth = 50
-	local minHeight = 25
-	local maxHeight = 50
-	
-	local actualWidth = love.math.random(minWidth, maxWidth)
-	local actualHeight = love.math.random(minHeight, maxHeight)
-		
-	for j = 1, actualHeight do
-		level[j] = {}
-		for i = 1, actualWidth do
-			if (i == 1) or (i == actualWidth) or (j == 1) 
-						or ((j == actualHeight) and ((i < (actualWidth / 2) - 1) or (i > (actualWidth / 2) + 2))) then
-				level[j][i] = 19
-			else
-				local p = love.math.random(0, 1)
-				if (p > 0.5) then
-					level[j][i] = 65
-				else
-					level[j][i] = 42
-				end
-			end
-		end
-	end
-	
-	return level, actualWidth, actualHeight
 end
 
 -- Renvoie la hitBox du tile i, j

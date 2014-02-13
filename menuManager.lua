@@ -71,7 +71,7 @@ function mt:update(dt)
 			ui:update(dt)
 			if (ui:ready() and (self.gameManager == nil)) then
 				self.serverChannel:push("menuManager startGame")
-				print("j'envoie startGame")
+				-- print("j'envoie startGame")
 			end
 		end
 	else
