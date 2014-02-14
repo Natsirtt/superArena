@@ -43,6 +43,9 @@ function newTouchScreenController()
 	
 	this.serverChannel = love.thread.getChannel("serverChannel")
 	
+	this.lastDx = 0
+	this.lastDy = 0
+	
     return setmetatable(this, mt)
 end
 
@@ -207,13 +210,17 @@ function mt:update(dt)
 			
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
-		if (dx ~= oldDX) or (dy ~= oldDY) then
+		if (dx ~= self.lastDx) or (dy ~= self.lastDy) then
+			self.lastDx = dx
+			self.lastDy = dy
 			self.serverChannel:push("player"..self.player.playerNo.." dir "..dx.." "..dy)
 		end
 		
 		if (self:isDown(1)) then
-			self:rumble(1.0)
-			self.serverChannel:push("player"..self.player.playerNo.." defend true")
+			if (not self.player:isDefending() and self.player.canDefend) then
+				self:rumble(1.0)
+				self.serverChannel:push("player"..self.player.playerNo.." defend true")
+			end
 		else
 			if (self.player:isDefending()) then
 				self.serverChannel:push("player"..self.player.playerNo.." defend false")

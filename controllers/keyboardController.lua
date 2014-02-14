@@ -12,6 +12,9 @@ function newKeyboardController()
 	
 	this.serverChannel = love.thread.getChannel("serverChannel")
 	
+	this.lastDx = 0
+	this.lastDy = 0
+	
     return setmetatable(this, mt)
 end
 
@@ -82,12 +85,16 @@ function mt:update(dt)
 	if (self.player ~= nil) then
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
-		if (dx ~= oldDX) or (dy ~= oldDY) then
+		if (dx ~= self.lastDx) or (dy ~= self.lastDy) then
+			self.lastDx = dx
+			self.lastDy = dy
 			self.serverChannel:push("player"..self.player.playerNo.." dir "..dx.." "..dy)
 		end
 		
 		if (love.keyboard.isDown("lctrl")) then
-			self.serverChannel:push("player"..self.player.playerNo.." defend true")
+			-- if (not self.player:isDefending() and self.player.canDefend) then
+				self.serverChannel:push("player"..self.player.playerNo.." defend true")
+			-- end
 		else
 			if (self.player:isDefending()) then
 				self.serverChannel:push("player"..self.player.playerNo.." defend false")

@@ -41,12 +41,14 @@ function mt:updateNetwork(dt)
 	while (tmp ~= nil) do
 		local param = tmp.message:match("^(%S*)")
 		print("Je suis le menu et je reçoie : "..param)
-		if (param == "startGame") then
+		if (param == "startGame") and (self.gameManager == nil) then
 			self.gameManager = newGameManager(self.controllers)
 		elseif (param == "newPlayer") then
 			if (not tmp.isLocal) then
+				local c = newNetworkController(nil)
 				local ui = self:getFirstFreeConnectionUi()
-				ui:bind(newNetworkController(nil))
+				self.controllers[#self.controllers + 1] = c
+				ui:bind(c)
 			end
 		end
 		tmp = self.menuChannel:pop()

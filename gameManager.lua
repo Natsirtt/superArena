@@ -34,6 +34,7 @@ function newGameManager(controllers)
 	end
 	
 	self.gameChannel = love.thread.getChannel("gameManager")
+	self.serverChannel = love.thread.getChannel("serverChannel")
 	
 	return setmetatable(self, mt)
 end
@@ -48,7 +49,12 @@ function mt:updateNetwork(dt)
 	local tmp = self.gameChannel:pop()
 	while (tmp ~= nil) do
 		local msg = tmp.message
-		local param, _ = msg:match("^(%S*) (.*)")
+		if (msg == "update") then
+			for _, p in ipairs(self.players) do
+				local s = p:toUpdateMessage()
+				self.serverChannel:push(s)
+			end
+		end
 		tmp = self.gameChannel:pop()
 	end
 end

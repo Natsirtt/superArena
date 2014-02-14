@@ -257,9 +257,9 @@ function mt:getDirection()
 end
 
 function mt:toUpdateMessage()
-	local s = "player"..self.playerNo.." "..self.life.." "..
-				self.x.." "..self.y.." "..self.dx.." "..self.dy.." "..
-				self.angle.." "..false.." "..self:isDefending()
+	local s = "player"..self.playerNo.." update "..self.life.." "..
+				math.floor(self.x).." "..math.floor(self.y).." "..self.dx.." "..self.dy.." "..
+				self.angle.." ".."false".." "..tostring(self:isDefending())
 	return s
 end
 
@@ -279,11 +279,12 @@ function mt:processMessages()
 				local dx, dy = arg2:match("^(%S*) (.*)")
 				self:setDirection(tonumber(dx), tonumber(dy))
 			elseif (arg1 == "update") then
-				local life, x, y, dx, dy, angle, attack, defense = arg2:match("^(%d*) (%d*) (%d*) (%d*) (%d*) (%d*) (%d*)")
+				local reg = "^(%d*) ([-+]?[0-9]*%.?[0-9]*) ([-+]?[0-9]*%.?[0-9]*) ([-+]?[0-9]*%.?[0-9]*) ([-+]?[0-9]*%.?[0-9]*) ([-+]?[0-9]*%.?[0-9]*) (%a*) (%a*)"
+				local life, x, y, dx, dy, angle, attack, defense = arg2:match(reg)
 		
 				self.life = tonumber(life)
-				self.setPosition(tonumber(x), tonumber(y))
-				self.setDirection(tonumber(dx), tonumber(dy))
+				self:setPosition(tonumber(x), tonumber(y))
+				self:setDirection(tonumber(dx), tonumber(dy))
 				self.angle = tonumber(angle)
 				
 				if (tonumber(defense) == 1) then

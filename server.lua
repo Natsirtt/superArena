@@ -5,6 +5,8 @@ require "love.math"
 local BROADCAST_PORT = 6000
 local SERVER_PORT = 6001
 
+local TOTAL_UPDATE_TIMER = 1.0 -- la durée entre chaque grosse mise à jours
+
 local udp = socket.udp()
 
 udp:setoption('broadcast',true)
@@ -21,12 +23,12 @@ function client(ip, port)
 	local tcp = socket.tcp()
 	
 	tcp:connect(ip, SERVER_PORT)
-	tcp:settimeout(0.1)
+	tcp:settimeout(0.0)
 	
 	while true do
 		local msg = tcp:receive()
 		if (msg ~= nil) then
-			print("Reception : "..msg)
+			--print("Reception : "..msg)
 			local channel, param = msg:match("^(%S*) (.*)")
 			love.thread.getChannel(channel):push({isLocal = false, message = param})
 		end
@@ -37,7 +39,7 @@ function client(ip, port)
 			love.thread.getChannel(channel):push({isLocal = true, message = param})
 			
 			tcp:send(m.."\n")
-			print("Envoie : "..m)
+			--print("Envoie : "..m)
 			m = serverChannel:pop()
 		end
 	end
@@ -81,7 +83,7 @@ function server()
 	udp:settimeout(0.0)
 	
 	local tcp = socket.tcp()
-	tcp:settimeout(0.1)
+	tcp:settimeout(0.0)
 	tcp:bind("*", SERVER_PORT)
 	tcp:listen(3)
 	
@@ -89,6 +91,9 @@ function server()
 	local gameStarted = false
 	
 	local clients = {}
+	
+	local completeUpdateTimer = TOTAL_UPDATE_TIMER
+	local lastUpdate = os.time()
 	
 	while true do
 		local messages = {}
@@ -102,8 +107,8 @@ function server()
 		for _, client in ipairs(clients) do
 			local msg = client:receive()
 			while (msg ~= nil) do
-				print("reception : "..msg)
-				messages[#messages + 1] = {isLocal = false, message = msg}
+				--print("reception : "..msg)
+				messages[#messages + 1] = {isLocal = false, message = msg, client = client}
 				msg = client:receive()
 			end
 		end	
@@ -121,8 +126,10 @@ function server()
 			love.thread.getChannel(channel):push({isLocal = msg.isLocal, message = param})
 			
 			for _, client in ipairs(clients) do
-				print("Envoie : "..msg.message)
-				client:send(msg.message.."\n")
+				--print("Envoie : "..msg.message)
+				if (msg.isLocal) or ((not msg.isLocal) and (msg.client ~= client)) then
+					client:send(msg.message.."\n")
+				end
 			end
 			i = i + 1
 		end
@@ -131,6 +138,7 @@ function server()
 			-- On teste si un client cherche un serveur
 			local msg, ip, port = udp:receivefrom()
 			if (msg ~= nil) and (hostname ~= socket.dns.tohostname(ip)) then
+				print("Demande de server !")
 				if (msg == "Connection") then
 					udp:sendto("ConnectionOK", ip, port)
 				end
@@ -138,6 +146,10 @@ function server()
 			local c = tcp:accept()
 			if (c ~= nil) then
 				print("Nouveau Client ! ")
+				
+				for i = 1, (#clients + 1) do
+					c:send("menuManager newPlayer\n")
+				end
 				clients[#clients + 1] = c
 				c:settimeout(0.1)
 			end
@@ -145,6 +157,12 @@ function server()
 			if (udp ~= nil) then
 				udp:close()
 				udp = nil
+			end
+			completeUpdateTimer = completeUpdateTimer - (os.time() - lastUpdate)
+			lastUpdate = os.time()
+			if (completeUpdateTimer <= 0.0) then
+				love.thread.getChannel("gameManager"):push({isLocal = true, message = "update"})
+				completeUpdateTimer = TOTAL_UPDATE_TIMER
 			end
 		end
 	end
