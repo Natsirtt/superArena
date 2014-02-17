@@ -11,7 +11,7 @@ local BLINK_PER_SECOND = 20.0
 function newCamera()
     local this = {}
 	
-	this.shakeSound = love.audio.newSource("shake.wav", "static")
+	this.shakeSound = love.audio.newSource("audio/shake.wav", "static")
 	this.shakeSound:setLooping(true)
 	this.shakeTimer = 0.0
 	this.blinkTimer = 0.0

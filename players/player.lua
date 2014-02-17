@@ -8,11 +8,13 @@ local SHIELD_LENGTH = 25
 local SHIELD_AMPLITUDE = 50
 
 local MAX_LIFE = 10
-local SPEED_BASE = 500
+local SPEED_BASE = 1500
 local RADIUS = 20
 local DEFENDING_MAX_TIME = 3
 local ANIMATION_RATE = 0.1
 local DIE_ANIMATION_FRAME_NB = 18
+
+local DASH_COOLDOWN = 0.6
 
 PLAYER_DAMAGE = 1
 
@@ -38,12 +40,14 @@ function newPlayer(gameManager, playerNo)
     this.isAttackingBool = false
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
+	this.dashCooldown = 0
 
 	--------------------------------------------------
 	-- Système de sons
 	--------------------------------------------------
-	this.deathSound = love.audio.newSource("death.wav", "static")
-	this.attackSound = love.audio.newSource("attack2.wav", "static")
+	this.deathSound = love.audio.newSource("audio/death.wav", "static")
+	this.attackSound = love.audio.newSource("audio/attack2.wav", "static")
+	this.dashSound = love.audio.newSource("audio/dash.wav", "static")
 
 	--------------------------------------------------
 	-- Système d'animation
@@ -87,14 +91,14 @@ function newPlayer(gameManager, playerNo)
 	--------------------------------------------------
 	if (world ~= nil) then
 		this.body = love.physics.newBody(world, 0, 0, "dynamic")
-		this.body:setMassData(0, 0, 1, 1)
-		--this.body:setLinearDamping(10)
+		this.body:setMassData(0, 0, 50, 1)
+		this.body:setLinearDamping(6.0)
 		this.shape = love.physics.newPolygonShape(- this.w / 2, - this.h / 2,
 												 this.w / 2, - this.h / 2,
 												 this.w / 2, this.h / 2,
 												 - this.w / 2, this.h / 2)
 		this.fixture = love.physics.newFixture(this.body, this.shape, 1)
-		this.fixture:setFriction(0)
+		this.fixture:setFriction(100)
 		this.fixture:setRestitution(0)
 		this.body:setPosition(this.x, this.y)
 	end
@@ -246,7 +250,7 @@ function mt:setDirection(dx, dy)
 		self.dx = dx
 		self.dy = dy
 		if (world ~= nil) then
-			self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+			-- self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 		end
 	end
 end
@@ -257,6 +261,7 @@ end
 
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
+	self.dashCooldown = math.max(self.dashCooldown - dt, 0.0)
 	
 	if (not self:isDead()) then
 		-- position checking
@@ -264,7 +269,8 @@ function mt:update(dt)
 			self:setDirection(0, 0)
 		end
 		if (world ~= nil) then
-			self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+			-- self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+			self.body:applyForce(self.dx * self.speed, self.dy * self.speed)
 			self.body:setAngle(math.rad(0))
 			local x, y = self.body:getPosition()
 			self.x = x
@@ -372,6 +378,7 @@ function mt:update(dt)
 	end
 	if (self.hitParticleSystem ~= nil) then
 		self.hitTimer = self.hitTimer + dt
+		self.hitParticleSystem:setPosition(self.x, self.y)
 		self.hitParticleSystem:update(dt)
 	end
 	if (self.explosionParticleSystem ~= nil) then
@@ -447,7 +454,8 @@ function mt:getLife()
     return self.life
 end
 
-function mt:hit(lifePoints)
+-- (x, y) La position de l'assaillant
+function mt:hit(lifePoints, x, y)
     self.life = self.life - lifePoints
     if self:isDead() then
     	self.attackAnimationProcessing = false
@@ -456,9 +464,10 @@ function mt:hit(lifePoints)
     	self.dy = 0
     	self.body:setLinearVelocity(0, 0)
 	else
-		local dx = math.cos(math.rad(self.angle + 180)) * 100
-		local dy = -math.sin(math.rad(self.angle + 180)) * 100
-		self.body:applyLinearImpulse(dx, dy)
+		local dx = x - self.x
+		local dy = y - self.y
+		local l = math.sqrt((dx * dx) + (dy * dy))
+		self.body:applyLinearImpulse(-dx * 500 / l, -dy * 500 / l)
     end
 	if (self.gameManager ~= nil) then
 		self.gameManager.camera:shake()
@@ -602,5 +611,29 @@ function mt:explode()
 		p:stop()
 		self.hitParticleSystem = p
 		p:start()
+	end
+end
+
+function mt:dash()
+	if (self.dashCooldown <= 0) then
+		local dx = math.cos(math.rad(self.angle + 90)) * 1000
+		local dy = -math.sin(math.rad(self.angle + 90)) * 1000
+		self.body:applyLinearImpulse(dx, dy)
+		self.dashCooldown = DASH_COOLDOWN
+		
+		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
+		p:setEmissionRate(20)
+		p:setSpeed(300, 400)
+		p:setPosition(self.x, self.y)
+		p:setEmitterLifetime(0.3)
+		p:setParticleLifetime(0.3)
+		p:setDirection(0)
+		p:setSpread(360)
+		p:setRadialAcceleration(-3000)
+		p:setTangentialAcceleration(1000)
+		p:stop()
+		self.hitParticleSystem = p
+		p:start()
+		self.dashSound:play()
 	end
 end

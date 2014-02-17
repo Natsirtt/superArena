@@ -157,7 +157,7 @@ function mt:playerAttack(player)
 				local shield = p:getShieldHitBox()
 				if (rectCollision(sword, p:getQuad())) then
 					if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
-						p:hit(PLAYER_DAMAGE)
+						p:hit(PLAYER_DAMAGE, x, y)
 						local x, y = p:getPosition()
 						self.arena:blood(x, y)
 					end
@@ -173,7 +173,7 @@ function mt:playerAttack(player)
 				local shield = p:getShieldHitBox()
 				if (rectCollision(sword, p:getQuad())) then
 					if (not p:isDefending() or (p:isDefending() and (not rectCollision(sword, shield)))) then
-						p:hit(PLAYER_DAMAGE)
+						p:hit(PLAYER_DAMAGE, x, y)
 						local x, y = p:getPosition()
 						self.arena:blood(x, y)
 					end
