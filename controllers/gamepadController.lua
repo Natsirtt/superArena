@@ -1,12 +1,24 @@
 local mt = {}
 mt.__index = mt
 
+local buttons = {}
+
+buttons["Windows"] = {}
+buttons["Linux"] = {}
+buttons["OS X"] = {}
+buttons["Android"] = {}
+
+-- Initializing all arrays manually to have cross-platforme coherence in inputs
+
+--TODO
+
 function newGamepadController(joystick)
     local this = {}
     
 	this.isGamePad = true
     this.joystick = joystick
 	this.player = nil
+    this.buttons = buttons[love.system.getOS()]
     
     return setmetatable(this, mt)
 end
