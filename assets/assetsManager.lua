@@ -137,7 +137,7 @@ end
 function mt:getPlayerAssets(tilesetName)
 	if (self.playerAssets[tilesetName] == nil) then
 		local assets = {}
-		assets["idle"] = {}
+		assets["idleDown"] = {}
 		assets["walkDown"] = {}
 		assets["walkRight"] = {}
 		assets["walkLeft"] = {}
@@ -168,7 +168,7 @@ function mt:getPlayerAssets(tilesetName)
 
 		for i = 1, 4 do
 			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["idle"], love.graphics.newImage(nid))
+			table.insert(assets["idleDown"], love.graphics.newImage(nid))
 		end
 
 		j = j + 1

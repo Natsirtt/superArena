@@ -21,6 +21,70 @@ PLAYER_DAMAGE = 1
 local BLINK_LIMIT = 0.2
 local BLINK_PER_SECOND = 15.0
 
+local ANIMATIONS = {}
+	-- up
+ANIMATIONS[0] = {
+	idle = "idleUp",
+	walk = "walkUp",
+	attack = "attackUp",
+	shield = "shieldUp"
+}
+	-- up left
+ANIMATIONS[45] = {
+	idle = "idleUp",
+	walk = "walkUp",
+	attack = "attackUp",
+	shield = "shieldUp"
+}
+	-- up right
+ANIMATIONS[-45] = {
+	idle = "idleUp",
+	walk = "walkUp",
+	attack = "attackUp",
+	shield = "shieldUp"
+}
+	-- left
+ANIMATIONS[90] = {
+	idle = "idleLeft",
+	walk = "walkLeft",
+	attack = "attackLeft",
+	shield = "shieldLeft"
+}
+	-- right
+ANIMATIONS[-90] = {
+	idle = "idleRight",
+	walk = "walkRight",
+	attack = "attackRight",
+	shield = "shieldRight"
+}
+	-- down left
+ANIMATIONS[135] = {
+	idle = "idleDown",
+	walk = "walkDown",
+	attack = "attackDown",
+	shield = "shieldDown"
+}
+	-- down right
+ANIMATIONS[-135] = {
+	idle = "idleDown",
+	walk = "walkDown",
+	attack = "attackDown",
+	shield = "shieldDown"
+}
+	-- down
+ANIMATIONS[180] = {
+	idle = "idleDown",
+	walk = "walkDown",
+	attack = "attackDown",
+	shield = "shieldDown"
+}
+ANIMATIONS[-180] = {
+	idle = "idleDown",
+	walk = "walkDown",
+	attack = "attackDown",
+	shield = "shieldDown"
+}
+
 function newPlayer(gameManager, playerNo)
     local this = {}
 	
@@ -59,7 +123,7 @@ function newPlayer(gameManager, playerNo)
 		this.assets = getAssetsManager():getPlayerAssets("assets/player"..playerNo..".png")
 	end
 	
-	this.assetsX = "idle"
+	this.assetsX = ANIMATIONS[this.angle].idle
 	this.assetsY = 0
 	this.temporaryAsset = false
 	this.temporaryRemainingFrame = 0
@@ -67,10 +131,10 @@ function newPlayer(gameManager, playerNo)
 	this.assestsLastChange = love.timer.getTime()
 	this.dieAnimationStarted = false
 	
-    this.attackAssetsX = "attackDown"
+    this.attackAssetsX = ANIMATIONS[this.angle].attack
     this.attackAssetsY = -1
     this.attackAnimationProcessing = false
-    this.defenseAssetsX = "shieldDown"
+    this.defenseAssetsX = ANIMATIONS[this.angle].shield
     this.defenseAssetsY = -1
     this.defenseAnimationProcessing = false
 	
@@ -199,15 +263,8 @@ end
 function mt:beginAttackAnimation()
 	self.attackAnimationProcessing = true
 	self.attackAssetsY = -1
-	if self.angle == 90 then
-		self.attackAssetsX = "attackLeft"
-	elseif self.angle == -90 then
-		self.attackAssetsX = "attackRight"
-	elseif self.angle == 180 or math.abs(self.angle) == 135 then
-		self.attackAssetsX = "attackDown"
-	elseif self.angle == 0 or math.abs(self.angle) == 45 then
-		self.attackAssetsX = "attackUp"
-	end
+	self.attackAssetsX = ANIMATIONS[self.angle].attack
+	
 	-- we make sure we change the asset right now
 	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
 end
@@ -215,15 +272,8 @@ end
 function mt:beginDefenseAnimation()
 	self.defenseAnimationProcessing = true
 	self.defenseAssetsY = -1
-	if self.angle == 90 then
-		self.defenseAssetsX = "shieldLeft"
-	elseif self.angle == -90 then
-		self.defenseAssetsX = "shieldRight"
-	elseif self.angle == 180 or math.abs(self.angle) == 135 then
-		self.defenseAssetsX = "shieldDown"
-	elseif self.angle == 0 or math.abs(self.angle) == 45 then
-		self.defenseAssetsX = "shieldUp"
-	end
+	self.defenseAssetsX = ANIMATIONS[self.angle].shield
+
 	-- we make sure we change the asset right now
 	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
 end
@@ -278,61 +328,31 @@ function mt:update(dt)
 			self.x = x
 			self.y = y
 		end
-
 		
 		if (self.dx == -1) and (self.dy == -1) then
 			self.angle = 45
-			if not self.temporaryAsset then
-				self.assetsX = "walkUp"
-			end
 		elseif (self.dx == -1) and (self.dy == 0) then
 			self.angle = 90
-			if not self.temporaryAsset then
-				self.assetsX = "walkLeft"
-			end
 		elseif (self.dx == -1) and (self.dy == 1) then
 			self.angle = 135
-			if not self.temporaryAsset then
-				self.assetsX = "walkDown"
-			end
 		elseif (self.dx == 1) and (self.dy == -1) then		
 			self.angle = -45
-			if not self.temporaryAsset then
-				self.assetsX = "walkUp"
-			end
 		elseif (self.dx == 1) and (self.dy == 0) then
 			self.angle = -90
-			if not self.temporaryAsset then
-				self.assetsX = "walkRight"
-			end
 		elseif (self.dx == 1) and (self.dy == 1) then
 			self.angle = -135
-			if not self.temporaryAsset then
-				self.assetsX = "walkDown"
-			end
 		elseif (self.dx == 0) and (self.dy == -1) then
 			self.angle = 0
-			if not self.temporaryAsset then
-				self.assetsX = "walkUp"
-			end
 		elseif (self.dx == 0) and (self.dy == 1) then
 			self.angle = 180
-			if not self.temporaryAsset then
-				self.assetsX = "walkDown"
-			end
 		end
-
+		if not self.temporaryAsset then
+			self.assetsX = ANIMATIONS[self.angle].walk
+		end
+		
 		if (self.dx == 0) and (self.dy == 0) then
 			if not self.temporaryAsset then
-				if self.angle == 0 or math.abs(self.angle) == 45 then
-					self.assetsX = "idleUp"
-				elseif self.angle == 180 or math.abs(self.angle) == 135 then
-					self.assetsX = "idle"
-				elseif self.angle == 90 then
-					self.assetsX = "idleLeft"
-				elseif self.angle == -90 then
-					self.assetsX = "idleRight"
-				end
+				self.assetsX = ANIMATIONS[self.angle].idle
 			end
 		end
 
