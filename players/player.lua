@@ -1,7 +1,7 @@
 local mt = {}
 mt.__index = mt
 
-SWORD_LENGTH = 75
+SWORD_LENGTH = 50
 local SWORD_AMPLITUDE = 45
 
 local SHIELD_LENGTH = 25
@@ -115,13 +115,13 @@ end
 function mt:setPosition(x, y)
 	self.x = x
 	self.y = y
-	if (world ~= nil) then
+	if ((world ~= nil) and (self.body ~= nil)) then
 		self.body:setPosition(x, y)
 	end
 end
 
 function mt:getPosition()
-	if (world ~= nil) then
+	if ((world ~= nil) and (self.body ~= nil)) then
 		local x, y = self.body:getPosition()
 		self.x = x
 		self.y = y
@@ -249,8 +249,10 @@ function mt:setDirection(dx, dy)
 	if not self:isDead() then
 		self.dx = dx
 		self.dy = dy
-		if (world ~= nil) then
-			-- self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
+		if ((world ~= nil) and (self.body ~= nil)) then
+			if (dx ~= self.dx) and (dy ~= self.dy) then
+				self.body:setLinearVelocity(0, 0)
+			end
 		end
 	end
 end
@@ -268,7 +270,7 @@ function mt:update(dt)
 		if self.isDefendingBool then --or self.isAttackingBool then
 			self:setDirection(0, 0)
 		end
-		if (world ~= nil) then
+		if ((world ~= nil) and (self.body ~= nil)) then
 			-- self.body:setLinearVelocity(self.dx * self.speed, self.dy * self.speed)
 			self.body:applyForce(self.dx * self.speed, self.dy * self.speed)
 			self.body:setAngle(math.rad(0))
@@ -360,6 +362,10 @@ function mt:update(dt)
 			end
 		end
 	else
+		if (self.exploded) and (self.fixture ~= nil) then
+			self.fixture:destroy()
+			self.fixture = nil
+		end
 		-- player is dead
 		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
 			self.assestsLastChange = love.timer.getTime()
@@ -438,11 +444,16 @@ function mt:draw()
 	love.graphics.setColor(255, 255, 255)
 
 	-- Affichage de la bounding box (debug)
-	-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
-	-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
+	if (world and self.fixture) then
+		local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
+		love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
+	end
 	
 	-- Affiche de la bounding box du bouclier
 	-- drawBox(self:getShieldHitBox())
+	
+	-- Affiche de la bounding box de l'épée
+	drawBox(self:getSwordHitBox())
 	
 end
 
@@ -571,7 +582,7 @@ function drawBox(box)
 						-- math.floor(box[3].x).." "..math.floor(box[3].y).." "..
 						-- math.floor(box[4].x).." "..math.floor(box[4].y).." ",
 						-- 100, 100)
-	love.graphics.polygon("fill", box[1].x, box[1].y, 
+	love.graphics.polygon("line", box[1].x, box[1].y, 
 								box[4].x, box[4].y,
 								box[3].x, box[3].y,
 								box[2].x, box[2].y
