@@ -464,16 +464,16 @@ function mt:draw()
 	love.graphics.setColor(255, 255, 255)
 
 	-- Affichage de la bounding box (debug)
-	if (world and self.fixture) then
-		local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
-		love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
-	end
+	-- if (world and self.fixture) then
+		-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.fixture:getBoundingBox()
+		-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
+	-- end
 	
 	-- Affiche de la bounding box du bouclier
 	-- drawBox(self:getShieldHitBox())
 	
 	-- Affiche de la bounding box de l'épée
-	drawBox(self:getSwordHitBox())
+	-- drawBox(self:getSwordHitBox())
 	
 end
 
