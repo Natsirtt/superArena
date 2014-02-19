@@ -493,7 +493,9 @@ function mt:hit(lifePoints, x, y)
     	self.assetsX = "die"
     	self.dx = 0
     	self.dy = 0
-    	self.body:setLinearVelocity(0, 0)
+		if (self.body ~= nil) then
+			self.body:setLinearVelocity(0, 0)
+		end
 	else
 		local dx = x - self.x
 		local dy = y - self.y
@@ -649,7 +651,9 @@ function mt:dash()
 	if (self.dashCooldown <= 0) then
 		local dx = math.cos(math.rad(self.angle + 90)) * 1000
 		local dy = -math.sin(math.rad(self.angle + 90)) * 1000
-		self.body:applyLinearImpulse(dx, dy)
+		if (world ~= nil) and (self.body ~= nil) then
+			self.body:applyLinearImpulse(dx, dy)
+		end
 		self.dashCooldown = DASH_COOLDOWN
 		
 		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
