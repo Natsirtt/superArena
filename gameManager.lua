@@ -34,6 +34,7 @@ function newGameManager(controllers)
 	end
 	
 	self.gameChannel = love.thread.getChannel("gameManager")
+	self.gameUpdateChannel = love.thread.getChannel("gameUpdate")
 	self.serverChannel = love.thread.getChannel("serverChannel")
 	
 	return setmetatable(self, mt)
@@ -52,7 +53,7 @@ function mt:updateNetwork(dt)
 		if (msg == "update") then
 			for _, p in ipairs(self.players) do
 				local s = p:toUpdateMessage()
-				self.serverChannel:push(s)
+				self.self.gameUpdateChannel:push(s)
 			end
 		end
 		tmp = self.gameChannel:pop()
@@ -62,6 +63,14 @@ end
 function mt:update(dt)
 	self:updateNetwork(dt)
 	self.task(self, dt)
+	
+	local res = ""
+	for _, p in ipairs(self.players) do
+		local s = p:toUpdateMessage()
+		res = res..s..";"
+	end
+	self.gameUpdateChannel:clear()
+	self.gameUpdateChannel:push(res)
 end
 
 function arenaPhase(self, dt)

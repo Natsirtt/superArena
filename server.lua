@@ -1,11 +1,13 @@
 local socket = require ("socket")
 
 require "love.math"
+require "love.filesystem"
+love.filesystem.load("LUBE.lua")
 
 local BROADCAST_PORT = 6000
 local SERVER_PORT = 6001
 
-local TOTAL_UPDATE_TIMER = 1.0 -- la durée entre chaque grosse mise à jours
+local TOTAL_UPDATE_TIMER = 0.3 -- la durée entre chaque grosse mise à jours
 
 local udp = socket.udp()
 
@@ -18,28 +20,49 @@ local serverChannel = love.thread.getChannel("serverChannel")
 
 local hostname = socket.dns.gethostname()
 
+function string:split(delimiter)
+  local result = { }
+  local from  = 1
+  local delim_from, delim_to = string.find( self, delimiter, from  )
+  while delim_from do
+    table.insert( result, string.sub( self, from , delim_from-1 ) )
+    from  = delim_to + 1
+    delim_from, delim_to = string.find( self, delimiter, from  )
+  end
+  table.insert( result, string.sub( self, from  ) )
+  return result
+end
+
+
 function client(ip, port)
 	print("Demarrage en mode client")
 	local tcp = socket.tcp()
 	
 	tcp:connect(ip, SERVER_PORT)
-	tcp:settimeout(0.0)
+	tcp:settimeout(0.1)
 	
 	while true do
 		local msg = tcp:receive()
 		if (msg ~= nil) then
 			--print("Reception : "..msg)
-			local channel, param = msg:match("^(%S*) (.*)")
-			love.thread.getChannel(channel):push({isLocal = false, message = param})
+			local res = string.split(msg, ";")
+			for _, m in ipairs(res) do
+				print("Reception2 : "..m)
+				if (m ~= nil) and (m ~= "") then
+					print("Reception3 : "..m)
+					local channel, param = m:match("^(%S*) (.*)")
+					love.thread.getChannel(channel):push({isLocal = false, message = param})
+				end
+			end
 		end
 		
 		local m = serverChannel:pop()
 		while (m ~= nil) do
+			--print("Envoie : "..m)
 			local channel, param = m:match("^(%S*) (.*)")
 			love.thread.getChannel(channel):push({isLocal = true, message = param})
 			
 			tcp:send(m.."\n")
-			--print("Envoie : "..m)
 			m = serverChannel:pop()
 		end
 	end
@@ -97,9 +120,10 @@ function server()
 	
 	while true do
 		local messages = {}
-		-- On récupére tous les messages envoyés par en local
+		-- On récupére tous les messages locaux
 		local m = serverChannel:pop()
 		while (m ~= nil) do
+			--print("reception locale : "..m)
 			messages[#messages + 1] = {isLocal = true, message = m}
 			m = serverChannel:pop()
 		end
@@ -107,7 +131,7 @@ function server()
 		for _, client in ipairs(clients) do
 			local msg = client:receive()
 			while (msg ~= nil) do
-				--print("reception : "..msg)
+				--print("reception distante : "..msg)
 				messages[#messages + 1] = {isLocal = false, message = msg, client = client}
 				msg = client:receive()
 			end
@@ -116,7 +140,7 @@ function server()
 		local i = 1
 		while i <= #messages do
 			local msg = messages[i]
-			-- print("Message : "..msg.message)
+			--print("Envoie : "..msg.message)
 			if (msg.message == "menuManager startGame") then
 				gameStarted = true
 				local s = generateLevel()
@@ -126,7 +150,6 @@ function server()
 			love.thread.getChannel(channel):push({isLocal = msg.isLocal, message = param})
 			
 			for _, client in ipairs(clients) do
-				--print("Envoie : "..msg.message)
 				if (msg.isLocal) or ((not msg.isLocal) and (msg.client ~= client)) then
 					client:send(msg.message.."\n")
 				end
@@ -161,8 +184,13 @@ function server()
 			completeUpdateTimer = completeUpdateTimer - (os.time() - lastUpdate)
 			lastUpdate = os.time()
 			if (completeUpdateTimer <= 0.0) then
-				love.thread.getChannel("gameManager"):push({isLocal = true, message = "update"})
-				completeUpdateTimer = TOTAL_UPDATE_TIMER
+				local msg = love.thread.getChannel("gameUpdate"):demand()
+				if (msg ~= nil) then
+					for _, client in ipairs(clients) do
+						client:send(msg.."\n")
+					end
+					completeUpdateTimer = TOTAL_UPDATE_TIMER
+				end
 			end
 		end
 	end
