@@ -214,9 +214,9 @@ function level_mt:hit(box)
 		end
 	end
 	
-	minX = math.max(math.floor((minX - self.dx - SWORD_LENGTH) / TILE_SIZE), 0)
+	minX = math.max(math.floor((minX - self.dx - SWORD_LENGTH) / TILE_SIZE), 1)
 	maxX = math.ceil((maxX - self.dx + SWORD_LENGTH) / TILE_SIZE)
-	minY = math.max(math.floor((minY - self.dy - SWORD_LENGTH) / TILE_SIZE), 0)
+	minY = math.max(math.floor((minY - self.dy - SWORD_LENGTH) / TILE_SIZE), 1)
 	maxY = math.min(math.ceil((maxY - self.dy + SWORD_LENGTH) / TILE_SIZE), self.height)
 	
 	for j = minY, maxY do
