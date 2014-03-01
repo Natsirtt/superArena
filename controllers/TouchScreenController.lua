@@ -24,12 +24,14 @@ function newTouchScreenController()
 	local attackX = shieldX - buttonRadius * 2
 	local attackY = love.graphics.getHeight() - buttonRadius * 2
 	local shieldY = attackY - buttonRadius
-	local attackIcon = love.graphics.newImage("assets/ui/btn_attack.png")
-	local shieldIcon = love.graphics.newImage("assets/ui/btn_defense.png")
+	local attackIcon = love.graphics.newImage("assets/ui/btn_attack2.png")
+	local shieldIcon = love.graphics.newImage("assets/ui/btn_defense2.png")
+	local attackIconDown = love.graphics.newImage("assets/ui/btn_attack_down2.png")
+	local shieldIconDown = love.graphics.newImage("assets/ui/btn_defense_down2.png")
 	
-	this.attackButton = newTouchScreenButton(buttonRadius, attackX, attackY, attackIcon)
-	this.shieldButton = newTouchScreenButton(buttonRadius, shieldX, shieldY, shieldIcon)
-	this.dashButton = newTouchScreenButton(buttonRadius, attackX, attackY - 2 * buttonRadius - 10, nil)
+	this.attackButton = newTouchScreenButton(buttonRadius, attackX, attackY, attackIcon, attackIconDown)
+	this.shieldButton = newTouchScreenButton(buttonRadius, shieldX, shieldY, shieldIcon, shieldIconDown)
+	this.dashButton = newTouchScreenButton(buttonRadius, attackX, attackY - 2 * buttonRadius - 10, nil, nil)
 	
 	this.joystick = nil
 	
