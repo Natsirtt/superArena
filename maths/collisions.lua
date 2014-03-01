@@ -77,23 +77,14 @@ function rectCollision(quad1, quad2)
 		--end
 
 		--we get the second segment
-		-- local seg2 = getSegment(q2projs)
-		local p1 = pointsTable[1]
-		local p2 = pointsTable[2]
-		local p3 = pointsTable[3]
-		local p4 = pointsTable[4]
-
 		-- we keep the min and max points related to their X composant
-		local pmax = p1
-		local pmin = p1
-	
-		pmax = p2:max(pmax)
-		pmax = p3:max(pmax)
-		pmax = p4:max(pmax)
-
-		pmin = p2:min(pmin)
-		pmin = p3:min(pmin)
-		pmin = p4:min(pmin)
+		local pmax = pointsTable[1]
+		local pmin = pointsTable[1]
+		
+		for _, p in ipairs(pointsTable) do
+			pmax = p:max(pmax)
+			pmin = p:min(pmin)
+		end
 
 		local seg2 = newSegment(pmin, pmax)
 
@@ -112,23 +103,14 @@ function rectCollision(quad1, quad2)
 		}
 
 		--we get the related segment
-		--local seg1 = getSegment(q1projs)
-		local p1 = pointsTable[1]
-		local p2 = pointsTable[2]
-		local p3 = pointsTable[3]
-		local p4 = pointsTable[4]
-
 		-- we keep the min and max points related to their X composant
-		local pmax = p1
-		local pmin = p1
-	
-		pmax = p2:max(pmax)
-		pmax = p3:max(pmax)
-		pmax = p4:max(pmax)
-
-		pmin = p2:min(pmin)
-		pmin = p3:min(pmin)
-		pmin = p4:min(pmin)
+		local pmax = pointsTable[1]
+		local pmin = pointsTable[1]
+		
+		for _, p in ipairs(pointsTable) do
+			pmax = p:max(pmax)
+			pmin = p:min(pmin)
+		end
 
 		local seg1 = newSegment(pmin, pmax)
 
@@ -145,8 +127,8 @@ end
 -- returns two tables, one for each axis, with a point (the origin of the vector) and a vector
 function rectGetAxes(quad)
 	local res = {}
-	local m1 = getMiddlePoint(quad[1], quad[3])
-	local m2 = getMiddlePoint(quad[2], quad[4])
+	local m1 = getMiddlePoint(quad[1], quad[2])
+	local m2 = getMiddlePoint(quad[3], quad[4])
 
 	local origin = getMiddlePoint(m1, m2)
 	res["origin"] = newPoint(origin.x, origin.y)

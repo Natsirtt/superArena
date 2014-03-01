@@ -122,10 +122,7 @@ end
 
 function arena_mt:draw()
 	if (not self.hasDoor) and (self.lvl) then
-		love.graphics.push()
-		love.graphics.translate(self:getWidth() / 2 - self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
 		self.lvl:draw()
-		love.graphics.pop()
 	end
 	
 	-- On dessine l'arene
