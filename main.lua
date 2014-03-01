@@ -29,7 +29,7 @@ function love.load(arg)
 
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
-    love.window.setMode(w, h, {
+    love.window.setMode(w / 3, h / 3, {
         fullscreen = false,
         fsaa = 4,
         borderless = true
