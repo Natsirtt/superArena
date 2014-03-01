@@ -6,7 +6,7 @@ function newTouchScreenController()
     	
 	this.player = nil
 	
-	this.minStickRadius = 50
+	this.minStickRadius = 65
 	this.maxStickRadius = 150
 	this.stickX = this.maxStickRadius
 	this.stickY = love.graphics.getHeight() - this.maxStickRadius
