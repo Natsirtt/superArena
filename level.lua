@@ -197,8 +197,33 @@ function level_mt:hit(box)
 	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
 	local m = getQuadCenter(box)
 	
-	for j, t in ipairs(self.map) do
-		for i, tileID in ipairs(t) do
+	local minX = box[1].x 
+	local maxX = box[1].x
+	local minY = box[1].y
+	local maxY = box[1].y
+	for i = 2, #box do
+		if (box[i].x < minX) then
+			minX = box[i].x
+		elseif (box[i].x > maxX) then
+			maxX = box[i].x
+		end
+		if (box[i].y < minY) then
+			minY = box[i].y
+		elseif (box[i].y > maxY) then
+			maxY = box[i].y
+		end
+	end
+	
+	minX = math.max(math.floor((minX - self.dx - SWORD_LENGTH) / TILE_SIZE), 1)
+	maxX = math.ceil((maxX - self.dx + SWORD_LENGTH) / TILE_SIZE)
+	minY = math.max(math.floor((minY - self.dy - SWORD_LENGTH) / TILE_SIZE), 1)
+	maxY = math.min(math.ceil((maxY - self.dy + SWORD_LENGTH) / TILE_SIZE), self.height)
+	
+	for j = minY, maxY do
+		local t = self.map[j]
+		maxX = math.min(maxX, #t)
+		for i = minX, maxX do
+			local tileID = t[i]
 			if (tileID ~= nil) and (tileID == 42) and (self.boxes[j][i] ~= nil) then
 				local x2 = (i - 1) * TILE_SIZE + self.dx
 				local y2 = (j - 1) * TILE_SIZE + self.dy + TILE_SIZE / 2 + TILE_SIZE
@@ -214,6 +239,7 @@ function level_mt:hit(box)
 			end
 		end
 	end
+	-- Inutile car "breakTile" met automatiquement à jours
 	-- if (regen) then
 		-- self.canvas = getLevelCanvas(self.canvas, self.map, TILE_SIZE * self.width, TILE_SIZE * self.height)
 	-- end

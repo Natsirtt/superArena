@@ -167,11 +167,11 @@ function arena_mt:destroyDoor()
 		self.boxes[self.porte.x][self.porte.y]:destroy()
 		self.boxes[self.porte.x][self.porte.y] = nil
 		
-		self.boxes[self.porte.x + 1][self.porte.y]:destroy()
-		self.boxes[self.porte.x + 1][self.porte.y] = nil
+		-- self.boxes[self.porte.x + 1][self.porte.y]:destroy()
+		-- self.boxes[self.porte.x + 1][self.porte.y] = nil
 		
-		self.boxes[self.porte.x - 1][self.porte.y]:destroy()
-		self.boxes[self.porte.x - 1][self.porte.y] = nil
+		-- self.boxes[self.porte.x - 1][self.porte.y]:destroy()
+		-- self.boxes[self.porte.x - 1][self.porte.y] = nil
 		
 		self.boxes[self.porte.x][self.porte.y - 1]:destroy()
 		self.boxes[self.porte.x][self.porte.y - 1] = nil
