@@ -160,6 +160,13 @@ function mt:playerAttack(player)
 						p:hit(PLAYER_DAMAGE, x, y)
 						local x, y = p:getPosition()
 						self.arena:blood(x, y)
+					else
+						player.shieldSound:play()
+						if (player.body) then
+							local dx = (x - x2) / d
+							local dy = (y - y2) / d
+							player.body:applyLinearImpulse(dx * 10000, dy * 10000)
+						end
 					end
 				end
 			end
@@ -176,6 +183,12 @@ function mt:playerAttack(player)
 						p:hit(PLAYER_DAMAGE, x, y)
 						local x, y = p:getPosition()
 						self.arena:blood(x, y)
+					else
+						if (player.body) then
+							local dx = (x - x2) / d
+							local dy = (y - y2) / d
+							player.body:applyLinearImpulse(dx, dy)
+						end
 					end
 				end
 			end

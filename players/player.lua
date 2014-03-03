@@ -115,6 +115,7 @@ function newPlayer(gameManager, playerNo)
 	this.deathSound = love.audio.newSource("audio/death.wav", "static")
 	this.attackSound = love.audio.newSource("audio/attack2.wav", "static")
 	this.dashSound = love.audio.newSource("audio/dash.wav", "static")
+	this.shieldSound = love.audio.newSource("audio/shield.wav", "static")
 
 	--------------------------------------------------
 	-- Système d'animation
@@ -608,7 +609,6 @@ function mt:canBeHit(player)
 	local x, y = self:getPosition()
 	local x2,y2 = player:getPosition()
 	if (not self:isDefending()) then
-		print("true")
 		return true
 	else
 		local p0 = ANIMATIONS[self.angle].shieldPos[1]:copy()
@@ -617,7 +617,6 @@ function mt:canBeHit(player)
 		p0:add(x, y)
 		p1:add(x, y)
 		local p2 = newPoint(x2, y2)
-		print(p0.x.." "..p0.y.." "..p1.x.." "..p1.y.." "..p2.x.." "..p2.y)
 		return determinant(p0, p1, p0, p2) < 0
 	end
 	
