@@ -648,7 +648,7 @@ function mt:explode()
 end
 
 function mt:dash()
-	if (self.dashCooldown <= 0) then
+	if (not self:isDead() and self.dashCooldown <= 0) then
 		local dx = math.cos(math.rad(self.angle + 90)) * 1000
 		local dy = -math.sin(math.rad(self.angle + 90)) * 1000
 		if (world ~= nil) and (self.body ~= nil) then
