@@ -21,12 +21,15 @@ buttons = {
 
 local buttonsMap = {}
 
+-- we are loading all 4 arrays in the RAM while for each game session the game
+-- runs on only one OS so we could just load the actual useful array.
+-- for now, well, we don't care
 buttonsMap["Windows"] = {}
 buttonsMap["Linux"] = {}
 buttonsMap["OS X"] = {}
 buttonsMap["Android"] = {}
 
--- Initializing all arrays manually to have cross-platforme coherence in inputs
+-- Initializing all arrays manually to have cross-platform coherence in inputs
 buttonsMap["Windows"][buttons.A] = 10
 buttonsMap["Windows"][buttons.B] = 11
 buttonsMap["Windows"][buttons.X] = 12
@@ -93,7 +96,7 @@ function newGamepadController(joystick)
 	this.isGamePad = true
     this.joystick = joystick
 	this.player = nil
-    this.buttons = buttons[love.system.getOS()]
+    this.buttonsMap = buttonsMap[love.system.getOS()]
     
     return setmetatable(this, mt)
 end
@@ -175,18 +178,18 @@ function mt:update(dt)
 			self.player:setDirection(dx, dy)
 		end
 		
-		if (self:isDown(11)) then
+		if (self:isDown(self.buttonsMap[buttons.Y])) then
 			self.player:setDefending(true)
 		else
 			self.player:setDefending(false)
-			if (self:isDown(10)) then
+			if (self:isDown(self.buttonsMap[buttons.X])) then
 				self.player:attack()
 			end
 		end
-		if (self:isDown(12)) then
+		if (self:isDown(self.buttonsMap[buttons.A])) then
 			self.player:dash()
 		end
-		if (self:isDown(13)) then
+		if (self:isDown(self.buttonsMap[buttons.SELECT])) then
 			self.player:hit(self.player.life)
 		end
 	end
