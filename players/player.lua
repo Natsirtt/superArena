@@ -131,7 +131,6 @@ function newPlayer(gameManager, playerNo)
 	this.assestsLastChange = love.timer.getTime()
 	this.dieAnimationStarted = false
 	
-    this.attackAssetsX = ANIMATIONS[this.angle].attack
     this.attackAssetsY = -1
     this.attackAnimationProcessing = false
     this.defenseAssetsX = ANIMATIONS[this.angle].shield
@@ -263,7 +262,6 @@ end
 function mt:beginAttackAnimation()
 	self.attackAnimationProcessing = true
 	self.attackAssetsY = -1
-	self.attackAssetsX = ANIMATIONS[self.angle].attack
 	
 	-- we make sure we change the asset right now
 	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
@@ -427,7 +425,7 @@ function mt:draw()
 	if (not self.exploded) then
 		local tex = nil
 		if self.attackAnimationProcessing then
-			tex = self.assets[self.attackAssetsX][self.attackAssetsY + 1]
+			tex = self.assets[ANIMATIONS[self.angle].attack][self.attackAssetsY + 1]
 		elseif self.defenseAnimationProcessing then
 			tex = self.assets[self.defenseAssetsX][self.defenseAssetsY + 1]
 		else
