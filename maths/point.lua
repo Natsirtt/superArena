@@ -39,6 +39,16 @@ function mt:projectOnLine(p, vector)
                     p.y + bc.y * baPrimeNorme)
 end
 
+function mt:add(x, y)
+	self.x = self.x + x
+	self.y = self.y + y
+end
+
+function determinant(p0, p1, p2, p3)
+	return (p1.x - p0.x) * (p3.y - p2.y)
+        - (p1.y -p0.y) * (p3.x - p2.x)
+end
+
 function mt:debugInfo()
     return "x = " .. self.x .. " - y = " .. self.y
 end

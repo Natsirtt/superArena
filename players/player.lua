@@ -27,63 +27,66 @@ ANIMATIONS[0] = {
 	idle = "idleUp",
 	walk = "walkUp",
 	attack = "attackUp",
-	shield = "shieldUp"
+	shield = "shieldUp",
+	shieldPos = {newPoint(12, -13), newPoint(-12, -13)}
 }
 	-- up left
 ANIMATIONS[45] = {
 	idle = "idleUp",
 	walk = "walkUp",
 	attack = "attackUp",
-	shield = "shieldUp"
+	shield = "shieldUp",
+	shieldPos = {newPoint(12, -13), newPoint(-12, -13)}
 }
 	-- up right
 ANIMATIONS[-45] = {
 	idle = "idleUp",
 	walk = "walkUp",
 	attack = "attackUp",
-	shield = "shieldUp"
+	shield = "shieldUp",
+	shieldPos = {newPoint(12, -13), newPoint(-12, -13)}
 }
 	-- left
 ANIMATIONS[90] = {
 	idle = "idleLeft",
 	walk = "walkLeft",
 	attack = "attackLeft",
-	shield = "shieldLeft"
+	shield = "shieldLeft",
+	shieldPos = {newPoint(-13, -13), newPoint(-13, 13)}
 }
 	-- right
 ANIMATIONS[-90] = {
 	idle = "idleRight",
 	walk = "walkRight",
 	attack = "attackRight",
-	shield = "shieldRight"
+	shield = "shieldRight",
+	shieldPos = {newPoint(13, 13), newPoint(13, -13)}
 }
 	-- down left
 ANIMATIONS[135] = {
 	idle = "idleDown",
 	walk = "walkDown",
 	attack = "attackDown",
-	shield = "shieldDown"
+	shield = "shieldDown",
+	shieldPos = {newPoint(-12, 13), newPoint(12, 13)}
 }
 	-- down right
 ANIMATIONS[-135] = {
 	idle = "idleDown",
 	walk = "walkDown",
 	attack = "attackDown",
-	shield = "shieldDown"
+	shield = "shieldDown",
+	shieldPos = {newPoint(-12, 13), newPoint(12, 13)}
 }
 	-- down
 ANIMATIONS[180] = {
 	idle = "idleDown",
 	walk = "walkDown",
 	attack = "attackDown",
-	shield = "shieldDown"
+	shield = "shieldDown",
+	shieldPos = {newPoint(-12, 13), newPoint(12, 13)}
 }
-ANIMATIONS[-180] = {
-	idle = "idleDown",
-	walk = "walkDown",
-	attack = "attackDown",
-	shield = "shieldDown"
-}
+ANIMATIONS[-180] = ANIMATIONS[180]
 
 function newPlayer(gameManager, playerNo)
     local this = {}
@@ -467,10 +470,14 @@ function mt:draw()
 		-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
 	-- end
 	
-	-- Affiche de la bounding box du bouclier
-	-- drawBox(self:getShieldHitBox())
+	-- Affichage du bouclier
+	-- love.graphics.setColor(255, 0, 0)
+	-- self:drawShield()
+	-- love.graphics.setPointSize(5)
+	-- love.graphics.point(self.x, self.y)
+	-- love.graphics.setColor(255, 255, 255)
 	
-	-- Affiche de la bounding box de l'épée
+	-- Affichage de la bounding box de l'épée
 	-- drawBox(self:getSwordHitBox())
 	
 end
@@ -596,32 +603,25 @@ function mt:getShieldHitBox()
 	}
 end
 
-function drawBox(box)
-	-- love.graphics.print(math.floor(box[1].x).." "..math.floor(box[1].y).." "..
-						-- math.floor(box[2].x).." "..math.floor(box[2].y).." "..
-						-- math.floor(box[3].x).." "..math.floor(box[3].y).." "..
-						-- math.floor(box[4].x).." "..math.floor(box[4].y).." ",
-						-- 100, 100)
-	love.graphics.polygon("line", box[1].x, box[1].y, 
-								box[4].x, box[4].y,
-								box[3].x, box[3].y,
-								box[2].x, box[2].y
-								)
-end
-
-function mt:debugSprites(state)
-	local t = {}
-	if state == "shield" then
-		table.insert(t, self.assets["shieldDown"][1])
-		table.insert(t, self.assets["shieldRight"][1])
-		table.insert(t, self.assets["shieldLeft"][1])
-		table.insert(t, self.assets["shieldUp"][1])
-	else 
-		t = self.assets[state]
+-- Vérifie si 'player' peut faire des dégats à 'self'
+function mt:canBeHit(player)
+	local x, y = self:getPosition()
+	local x2,y2 = player:getPosition()
+	if (not self:isDefending()) then
+		print("true")
+		return true
+	else
+		local p0 = ANIMATIONS[self.angle].shieldPos[1]:copy()
+		local p1 = ANIMATIONS[self.angle].shieldPos[2]:copy()
+		local x, y = self:getPosition()
+		p0:add(x, y)
+		p1:add(x, y)
+		local p2 = newPoint(x2, y2)
+		print(p0.x.." "..p0.y.." "..p1.x.." "..p1.y.." "..p2.x.." "..p2.y)
+		return determinant(p0, p1, p0, p2) < 0
 	end
-	for j, sprite in ipairs(t) do
-		love.graphics.draw(sprite, 175 * (j - 1), 200)
-	end
+	
+	return false
 end
 
 function mt:explode()
@@ -669,4 +669,44 @@ function mt:dash()
 		p:start()
 		self.dashSound:play()
 	end
+end
+
+-------------------------------------------------------
+-- DEBUG
+-------------------------------------------------------
+
+function mt:debugSprites(state)
+	local t = {}
+	if state == "shield" then
+		table.insert(t, self.assets["shieldDown"][1])
+		table.insert(t, self.assets["shieldRight"][1])
+		table.insert(t, self.assets["shieldLeft"][1])
+		table.insert(t, self.assets["shieldUp"][1])
+	else 
+		t = self.assets[state]
+	end
+	for j, sprite in ipairs(t) do
+		love.graphics.draw(sprite, 175 * (j - 1), 200)
+	end
+end
+
+function drawBox(box)
+	-- love.graphics.print(math.floor(box[1].x).." "..math.floor(box[1].y).." "..
+						-- math.floor(box[2].x).." "..math.floor(box[2].y).." "..
+						-- math.floor(box[3].x).." "..math.floor(box[3].y).." "..
+						-- math.floor(box[4].x).." "..math.floor(box[4].y).." ",
+						-- 100, 100)
+	love.graphics.polygon("line", box[1].x, box[1].y, 
+								box[4].x, box[4].y,
+								box[3].x, box[3].y,
+								box[2].x, box[2].y)
+end
+
+function mt:drawShield()
+	local p0 = ANIMATIONS[self.angle].shieldPos[1]:copy()
+	local p1 = ANIMATIONS[self.angle].shieldPos[2]:copy()
+	local x, y = self:getPosition()
+	p0:add(x, y)
+	p1:add(x, y)
+	love.graphics.line(p0.x, p0.y, p1.x, p1.y)
 end
