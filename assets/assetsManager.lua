@@ -137,25 +137,6 @@ end
 function mt:getPlayerAssets(tilesetName)
 	if (self.playerAssets[tilesetName] == nil) then
 		local assets = {}
-		assets["idleDown"] = {}
-		assets["walkDown"] = {}
-		assets["walkRight"] = {}
-		assets["walkLeft"] = {}
-		assets["walkUp"] = {}
-		assets["attackRight"] = {}
-		assets["attackLeft"] = {}
-		assets["attackUp"] = {}
-		assets["attackDown"] = {}
-		assets["shieldDown"] = {}
-		assets["shieldUp"] = {}
-		assets["shieldLeft"] = {}
-		assets["shieldRight"] = {}
-		assets["victory"] = {}
-		assets["die"] = {}
-		assets["idleUp"] = {}
-		assets["idleLeft"] = {}
-		assets["idleRight"] = {}
-		assets["tornado"] = {}
 
 		local tileSet = nil
 		if (tilesetName == "ennemy") then
@@ -163,174 +144,34 @@ function mt:getPlayerAssets(tilesetName)
 		else
 			tileSet = love.graphics.newImage(tilesetName)
 		end
-		local imageData = tileSet:getData()
-		local nid = love.image.newImageData(150, 150)
-		local j = 0
 
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["idleDown"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["walkDown"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["walkRight"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["walkLeft"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["walkUp"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		for i = 1, 2 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["attackRight"], love.graphics.newImage(nid))
-		end
-		table.insert(assets["attackRight"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
-		table.insert(assets["attackRight"], love.graphics.newImage(nid))
-
-		j = j + 1
-
-		for i = 1, 2 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["attackLeft"], love.graphics.newImage(nid))
-		end
-		table.insert(assets["attackLeft"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
-		table.insert(assets["attackLeft"], love.graphics.newImage(nid))
-
-		j = j + 1
-
-		for i = 1, 2 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["attackUp"], love.graphics.newImage(nid))
-		end
-		table.insert(assets["attackUp"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
-		table.insert(assets["attackUp"], love.graphics.newImage(nid))
-
-		j = j + 1
-
-		for i = 1, 2 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["attackDown"], love.graphics.newImage(nid))
-		end
-		table.insert(assets["attackDown"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 150 * 2, 150 * j, 150, 150)
-		table.insert(assets["attackDown"], love.graphics.newImage(nid))
-
-		j = j + 1
+		assets["idleDown"] = newAnimation(tileSet, {0, 1, 2, 3}, 24, true)
+		assets["walkDown"] = newAnimation(tileSet, {5, 6, 7, 8}, 24, true)
+		assets["walkRight"] = newAnimation(tileSet, {10, 11, 12, 13}, 24, true)
+		assets["walkLeft"] = newAnimation(tileSet, {15, 16, 17, 18}, 24, true)
+		assets["walkUp"] = newAnimation(tileSet, {20, 21, 22, 23}, 24, true)
+		assets["attackRight"] = newAnimation(tileSet, {25, 26, 26, 27}, 24, false)
+		assets["attackLeft"] = newAnimation(tileSet, {30, 31, 31, 32}, 24, false)
+		assets["attackUp"] = newAnimation(tileSet, {35, 36, 36, 37}, 24, false)
+		assets["attackDown"] = newAnimation(tileSet, {40, 41, 41, 42}, 24, false)
 
 		-- shield
-
-		nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
-		table.insert(assets["shieldDown"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 150, 150 * j, 150, 150)
-		table.insert(assets["shieldRight"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 300, 150 * j, 150, 150)
-		table.insert(assets["shieldLeft"], love.graphics.newImage(nid))
-		nid:paste(imageData, 0, 0, 450, 150 * j, 150, 150)
-		table.insert(assets["shieldUp"], love.graphics.newImage(nid))
-
-		j = j + 1
+		assets["shieldDown"] = newAnimation(tileSet, {45}, 1, false)
+		assets["shieldRight"] = newAnimation(tileSet, {46}, 1, false)
+		assets["shieldLeft"] = newAnimation(tileSet, {47}, 1, false)
+		assets["shieldUp"] = newAnimation(tileSet, {48}, 1, false)
 
 		-- victory
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * ((i - 1) % 2), 150 * j, 150, 150)
-			table.insert(assets["victory"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
+		assets["victory"] = newAnimation(tileSet, {50, 51}, 8, true)
 
 		--die animation
+		assets["die"] = newAnimation(tileSet, {55, 56, 57, 58, 59, 60, 61, 62, 63, 65}, 10, false)
 
-		for i = 1, 5 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["die"], love.graphics.newImage(nid))
-		end
-		table.insert(assets["die"], love.graphics.newImage(nid))
-
-		j = j + 1
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["die"], love.graphics.newImage(nid))
-			table.insert(assets["die"], love.graphics.newImage(nid))
-		end
-		table.insert(assets["die"], love.graphics.newImage(nid))
-		table.insert(assets["die"], love.graphics.newImage(nid))
-		table.insert(assets["die"], love.graphics.newImage(nid))
-
-		j = j + 1
-
-		nid:paste(imageData, 0, 0, 0, 150 * j, 150, 150)
-		table.insert(assets["die"], love.graphics.newImage(nid))
-
-		j = j + 1
-
-		-- idle right
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["idleRight"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		-- idle left
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["idleLeft"], love.graphics.newImage(nid))
-		end
-
-		j = j + 1
-
-		-- idle up
-
-		for i = 1, 4 do
-			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
-			table.insert(assets["idleUp"], love.graphics.newImage(nid))
-		end
+		assets["idleRight"] = newAnimation(tileSet, {70, 71, 72, 73}, 24, true)
+		assets["idleLeft"] = newAnimation(tileSet, {75, 76, 77, 78}, 24, true)
+		assets["idleUp"] = newAnimation(tileSet, {80, 85, 86, 87}, 24, true)
 		
-		table.insert(assets["tornado"], assets["attackDown"][2])
-		-- table.insert(assets["tornado"], assets["attackDown"][3])
-		
-		-- table.insert(assets["tornado"], assets["attackRight"][3])
-		table.insert(assets["tornado"], assets["attackRight"][2])
-		table.insert(assets["tornado"], assets["attackRight"][1])
-		
-		table.insert(assets["tornado"], assets["attackUp"][1])
-		table.insert(assets["tornado"], assets["attackUp"][2])
-		-- table.insert(assets["tornado"], assets["attackUp"][3])
-		
-		table.insert(assets["tornado"], assets["attackLeft"][1])
-		table.insert(assets["tornado"], assets["attackLeft"][2])
-		-- table.insert(assets["tornado"], assets["attackLeft"][3])
-		
-		table.insert(assets["tornado"], assets["attackDown"][1])
+		assets["tornado"] = newAnimation(tileSet, {41, 26, 25, 35, 36, 30, 31, 40}, 30, false)
 		
 		self.playerAssets[tilesetName] = assets
 	end

@@ -6,20 +6,13 @@ mt.__index = mt
 SWORD_LENGTH = 50
 local SWORD_AMPLITUDE = 45
 
-local SHIELD_LENGTH = 25
-local SHIELD_AMPLITUDE = 50
-
 local MAX_LIFE = 10
 local SPEED_BASE = 1500
 local RADIUS = 20
 local DEFENDING_MAX_TIME = 3
 
-local ANIMATION_RATE = 0.1
-local DIE_ANIMATION_FRAME_NB = 18
-local TORNADO_ANIMATION_FRAME_NB = 12
-
 local DASH_COOLDOWN = 0.6
-local TORNADO_COOLDOWN = 2.0
+local TORNADO_COOLDOWN = 0.5
 
 PLAYER_DAMAGE = 1
 
@@ -61,29 +54,17 @@ function newPlayer(gameManager, playerNo)
 	-- Système d'animation
 	--------------------------------------------------
 	this.assets = nil
-	if (playerNo == -1) then
+	if (playerNo < 0) then
 		this.assets = getAssetsManager():getPlayerAssets("ennemy")
 	else
 		this.assets = getAssetsManager():getPlayerAssets("assets/player"..playerNo..".png")
 	end
 	
-	this.assetsX = ANIMATIONS[this.angle].idle
-	this.assetsY = 0
-	this.temporaryAsset = false
-	this.temporaryRemainingFrame = 0
-	this.assetsMod = 4
-	this.assestsLastChange = love.timer.getTime()
+	this.currentAnimation = this.assets[ANIMATIONS[this.angle].idle]
+	
 	this.dieAnimationStarted = false
-	
-    this.attackAssetsY = -1
     this.attackAnimationProcessing = false
-	
-    this.defenseAssetsX = ANIMATIONS[this.angle].shield
-    this.defenseAssetsY = -1
     this.defenseAnimationProcessing = false
-	
-    this.tornadoAssetsX = "tornado"
-    this.tornadoAssetsY = -1
     this.tornadoAnimationProcessing = false
 	
 	--------------------------------------------------
@@ -204,53 +185,20 @@ end
 
 function mt:beginAttackAnimation()
 	self.attackAnimationProcessing = true
-	self.attackAssetsY = -1
-	
-	-- we make sure we change the asset right now
-	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
+	self.currentAnimation = self.assets[ANIMATIONS[self.angle].attack]
+	self.currentAnimation:play()
 end
 
 function mt:beginDefenseAnimation()
 	self.defenseAnimationProcessing = true
-	self.defenseAssetsY = -1
-	self.defenseAssetsX = ANIMATIONS[self.angle].shield
-
-	-- we make sure we change the asset right now
-	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
+	self.currentAnimation = self.assets[ANIMATIONS[self.angle].shield]
+	self.currentAnimation:play()
 end
 
 function mt:beginTornadoAnimation()
 	self.tornadoAnimationProcessing = true
-	self.tornadoAssetsY = -1
-	self.tornadoAssetsX = "tornado"
-
-	-- we make sure we change the asset right now
-	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
-end
-
-function mt:processAttackAnimation()
-	self.attackAssetsY = self.attackAssetsY + 1
-	-- print("attack assets y = " .. self.attackAssetsY)
-	if self.attackAssetsY >= 4 then
-		self.attackAnimationProcessing = false
-	end
-end
-
-function mt:processDefenseAnimation()
-	self.defenseAssetsY = self.defenseAssetsY + 1
-	-- print("defense assets y = " .. self.defenseAssetsY)
-	if self.defenseAssetsY >= 1 then
-		self.defenseAssetsY = 1
-		self.defenseAnimationProcessing = false
-	end
-end
-
-function mt:processTornadoAnimation()
-	self.tornadoAssetsY = self.tornadoAssetsY + 1
-	if self.tornadoAssetsY >= 8 then
-		self.tornadoAssetsY = 1
-		self.tornadoAnimationProcessing = false
-	end
+	self.currentAnimation = self.assets["tornado"]
+	self.currentAnimation:play()
 end
 
 function mt:setDirection(dx, dy)
@@ -305,15 +253,34 @@ function mt:update(dt)
 		elseif (self.dx == 0) and (self.dy == 1) then
 			self.angle = 180
 		end
-		if not self.temporaryAsset then
-			self.assetsX = ANIMATIONS[self.angle].walk
-		end
 		
-		if (self.dx == 0) and (self.dy == 0) then
-			if not self.temporaryAsset then
-				self.assetsX = ANIMATIONS[self.angle].idle
+		if self.attackAnimationProcessing then
+			if self.currentAnimation:isFinished() then
+				self.attackAnimationProcessing = false
+			end
+		elseif self.defenseAnimationProcessing then
+			if self.currentAnimation:isFinished() then
+				self.defenseAnimationProcessing = false
+			end
+		elseif self.tornadoAnimationProcessing then
+			if self.currentAnimation:isFinished() then
+				self.tornadoAnimationProcessing = false
+			end
+		else
+			if (self.dx == 0) and (self.dy == 0) then
+				if (self.currentAnimation ~= self.assets[ANIMATIONS[self.angle].idle]) then
+					self.currentAnimation = self.assets[ANIMATIONS[self.angle].idle]
+					self.currentAnimation:play()
+				end
+			else
+				if (self.currentAnimation ~= self.assets[ANIMATIONS[self.angle].walk]) then
+					self.currentAnimation = self.assets[ANIMATIONS[self.angle].walk]
+					self.currentAnimation:play()
+				end
 			end
 		end
+		self.currentAnimation:update(dt)
+		
 
 		-- defending checking
 		if self:isDefending() then
@@ -328,38 +295,13 @@ function mt:update(dt)
 				self.canDefend = true
 			end
 		end
-
-		--animation
-		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
-			self.assestsLastChange = love.timer.getTime()
-			if self.attackAnimationProcessing then
-				self:processAttackAnimation()
-			elseif self.defenseAnimationProcessing then
-				self:processDefenseAnimation()
-			elseif self.tornadoAnimationProcessing then
-				self:processTornadoAnimation()
-			else
-				self.assetsY = (self.assetsY + 1) % self.assetsMod
-			end
-		end
 	else
+		-- player is dead
 		if (self.exploded) and (self.fixture ~= nil) then
 			self.fixture:destroy()
 			self.fixture = nil
 		end
-		-- player is dead
-		if love.timer.getTime() - self.assestsLastChange >= ANIMATION_RATE then
-			self.assestsLastChange = love.timer.getTime()
-			self.assetsX = "die"
-			
-			if not self.dieAnimationStarted then
-				self.assetsY = -1
-				self.dieAnimationStarted = true
-			end
-			if self.assetsY < DIE_ANIMATION_FRAME_NB - 1 then
-				self.assetsY = self.assetsY + 1
-			end
-		end
+		self.currentAnimation:update(dt)
 		--self.deathTimer = self.deathTimer + dt
 		--self.deathParticleSystem:update(dt)
 	end
@@ -386,16 +328,7 @@ function mt:draw()
 	end
 	
 	if (not self.exploded) then
-		local tex = nil
-		if self.attackAnimationProcessing then
-			tex = self.assets[ANIMATIONS[self.angle].attack][self.attackAssetsY + 1]
-		elseif self.defenseAnimationProcessing then
-			tex = self.assets[self.defenseAssetsX][self.defenseAssetsY + 1]
-		elseif self.tornadoAnimationProcessing then
-			tex = self.assets["tornado"][self.tornadoAssetsY + 1]
-		else
-			tex = self.assets[self.assetsX][self.assetsY + 1]
-		end
+		local tex = self.currentAnimation:getCurrentFrame()
 		local x, y = self:getPosition()
 		if (tex ~= nil) then
 			love.graphics.push()
@@ -456,8 +389,8 @@ end
 function mt:hit(lifePoints, x, y)
     self.life = self.life - lifePoints
     if self:isDead() then
-    	self.attackAnimationProcessing = false
-    	self.assetsX = "die"
+		self.currentAnimation = self.assets["die"]
+		self.currentAnimation:play()
     	self.dx = 0
     	self.dy = 0
 		if (self.body ~= nil) then
@@ -474,7 +407,7 @@ function mt:hit(lifePoints, x, y)
 	end
 	self:blink({r = 255, g = 20, b = 20})
 	if self:isDead() then
-		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
+		local p = love.graphics.newParticleSystem(self.currentAnimation:getCurrentFrame(), 1000)
 		p:setEmissionRate(100)
 		p:setSpeed(300, 400)
 		p:setPosition(self.x, self.y)
@@ -490,7 +423,7 @@ function mt:hit(lifePoints, x, y)
 		
 		self.deathSound:play()
 	else
-		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
+		local p = love.graphics.newParticleSystem(self.currentAnimation:getCurrentFrame(), 1000)
 		p:setEmissionRate(20)
 		p:setSpeed(300, 400)
 		p:setPosition(self.x, self.y)
@@ -536,32 +469,6 @@ function mt:getSwordHitBox()
 		{x = self.x + dx2 / 2 + dx, y = self.y + dy2 / 2 + dy},
 		{x = self.x - dx2 / 2 + dx, y = self.y - dy2 / 2 + dy},
 		{x = self.x - dx2 / 2,      y = self.y - dy2 / 2}
-	}
-end
-
-function mt:getShieldHitBox()
-	-- la longueur de la hitbox (de l'épée)
-	local length = SHIELD_LENGTH
-	-- l'amplitude de l'épée
-	local amp = SHIELD_AMPLITUDE
-	
-	local dx = math.cos(math.rad(self.angle + 90))
-	local dy = -math.sin(math.rad(self.angle + 90))
-	local l = math.sqrt(dx * dx + dy * dy)
-	dx = (dx / l) * length
-	dy = (dy / l) * length
-	
-	local dx2 = math.cos(math.rad(self.angle + 180))
-	local dy2 = -math.sin(math.rad(self.angle + 180))
-	l = math.sqrt(dx2 * dx2 + dy2 * dy2)
-	dx2 = (dx2 / l) * amp
-	dy2 = (dy2 / l) * amp
-	
-	return {
-		{x = self.x + dx2 / 2 + dx / 2,      y = self.y + dy2 / 2 + dy / 2},
-		{x = self.x + dx2 / 2 + dx,          y = self.y + dy2 / 2 + dy},
-		{x = self.x - dx2 / 2 + dx,          y = self.y - dy2 / 2 + dy},
-		{x = self.x - dx2 / 2 + dx / 2,      y = self.y - dy2 / 2 + dy / 2}
 	}
 end
 
@@ -614,7 +521,7 @@ function mt:dash()
 		end
 		self.dashCooldown = DASH_COOLDOWN
 		
-		local p = love.graphics.newParticleSystem(self.assets[self.assetsX][self.assetsY + 1], 1000)
+		local p = love.graphics.newParticleSystem(self.currentAnimation:getCurrentFrame(), 1000)
 		p:setEmissionRate(20)
 		p:setSpeed(300, 400)
 		p:setPosition(self.x, self.y)
@@ -642,21 +549,6 @@ end
 -------------------------------------------------------
 -- DEBUG
 -------------------------------------------------------
-
-function mt:debugSprites(state)
-	local t = {}
-	if state == "shield" then
-		table.insert(t, self.assets["shieldDown"][1])
-		table.insert(t, self.assets["shieldRight"][1])
-		table.insert(t, self.assets["shieldLeft"][1])
-		table.insert(t, self.assets["shieldUp"][1])
-	else 
-		t = self.assets[state]
-	end
-	for j, sprite in ipairs(t) do
-		love.graphics.draw(sprite, 175 * (j - 1), 200)
-	end
-end
 
 function drawBox(box)
 	-- love.graphics.print(math.floor(box[1].x).." "..math.floor(box[1].y).." "..

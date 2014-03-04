@@ -1,7 +1,9 @@
 love.filesystem.load("maths/point.lua")()
 love.filesystem.load("maths/vector.lua")()
 love.filesystem.load("maths/segment.lua")()
+love.filesystem.load("maths/quad.lua")()
 love.filesystem.load("maths/collisions.lua")()
+love.filesystem.load("animation.lua")()
 love.filesystem.load("controllers/gamepadController.lua")()
 love.filesystem.load("controllers/keyboardController.lua")()
 love.filesystem.load("controllers/TouchScreenController.lua")()
@@ -29,7 +31,7 @@ function love.load(arg)
 
     local _, _, flags = love.window.getMode()
     local w, h = love.window.getDesktopDimensions(flags.display)
-    love.window.setMode(w / 3, h / 3, {
+    love.window.setMode(w, h, {
         fullscreen = false,
         fsaa = 4,
         borderless = true

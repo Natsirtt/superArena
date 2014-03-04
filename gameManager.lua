@@ -154,7 +154,6 @@ function mt:playerAttack(player)
 			local x2, y2 = p:getPosition()
 			local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
 			if (d <= maxDistSqr) then
-				local shield = p:getShieldHitBox()
 				if (rectCollision(sword, p:getQuad())) then
 					if (p:canBeHit(player)) then
 						p:hit(PLAYER_DAMAGE, x, y)
@@ -177,7 +176,6 @@ function mt:playerAttack(player)
 			local x2, y2 = p:getPosition()
 			local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
 			if (d <= maxDistSqr) then
-				local shield = p:getShieldHitBox()
 				if (rectCollision(sword, p:getQuad())) then
 					if (p:canBeHit(player)) then
 						p:hit(PLAYER_DAMAGE, x, y)
