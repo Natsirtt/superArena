@@ -155,6 +155,7 @@ function mt:getPlayerAssets(tilesetName)
 		assets["idleUp"] = {}
 		assets["idleLeft"] = {}
 		assets["idleRight"] = {}
+		assets["tornado"] = {}
 
 		local tileSet = nil
 		if (tilesetName == "ennemy") then
@@ -313,6 +314,23 @@ function mt:getPlayerAssets(tilesetName)
 			nid:paste(imageData, 0, 0, 150 * (i - 1), 150 * j, 150, 150)
 			table.insert(assets["idleUp"], love.graphics.newImage(nid))
 		end
+		
+		table.insert(assets["tornado"], assets["attackDown"][2])
+		-- table.insert(assets["tornado"], assets["attackDown"][3])
+		
+		-- table.insert(assets["tornado"], assets["attackRight"][3])
+		table.insert(assets["tornado"], assets["attackRight"][2])
+		table.insert(assets["tornado"], assets["attackRight"][1])
+		
+		table.insert(assets["tornado"], assets["attackUp"][1])
+		table.insert(assets["tornado"], assets["attackUp"][2])
+		-- table.insert(assets["tornado"], assets["attackUp"][3])
+		
+		table.insert(assets["tornado"], assets["attackLeft"][1])
+		table.insert(assets["tornado"], assets["attackLeft"][2])
+		-- table.insert(assets["tornado"], assets["attackLeft"][3])
+		
+		table.insert(assets["tornado"], assets["attackDown"][1])
 		
 		self.playerAssets[tilesetName] = assets
 	end

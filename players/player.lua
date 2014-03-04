@@ -1,3 +1,5 @@
+love.filesystem.load("players/playerAnimation.lua")()
+
 local mt = {}
 mt.__index = mt
 
@@ -11,82 +13,18 @@ local MAX_LIFE = 10
 local SPEED_BASE = 1500
 local RADIUS = 20
 local DEFENDING_MAX_TIME = 3
+
 local ANIMATION_RATE = 0.1
 local DIE_ANIMATION_FRAME_NB = 18
+local TORNADO_ANIMATION_FRAME_NB = 12
 
 local DASH_COOLDOWN = 0.6
+local TORNADO_COOLDOWN = 2.0
 
 PLAYER_DAMAGE = 1
 
 local BLINK_LIMIT = 0.2
 local BLINK_PER_SECOND = 15.0
-
-local ANIMATIONS = {}
-	-- up
-ANIMATIONS[0] = {
-	idle = "idleUp",
-	walk = "walkUp",
-	attack = "attackUp",
-	shield = "shieldUp",
-	shieldPos = {newPoint(12, -13), newPoint(-12, -13)}
-}
-	-- up left
-ANIMATIONS[45] = {
-	idle = "idleUp",
-	walk = "walkUp",
-	attack = "attackUp",
-	shield = "shieldUp",
-	shieldPos = {newPoint(12, -13), newPoint(-12, -13)}
-}
-	-- up right
-ANIMATIONS[-45] = {
-	idle = "idleUp",
-	walk = "walkUp",
-	attack = "attackUp",
-	shield = "shieldUp",
-	shieldPos = {newPoint(12, -13), newPoint(-12, -13)}
-}
-	-- left
-ANIMATIONS[90] = {
-	idle = "idleLeft",
-	walk = "walkLeft",
-	attack = "attackLeft",
-	shield = "shieldLeft",
-	shieldPos = {newPoint(-13, -13), newPoint(-13, 13)}
-}
-	-- right
-ANIMATIONS[-90] = {
-	idle = "idleRight",
-	walk = "walkRight",
-	attack = "attackRight",
-	shield = "shieldRight",
-	shieldPos = {newPoint(13, 13), newPoint(13, -13)}
-}
-	-- down left
-ANIMATIONS[135] = {
-	idle = "idleDown",
-	walk = "walkDown",
-	attack = "attackDown",
-	shield = "shieldDown",
-	shieldPos = {newPoint(-12, 13), newPoint(12, 13)}
-}
-	-- down right
-ANIMATIONS[-135] = {
-	idle = "idleDown",
-	walk = "walkDown",
-	attack = "attackDown",
-	shield = "shieldDown",
-	shieldPos = {newPoint(-12, 13), newPoint(12, 13)}
-}
-	-- down
-ANIMATIONS[180] = {
-	idle = "idleDown",
-	walk = "walkDown",
-	attack = "attackDown",
-	shield = "shieldDown",
-	shieldPos = {newPoint(-12, 13), newPoint(12, 13)}
-}
-ANIMATIONS[-180] = ANIMATIONS[180]
 
 function newPlayer(gameManager, playerNo)
     local this = {}
@@ -108,6 +46,7 @@ function newPlayer(gameManager, playerNo)
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
 	this.dashCooldown = 0
+	this.tornadoCooldown = 0
 
 	--------------------------------------------------
 	-- Système de sons
@@ -116,6 +55,7 @@ function newPlayer(gameManager, playerNo)
 	this.attackSound = love.audio.newSource("audio/attack2.wav", "static")
 	this.dashSound = love.audio.newSource("audio/dash.wav", "static")
 	this.shieldSound = love.audio.newSource("audio/shield.wav", "static")
+	this.tornadoSound = love.audio.newSource("audio/tornado.wav", "static")
 
 	--------------------------------------------------
 	-- Système d'animation
@@ -137,9 +77,14 @@ function newPlayer(gameManager, playerNo)
 	
     this.attackAssetsY = -1
     this.attackAnimationProcessing = false
+	
     this.defenseAssetsX = ANIMATIONS[this.angle].shield
     this.defenseAssetsY = -1
     this.defenseAnimationProcessing = false
+	
+    this.tornadoAssetsX = "tornado"
+    this.tornadoAssetsY = -1
+    this.tornadoAnimationProcessing = false
 	
 	--------------------------------------------------
 	-- Système de particules / Effets
@@ -216,13 +161,6 @@ function mt:getQuad()
 	}
 end
 
-function mt:oldGetQuad()
-    return {x = self.x - RADIUS,
-            y = self.y - RADIUS,
-            w = RADIUS * 2,
-            h = RADIUS * 2}
-end
-
 function mt:setPositionFromQuad(quad)
 	local pm1 = getMiddlePoint(quad[1], quad[3])
 	local pm2 = getMiddlePoint(quad[2], quad[4])
@@ -250,7 +188,8 @@ function mt:isDefending()
 end
 
 function mt:canAttack()
-	return not self:isDead() and not self:isDefending() and not self.attackAnimationProcessing
+	return not self:isDead() and not self:isDefending() and 
+			not self.attackAnimationProcessing and not self.tornadoAnimationProcessing
 end
 
 function mt:attack()
@@ -280,6 +219,15 @@ function mt:beginDefenseAnimation()
 	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
 end
 
+function mt:beginTornadoAnimation()
+	self.tornadoAnimationProcessing = true
+	self.tornadoAssetsY = -1
+	self.tornadoAssetsX = "tornado"
+
+	-- we make sure we change the asset right now
+	self.assestsLastChange = love.timer.getTime() - ANIMATION_RATE - 1
+end
+
 function mt:processAttackAnimation()
 	self.attackAssetsY = self.attackAssetsY + 1
 	-- print("attack assets y = " .. self.attackAssetsY)
@@ -294,6 +242,14 @@ function mt:processDefenseAnimation()
 	if self.defenseAssetsY >= 1 then
 		self.defenseAssetsY = 1
 		self.defenseAnimationProcessing = false
+	end
+end
+
+function mt:processTornadoAnimation()
+	self.tornadoAssetsY = self.tornadoAssetsY + 1
+	if self.tornadoAssetsY >= 8 then
+		self.tornadoAssetsY = 1
+		self.tornadoAnimationProcessing = false
 	end
 end
 
@@ -316,6 +272,7 @@ end
 function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
 	self.dashCooldown = math.max(self.dashCooldown - dt, 0.0)
+	self.tornadoCooldown = math.max(self.tornadoCooldown - dt, 0)
 	
 	if (not self:isDead()) then
 		-- position checking
@@ -379,6 +336,8 @@ function mt:update(dt)
 				self:processAttackAnimation()
 			elseif self.defenseAnimationProcessing then
 				self:processDefenseAnimation()
+			elseif self.tornadoAnimationProcessing then
+				self:processTornadoAnimation()
 			else
 				self.assetsY = (self.assetsY + 1) % self.assetsMod
 			end
@@ -432,6 +391,8 @@ function mt:draw()
 			tex = self.assets[ANIMATIONS[self.angle].attack][self.attackAssetsY + 1]
 		elseif self.defenseAnimationProcessing then
 			tex = self.assets[self.defenseAssetsX][self.defenseAssetsY + 1]
+		elseif self.tornadoAnimationProcessing then
+			tex = self.assets["tornado"][self.tornadoAssetsY + 1]
 		else
 			tex = self.assets[self.assetsX][self.assetsY + 1]
 		end
@@ -667,6 +628,14 @@ function mt:dash()
 		self.hitParticleSystem = p
 		p:start()
 		self.dashSound:play()
+	end
+end
+
+function mt:tornato()
+	if (self:canAttack() and (self.tornadoCooldown <= 0)) then
+		self.tornadoCooldown = TORNADO_COOLDOWN
+		self:beginTornadoAnimation()
+		self.tornadoSound:play()
 	end
 end
 

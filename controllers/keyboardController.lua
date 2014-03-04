@@ -87,14 +87,13 @@ function mt:update(dt)
 			self.player:setDefending(false)
 			if (love.keyboard.isDown(" ")) then
 				self.player:attack()
+			elseif (love.keyboard.isDown("e")) then
+				self.player:tornato()
 			end
 		end
 		
 		if (love.keyboard.isDown("lalt")) then
 			self.player:dash()
-		end
-		if (love.keyboard.isDown("k")) then
-			self.player:hit(self.player.life)
 		end
 	end
 end
