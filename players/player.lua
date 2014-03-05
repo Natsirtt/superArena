@@ -255,6 +255,12 @@ function mt:update(dt)
 		end
 		
 		if self.attackAnimationProcessing then
+			if (self.currentAnimation ~= self.assets[ANIMATIONS[self.angle].attack]) then
+				self.assets[ANIMATIONS[self.angle].attack]:play()
+				self.assets[ANIMATIONS[self.angle].attack].currentFrame = self.currentAnimation.currentFrame
+				self.assets[ANIMATIONS[self.angle].attack].finish = self.currentAnimation.finish
+				self.currentAnimation = self.assets[ANIMATIONS[self.angle].attack]
+			end
 			if self.currentAnimation:isFinished() then
 				self.attackAnimationProcessing = false
 			end
