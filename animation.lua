@@ -59,6 +59,10 @@ function mt:getCurrentFrame()
 	return self.frames[self.index[math.floor(self.currentFrame)]]
 end
 
+function mt:getCurrentFrameIndex()
+	return self.index[math.floor(self.currentFrame)]
+end
+
 function mt:isFinished()
 	return self.finish
 end

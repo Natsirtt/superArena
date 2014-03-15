@@ -1,4 +1,5 @@
 love.filesystem.load("players/playerAnimation.lua")()
+love.filesystem.load("players/playerHitbox.lua")()
 
 local mt = {}
 mt.__index = mt
@@ -175,9 +176,6 @@ end
 
 function mt:attack()
 	if self:canAttack() then
-		if (self.gameManager ~= nil) then
-			self.gameManager:playerAttack(self)
-		end
 		self.attackSound:play()
 		self:beginAttackAnimation()
 	end
@@ -263,6 +261,10 @@ function mt:update(dt)
 			end
 			if self.currentAnimation:isFinished() then
 				self.attackAnimationProcessing = false
+			else
+				if (self.gameManager) and (not self:isDead()) then
+					self.gameManager:playerAttack(self)
+				end
 			end
 		elseif self.defenseAnimationProcessing then
 			if self.currentAnimation:isFinished() then
@@ -271,6 +273,10 @@ function mt:update(dt)
 		elseif self.tornadoAnimationProcessing then
 			if self.currentAnimation:isFinished() then
 				self.tornadoAnimationProcessing = false
+			else
+				if (self.gameManager) and (not self:isDead()) then
+					self.gameManager:playerAttack(self)
+				end
 			end
 		else
 			if (self.dx == 0) and (self.dy == 0) then
@@ -348,7 +354,12 @@ function mt:draw()
 				-- love.graphics.rotate(math.rad(self.angle / 6))
 			-- end
 			love.graphics.draw(tex, -tex:getWidth() / 2, -tex:getHeight() / 2)
+			
 			love.graphics.pop()
+			-- Affichage de la bounding box de l'épée
+			if self.attackAnimationProcessing then
+				drawBox(self:getSwordHitBox())
+			end			
 		else
 			print("Erreur : Pas de texture a afficher pour le joueur "..self:getNumber())
 		end
@@ -377,10 +388,6 @@ function mt:draw()
 	-- love.graphics.setPointSize(5)
 	-- love.graphics.point(self.x, self.y)
 	-- love.graphics.setColor(255, 255, 255)
-	
-	-- Affichage de la bounding box de l'épée
-	-- drawBox(self:getSwordHitBox())
-	
 end
 
 function mt:isDead()
@@ -454,28 +461,30 @@ end
 
 function mt:getSwordHitBox()
 	-- la longueur de la hitbox (de l'épée)
-	local length = SWORD_LENGTH
+	-- local length = SWORD_LENGTH
 	-- l'amplitude de l'épée
-	local amp = SWORD_AMPLITUDE
+	-- local amp = SWORD_AMPLITUDE
 	
-	local dx = math.cos(math.rad(self.angle + 90))
-	local dy = -math.sin(math.rad(self.angle + 90))
-	local l = math.sqrt(dx * dx + dy * dy)
-	dx = (dx / l) * length
-	dy = (dy / l) * length
+	-- local dx = math.cos(math.rad(self.angle + 90))
+	-- local dy = -math.sin(math.rad(self.angle + 90))
+	-- local l = math.sqrt(dx * dx + dy * dy)
+	-- dx = (dx / l) * length
+	-- dy = (dy / l) * length
 	
-	local dx2 = math.cos(math.rad(self.angle + 180))
-	local dy2 = -math.sin(math.rad(self.angle + 180))
-	l = math.sqrt(dx2 * dx2 + dy2 * dy2)
-	dx2 = (dx2 / l) * amp
-	dy2 = (dy2 / l) * amp
+	-- local dx2 = math.cos(math.rad(self.angle + 180))
+	-- local dy2 = -math.sin(math.rad(self.angle + 180))
+	-- l = math.sqrt(dx2 * dx2 + dy2 * dy2)
+	-- dx2 = (dx2 / l) * amp
+	-- dy2 = (dy2 / l) * amp
 	
-	return {
-		{x = self.x + dx2 / 2,      y = self.y + dy2 / 2},
-		{x = self.x + dx2 / 2 + dx, y = self.y + dy2 / 2 + dy},
-		{x = self.x - dx2 / 2 + dx, y = self.y - dy2 / 2 + dy},
-		{x = self.x - dx2 / 2,      y = self.y - dy2 / 2}
-	}
+	-- return {
+		-- {x = self.x + dx2 / 2,      y = self.y + dy2 / 2},
+		-- {x = self.x + dx2 / 2 + dx, y = self.y + dy2 / 2 + dy},
+		-- {x = self.x - dx2 / 2 + dx, y = self.y - dy2 / 2 + dy},
+		-- {x = self.x - dx2 / 2,      y = self.y - dy2 / 2}
+	-- }
+	local box = getHitbox(self.currentAnimation:getCurrentFrameIndex())
+	return getTranslatedQuad(box, self.x, self.y)
 end
 
 -- Vérifie si 'player' peut faire des dégats à 'self'
