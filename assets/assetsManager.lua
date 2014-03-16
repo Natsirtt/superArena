@@ -145,20 +145,20 @@ function mt:getPlayerAssets(tilesetName)
 			tileSet = love.graphics.newImage(tilesetName)
 		end
 
-		assets["idleDown"] = newAnimation(tileSet, {0, 1, 2, 3}, 24, true)
-		assets["idleRight"] = newAnimation(tileSet, {70, 71, 72, 73}, 24, true)
-		assets["idleLeft"] = newAnimation(tileSet, {75, 76, 77, 78}, 24, true)
-		assets["idleUp"] = newAnimation(tileSet, {80, 85, 86, 87}, 24, true)
+		assets["idleDown"] = newAnimation(tileSet, {0, 1, 2, 3}, 15, true)
+		assets["idleRight"] = newAnimation(tileSet, {70, 71, 72, 73}, 15, true)
+		assets["idleLeft"] = newAnimation(tileSet, {75, 76, 77, 78}, 15, true)
+		assets["idleUp"] = newAnimation(tileSet, {80, 85, 86, 87}, 15, true)
 		
-		assets["walkDown"] = newAnimation(tileSet, {5, 6, 7, 8}, 24, true)
-		assets["walkRight"] = newAnimation(tileSet, {10, 11, 12, 13}, 24, true)
-		assets["walkLeft"] = newAnimation(tileSet, {15, 16, 17, 18}, 24, true)
-		assets["walkUp"] = newAnimation(tileSet, {20, 21, 22, 23}, 24, true)
+		assets["walkDown"] = newAnimation(tileSet, {5, 6, 7, 8}, 15, true)
+		assets["walkRight"] = newAnimation(tileSet, {10, 11, 12, 13}, 15, true)
+		assets["walkLeft"] = newAnimation(tileSet, {15, 16, 17, 18}, 15, true)
+		assets["walkUp"] = newAnimation(tileSet, {20, 21, 22, 23}, 15, true)
 		
-		assets["attackRight"] = newAnimation(tileSet, {25, 26, 26, 27}, 24, false)
-		assets["attackLeft"] = newAnimation(tileSet, {30, 31, 31, 32}, 24, false)
-		assets["attackUp"] = newAnimation(tileSet, {35, 36, 36, 37}, 24, false)
-		assets["attackDown"] = newAnimation(tileSet, {40, 41, 41, 42}, 24, false)
+		assets["attackRight"] = newAnimation(tileSet, {25, 26, 26, 27}, 15, false)
+		assets["attackLeft"] = newAnimation(tileSet, {30, 31, 31, 32}, 15, false)
+		assets["attackUp"] = newAnimation(tileSet, {35, 36, 36, 37}, 15, false)
+		assets["attackDown"] = newAnimation(tileSet, {40, 41, 41, 42}, 15, false)
 
 		-- shield
 		assets["shieldDown"] = newAnimation(tileSet, {45}, 1, false)

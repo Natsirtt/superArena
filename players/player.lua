@@ -357,9 +357,9 @@ function mt:draw()
 			
 			love.graphics.pop()
 			-- Affichage de la bounding box de l'épée
-			if self.attackAnimationProcessing then
-				drawBox(self:getSwordHitBox())
-			end			
+			-- if self.attackAnimationProcessing then
+				-- drawBox(self:getSwordHitBox())
+			-- end			
 		else
 			print("Erreur : Pas de texture a afficher pour le joueur "..self:getNumber())
 		end
