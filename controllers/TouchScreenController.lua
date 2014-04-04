@@ -13,25 +13,49 @@ function newTouchScreenController()
 	this.stickX = this.maxStickRadius
 	this.stickY = love.graphics.getHeight() - this.maxStickRadius
 	
+	this.minStickRadius2 = 50
+	this.maxStickRadius2 = 175
+	this.stickX2 = love.graphics.getWidth() - this.maxStickRadius
+	this.stickY2 = love.graphics.getHeight() - this.maxStickRadius
+	
 	this.movePressed = false
 	this.lastMoveTouchX = this.stickX
 	this.lastMoveTouchY = this.stickY
+	
+	this.movePressed2 = false
+	this.lastMoveTouchX2 = this.stickX2
+	this.lastMoveTouchY2 = this.stickY2
+	
 	this.moveTouchId = -1     -- l'id du touch (valable jusqu'à la fin du touch)
 	this.moveTouchNumber = -1 -- Le numéro du touch si on drag (valable pour une frame)
 	
-	local buttonRadius = 70
-	local shieldX = love.graphics.getWidth() - buttonRadius * 2
-	local attackX = shieldX - buttonRadius * 2
-	local attackY = love.graphics.getHeight() - buttonRadius * 2
-	local shieldY = attackY - buttonRadius
-	local attackIcon = love.graphics.newImage("assets/ui/btn_attack2.png")
-	local shieldIcon = love.graphics.newImage("assets/ui/btn_defense2.png")
-	local attackIconDown = love.graphics.newImage("assets/ui/btn_attack_down2.png")
-	local shieldIconDown = love.graphics.newImage("assets/ui/btn_defense_down2.png")
+	this.moveTouchId2 = -1     -- l'id du touch (valable jusqu'à la fin du touch)
+	this.moveTouchNumber2 = -1 -- Le numéro du touch si on drag (valable pour une frame)
+	
+	local buttonRadius = 60
+	local shieldX = this.stickX2 + math.cos(math.rad(270)) * this.maxStickRadius2
+	local shieldY = this.stickY2 + math.sin(math.rad(270)) * this.maxStickRadius2
+	-- local attackX = this.stickX2 + math.cos(math.rad(225)) * this.maxStickRadius2
+	-- local attackY = this.stickY2 + math.sin(math.rad(225)) * this.maxStickRadius2
+	local attackX = this.stickX2
+	local attackY = this.stickY2
+	-- local dashX = this.stickX2 + math.cos(math.rad(180)) * this.maxStickRadius2
+	-- local dashY = this.stickY2 + math.sin(math.rad(180)) * this.maxStickRadius2
+	local dashX = this.stickX2 + math.cos(math.rad(225)) * this.maxStickRadius2
+	local dashY = this.stickY2 + math.sin(math.rad(225)) * this.maxStickRadius2
+	-- local tornadoX = this.stickX2 + math.cos(math.rad(90)) * this.maxStickRadius2
+	-- local tornadoY = this.stickY2 + math.sin(math.rad(90)) * this.maxStickRadius2
+	local tornadoX = this.stickX2 + math.cos(math.rad(180)) * this.maxStickRadius2
+	local tornadoY = this.stickY2 + math.sin(math.rad(180)) * this.maxStickRadius2
+	local attackIcon = love.graphics.newImage("assets/ui/btn_attack.png")
+	local shieldIcon = love.graphics.newImage("assets/ui/btn_defense.png")
+	local attackIconDown = love.graphics.newImage("assets/ui/btn_attack_down.png")
+	local shieldIconDown = love.graphics.newImage("assets/ui/btn_defense_down.png")
 	
 	this.attackButton = newTouchScreenButton(buttonRadius, attackX, attackY, attackIcon, attackIconDown)
 	this.shieldButton = newTouchScreenButton(buttonRadius, shieldX, shieldY, shieldIcon, shieldIconDown)
-	this.dashButton = newTouchScreenButton(buttonRadius, attackX, attackY - 2 * buttonRadius - 10, nil, nil)
+	this.dashButton = newTouchScreenButton(buttonRadius, dashX, dashY, nil, nil)
+	this.tornadoButton = newTouchScreenButton(buttonRadius, tornadoX, tornadoY, nil, nil)
 	
 	this.joystick = nil
 	
@@ -176,12 +200,70 @@ function mt:updateMoveStick()
 	end
 end
 
+function mt:updateActionStick()
+	if (love.touch) then
+		if (not self.movePressed2) then
+			local count = love.touch.getTouchCount()
+			for i = 1, count do
+				local tid, tx, ty = love.touch.getTouch(i)
+				tx = tx * love.graphics.getWidth()
+				ty = ty * love.graphics.getHeight()
+				local xp = (tx - self.stickX2)
+				local yp = (ty - self.stickY2)
+				local d = math.sqrt((xp * xp) + (yp * yp))
+				self.movePressed2 =  d < self.minStickRadius2
+				if (self.movePressed2) then
+					self.moveTouchId2 = tid
+					return
+				end
+			end
+		else
+			local found = false
+			self.moveTouchNumber2 = -1
+			local count = love.touch.getTouchCount()
+			for i = 1, count do
+				local tid, tx, ty = love.touch.getTouch(i)
+				if (tid == self.moveTouchId2) then
+					found = true	
+					tx = tx * love.graphics.getWidth()
+					ty = ty * love.graphics.getHeight()
+					local xp = (tx - self.stickX2)
+					local yp = (ty - self.stickY2)
+					local d = math.sqrt((xp * xp) + (yp * yp))
+					if (d > self.maxStickRadius) then
+						xp = xp / d
+						yp = yp / d
+						self.lastMoveTouchX2 = self.stickX2 + xp * self.maxStickRadius2
+						self.lastMoveTouchY2 = self.stickY2 + yp * self.maxStickRadius2
+					else
+						self.lastMoveTouchX2 = tx
+						self.lastMoveTouchY2 = ty
+					end
+						
+					if (d > self.minStickRadius) then
+						self.moveTouchNumber2 = i
+					end
+				end
+			end
+			if (not found) then
+				self.moveTouchId2 = -1
+				self.lastMoveTouchX2 = self.stickX2
+				self.lastMoveTouchY2 = self.stickY2
+			end
+			self.movePressed2 = found
+		end
+	end
+end
+
 function mt:update(dt)
 	if (self.player ~= nil) and (self:isConnected()) then
 		self:updateMoveStick()
+		--self:updateActionStick()
+		self.movePressed2 = true
 		self.attackButton:update(dt)
 		self.shieldButton:update(dt)
 		self.dashButton:update(dt)
+		self.tornadoButton:update(dt)
 			
 		local dx, dy = self:getAxes()
 		local oldDX, oldDY = self.player:getDirection()
@@ -189,17 +271,20 @@ function mt:update(dt)
 			self.player:setDirection(dx, dy)
 		end
 		
-		if (self.shieldButton:isDown()) then
+		if (self.movePressed2 and self.shieldButton:isDown()) then
 			self:rumble(1.0)
 			self.player:setDefending(true)
 		else
 			self.player:setDefending(false)
-			if (self.attackButton:isDown()) then
+			if (self.movePressed2 and self.attackButton:isDown()) then
 				self:rumble(1.0)
 				self.player:attack()
-			elseif self.dashButton:isDown() then
+			elseif self.movePressed2 and self.dashButton:isDown() then
 				self:rumble(1.0)
 				self.player:dash()
+			elseif self.movePressed2 and self.tornadoButton:isDown() then
+				self:rumble(1.0)
+				self.player:tornado()
 			else
 				self:rumble(0.0)
 			end
@@ -215,7 +300,8 @@ function mt:draw()
 	self.attackButton:draw()
 	self.shieldButton:draw()
 	self.dashButton:draw()
-	
+	self.tornadoButton:draw()
+	-- stick move
 	if (self.movePressed) then
 		love.graphics.setColor(255, 0, 0)
 	end
@@ -227,6 +313,19 @@ function mt:draw()
 	end
 	love.graphics.circle("line", self.stickX, self.stickY, self.maxStickRadius)
 	love.graphics.setColor(255, 255, 255)
+	
+	-- stick action
+	-- if (self.movePressed2) then
+		-- love.graphics.setColor(255, 0, 0)
+	-- end
+	-- love.graphics.circle("line", self.lastMoveTouchX2, self.lastMoveTouchY2, self.minStickRadius2)
+	-- love.graphics.setColor(255, 255, 255)
+	
+	-- if (self.moveTouchNumber2 ~= -1) then 
+		-- love.graphics.setColor(255, 0, 0)
+	-- end
+	-- love.graphics.circle("line", self.stickX2, self.stickY2, self.maxStickRadius2)
+	-- love.graphics.setColor(255, 255, 255)
 	
 	-- if (self.joystick ~= nil) then
 		-- love.graphics.print("Joystick ", 200, 200)

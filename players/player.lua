@@ -15,7 +15,7 @@ local DEFENDING_MAX_TIME = 3
 local DASH_COOLDOWN = 0.6
 local TORNADO_COOLDOWN = 0.5
 
-PLAYER_DAMAGE = 1
+PLAYER_DAMAGE = 0.3
 
 local BLINK_LIMIT = 0.2
 local BLINK_PER_SECOND = 15.0
@@ -553,7 +553,7 @@ function mt:dash()
 	end
 end
 
-function mt:tornato()
+function mt:tornado()
 	if (self:canAttack() and (self.tornadoCooldown <= 0)) then
 		self.tornadoCooldown = TORNADO_COOLDOWN
 		self:beginTornadoAnimation()

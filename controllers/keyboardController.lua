@@ -88,7 +88,7 @@ function mt:update(dt)
 			if (love.keyboard.isDown(" ")) then
 				self.player:attack()
 			elseif (love.keyboard.isDown("e")) then
-				self.player:tornato()
+				self.player:tornado()
 			end
 		end
 		
