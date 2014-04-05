@@ -16,7 +16,7 @@ function newGameManager(controllers)
 	
 	self.arena = nil
 	
-	self.globalTimer = 60 -- En secondes (à modifier)
+	self.globalTimer = 90 -- En secondes (à modifier)
 	self.camera = nil
 	self.cameraPosX = 0
 	self.cameraPosY = 0
@@ -65,8 +65,12 @@ function newGameManager(controllers)
 end
 
 function mt:update(dt)
-	if (not self.finish) then
+	if (not self.finish) and (self.arena.hasDoor) then
 		self.globalTimer = math.max(0, self.globalTimer - dt)
+		
+		if (self.globalTimer <= 0) then
+			self.finish = true
+		end
 	end
 
 	self.camera:update(dt)
@@ -156,7 +160,9 @@ function mt:draw()
 	love.graphics.setColor(255, 0, 0)
 	
 	-- On affiche le timer
-	--love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
+	if (self.arena.hasDoor) then
+		love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
+	end
 end
 
 function mt:getAlivePlayers()
@@ -254,7 +260,15 @@ end
 
 function mt:getVictoryString()
 	local alives = self:getAlivePlayers()
-	self.finish = (#alives == 0) or (#alives == 1) and not self.isCoop
+	if (self.globalTimer <= 0) then
+		local n = 1
+		local s = "Bravo vous êtes des guerriers honorables !\n"
+		for _, player in ipairs(self.players) do
+			s = s.."joueur "..player.playerNo.." : 0 points\n"
+			n = n + 1
+		end
+		return s, n
+	end
 	if (#alives == 1) then
 		return "Le joueur "..alives[1].playerNo.." remporte la victoire\n", 1
 	end

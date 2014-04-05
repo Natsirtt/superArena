@@ -58,7 +58,7 @@ function newArena(gameManager)
 	arena.canvas["up"] = nil
 	
 	arena.publicTimer = 0
-	arena.doorLife = 04
+	arena.doorLife = 100
 	arena.hasDoor = true
 	arena.boxes = {}
 	
@@ -103,7 +103,12 @@ function newArena(gameManager)
 	end
 	
 	arena.lvl = newLevel(arena.gameManager)
-
+	
+	--------------------------------------------------
+	-- Système de sons
+	--------------------------------------------------
+	arena.doorSound = love.audio.newSource("audio/destroyDoor.wav", "static")
+	
 	return setmetatable(arena, arena_mt)
 end
 
@@ -180,6 +185,9 @@ function arena_mt:destroyDoor()
 		self.boxes[self.porte.x][self.porte.y - 2]:destroy()
 		self.boxes[self.porte.x][self.porte.y - 2] = nil
 		self.hasDoor = false
+		self.doorSound:play()
+		self.gameManager.camera:shake()
+		
 		if (self.doorListener) then
 			self.doorListener()
 		end
@@ -213,20 +221,22 @@ function arena_mt:hitDoor(box)
 		if (rectCollision(box, dbox)) then
 			self.doorLife = math.max(0, self.doorLife - 1)
 			self:blink({r = 255, g = 20, b = 20})
-			local m = getQuadCenter(dbox)
-			local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
-			p:setEmissionRate(20)
-			p:setSpeed(520, 400)
-			p:setPosition(m.x, m.y)
-			p:setEmitterLifetime(0.3)
-			p:setParticleLifetime(0.3)
-			p:setDirection(0)
-			p:setSpread(368)
-			p:setRadialAcceleration(-5200)
-			p:setTangentialAcceleration(1000)
-			p:stop()
-			self.hitParticleSystem = p
-			p:start()
+			if (self.hitParticleSystem == nil) or ((self.hitParticleSystem ~= nil) and not self.hitParticleSystem:isActive()) then
+				local m = getQuadCenter(dbox)
+				local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
+				p:setEmissionRate(20)
+				p:setSpeed(520, 400)
+				p:setPosition(m.x, m.y)
+				p:setEmitterLifetime(0.3)
+				p:setParticleLifetime(0.3)
+				p:setDirection(0)
+				p:setSpread(368)
+				p:setRadialAcceleration(-5200)
+				p:setTangentialAcceleration(1000)
+				p:stop()
+				self.hitParticleSystem = p
+				p:start()
+			end
 			
 			if (self.doorLife == 0) then
 				self:destroyDoor()
