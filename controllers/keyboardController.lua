@@ -10,6 +10,10 @@ function newKeyboardController()
     return setmetatable(this, mt)
 end
 
+function mt:getStartButton()
+	return "return"
+end
+
 function mt:getID()
     return -1
 end

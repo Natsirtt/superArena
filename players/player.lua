@@ -20,6 +20,9 @@ PLAYER_DAMAGE = 0.3
 local BLINK_LIMIT = 0.2
 local BLINK_PER_SECOND = 15.0
 
+local KILL_POINTS = 100
+local BOX_POINTS = 5
+
 function newPlayer(gameManager, playerNo)
     local this = {}
 	
@@ -37,10 +40,17 @@ function newPlayer(gameManager, playerNo)
     this.isDefendingBool = false
 	this.canDefend = true
     this.isAttackingBool = false
+	this.hasBeenHit = false
+	this.isRealPlayer = playerNo >= 0
     this.defendingTimeLeft = DEFENDING_MAX_TIME
     this.speed = SPEED_BASE
 	this.dashCooldown = 0
 	this.tornadoCooldown = 0
+	this.dyingListener = nil
+	
+	this.iaKilled = 0
+	this.boxDestroyed = 0
+	this.extraPoints = 0
 
 	--------------------------------------------------
 	-- Système de sons
@@ -399,9 +409,14 @@ function mt:getLife()
 end
 
 -- (x, y) La position de l'assaillant
-function mt:hit(lifePoints, x, y)
-    self.life = self.life - lifePoints
-    if self:isDead() then
+function mt:hit(hitter, lifePoints, x, y)
+	local oldDead = self:isDead()
+	self.hasBeenHit = true
+    self.life = math.max(0, self.life - lifePoints)
+    if not oldDead and self:isDead() then
+		if (self.dyingListener) then
+			self.dyingListener(hitter, self)
+		end
 		self.currentAnimation = self.assets["die"]
 		self.currentAnimation:play()
     	self.dx = 0
@@ -453,36 +468,10 @@ function mt:hit(lifePoints, x, y)
 end
 
 function mt:heal(lifePoints)
-    self.life = self.life + lifePoints
-    if self.life > MAX_LIFE then
-        self.life = MAX_LIFE
-    end
+    self.life = math.min(self.life + lifePoints, MAX_LIFE)
 end
 
 function mt:getSwordHitBox()
-	-- la longueur de la hitbox (de l'épée)
-	-- local length = SWORD_LENGTH
-	-- l'amplitude de l'épée
-	-- local amp = SWORD_AMPLITUDE
-	
-	-- local dx = math.cos(math.rad(self.angle + 90))
-	-- local dy = -math.sin(math.rad(self.angle + 90))
-	-- local l = math.sqrt(dx * dx + dy * dy)
-	-- dx = (dx / l) * length
-	-- dy = (dy / l) * length
-	
-	-- local dx2 = math.cos(math.rad(self.angle + 180))
-	-- local dy2 = -math.sin(math.rad(self.angle + 180))
-	-- l = math.sqrt(dx2 * dx2 + dy2 * dy2)
-	-- dx2 = (dx2 / l) * amp
-	-- dy2 = (dy2 / l) * amp
-	
-	-- return {
-		-- {x = self.x + dx2 / 2,      y = self.y + dy2 / 2},
-		-- {x = self.x + dx2 / 2 + dx, y = self.y + dy2 / 2 + dy},
-		-- {x = self.x - dx2 / 2 + dx, y = self.y - dy2 / 2 + dy},
-		-- {x = self.x - dx2 / 2,      y = self.y - dy2 / 2}
-	-- }
 	local box = getHitbox(self.currentAnimation:getCurrentFrameIndex())
 	return getTranslatedQuad(box, self.x, self.y)
 end
@@ -559,6 +548,26 @@ function mt:tornado()
 		self:beginTornadoAnimation()
 		self.tornadoSound:play()
 	end
+end
+
+function mt:setDyingListener(func)
+	self.dyingListener = func
+end
+
+function mt:incrementKillScore()
+	self.iaKilled = self.iaKilled + 1
+end
+
+function mt:incrementBoxScore()
+	self.boxDestroyed = self.boxDestroyed + 1
+end
+
+function mt:addExtraPoints(points)
+	self.extraPoints = self.extraPoints + points
+end
+
+function mt:getScore()
+	return self.iaKilled * KILL_POINTS + self.boxDestroyed * BOX_POINTS + self.extraPoints
 end
 
 -------------------------------------------------------

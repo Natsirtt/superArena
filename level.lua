@@ -196,7 +196,7 @@ function level_mt:breakTile(i, j)
 	love.graphics.setColor(r, g, b, a)
 end
 
-function level_mt:hit(box)
+function level_mt:hit(hitter, box)
 	local regen = false
 	
 	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
@@ -234,6 +234,7 @@ function level_mt:hit(box)
 				if (rectCollision(hitbox, box)) then
 					regen = true
 					self:breakTile(i, j)
+					hitter:incrementBoxScore()
 					self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 				end
 			end

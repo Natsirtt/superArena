@@ -8,22 +8,25 @@ local music = love.audio.newSource("audio/the-fight.mp3")
 
 function newGameManager(controllers)
 	local self = {}
+	
+	self.rebootListener = nil
 
 	self.players = {}
 	self.iaPlayers = {}
 	
 	self.arena = nil
-
-	self.task = arenaPhase
-	self.drawTask = arenaPhaseDraw
-
-	self.phaseInitialized = false
 	
 	self.globalTimer = 60 -- En secondes (à modifier)
 	self.camera = nil
 	self.cameraPosX = 0
 	self.cameraPosY = 0
 	
+	self.isCoop = false
+	self.finish = false
+	
+	if (world ~= nil) then
+		world:destroy()
+	end
 	world = love.physics.newWorld(0, 0, true)
 	self.cameraPlayers = {}
 	
@@ -32,62 +35,70 @@ function newGameManager(controllers)
 		self.players[#self.players + 1] = p
 		c:bind(p)
 	end
+	
+	love.graphics.setNewFont(24)
+	self.arena = newArena(self)
+	self.arena:setDoorListener(
+		function()
+			self.isCoop = true
+			for _, player in ipairs(self.players) do
+				self.isCoop = self.isCoop and not player.hasBeenHit
+			end
+		end
+	)
+	for _, player in ipairs(self.players) do
+		player:setDyingListener(
+			function(killer, killed)
+				killer:heal(2)
+				local alives = self:getAlivePlayers()
+				self.finish = (#alives == 0) or (#alives == 1) and not self.isCoop
+			end
+		)
+	end
+
+	self.camera = newCamera()
+	music:play() -- one play for now, no loop
+	--ui debug
+	math.randomseed(os.time())
 		
 	return setmetatable(self, mt)
 end
 
-function mt:draw()
-	if self.drawTask ~= nil then
-		self.drawTask(self)
-	end
-end
-
 function mt:update(dt)
-	self.task(self, dt)
-end
-
-function arenaPhase(self, dt)
-	self.globalTimer = math.max(0, self.globalTimer - dt)
-	self.drawTask = arenaPhaseDraw
-
-	if not self.phaseInitialized then
-		love.graphics.setNewFont(24)
-		self.arena = newArena(self)
-		self.camera = newCamera()
-		self.phaseInitialized = true
-		music:play() -- one play for now, no loop
-		--ui debug
-		math.randomseed(os.time())
-		----------
+	if (not self.finish) then
+		self.globalTimer = math.max(0, self.globalTimer - dt)
 	end
 
 	self.camera:update(dt)
 	self.arena:update(dt)
 	
-	getControllersManager():updateAll(dt)
-
+	if (not self.finish) then
+		getControllersManager():updateAll(dt)
+	end
+	-- On met les joueurs à jour
 	for _, player in ipairs(self.players) do
-		local lastQuad = player:getQuad()
-		--ui debug
-		--if math.random(0, 100) > 99 then
-		--	player:hit(1)
-		--end
-		----------
 		player:update(dt)
-    end
-	-- On met les ordis à jour
+	end
+	-- On met les IA à jour
 	for _, player in ipairs(self.iaPlayers) do
 		player:update(dt)
-    end
-	
+	end
+	-- On met à jour la physique
 	world:update(dt)
+	
+	if (self.finish) then
+		local binded = getControllersManager().bindedControllers
+		for _, c in ipairs(binded) do
+			if ((c.isGamePad) or (c.isKeyboard)) and c:isDown(c:getStartButton()) then
+				if (self.rebootListener) then
+					self.rebootListener()
+				end
+			end
+		end
+	end
 end
 
-function arenaPhaseDraw(self)
-	if not self.phaseInitialized then
-		return
-	end
-	
+function mt:draw()
 	love.graphics.push()
 
 	-- keeping our own table of players to be focused by the camera
@@ -102,7 +113,9 @@ function arenaPhaseDraw(self)
 	self.cameraPosY = love.window.getHeight() / 2 - y
 	
 	self.camera:draw()
+	-- On dessine l'arene
 	self.arena:draw()
+	
 	-- self.arena:drawDebug()
 	-- getAssetsManager():drawAsset(24, 200, 200)
 	-- getAssetsManager():debugAssets()
@@ -115,21 +128,34 @@ function arenaPhaseDraw(self)
 	for _, player in ipairs(self.iaPlayers) do
 		player:draw()
     end
-	
+	-- On dessine la partie de l'arene qui doit etre dessiné après le joueur
 	self.arena:postPlayerDraw()
 	
 	love.graphics.pop()
-	
+	-- On dessine les controllers si besoin
 	getControllersManager():drawAll()
-
 
 	-- UI
 	for _, player in ipairs(self.players) do
 		drawUI(player)
 	end
 	
+	if (self.finish) then
+		local font = love.graphics.getFont()
+		local victoryString, lineNb = self:getVictoryString()
+		local w = font:getWidth(victoryString)
+		local h = font:getHeight(victoryString)
+		victoryString = victoryString.."Start/Démarrer pour recommencer"
+		lineNb = lineNb + 1
+		love.graphics.setColor(0, 0, 0)
+		love.graphics.rectangle("fill", love.graphics.getWidth() / 2 - (w + 20) / 2, love.graphics.getHeight() / 2 - (h * lineNb + 20) / 2, w + 20, h * lineNb + 20)
+		love.graphics.setColor(255, 255, 255)
+		love.graphics.printf(victoryString, love.graphics.getWidth() / 2 - w / 2, love.graphics.getHeight() / 2 - h * lineNb / 2, w, "center")
+	end
+	
 	love.graphics.setColor(255, 0, 0)
 	
+	-- On affiche le timer
 	--love.graphics.print(string.format("%d", self.globalTimer).."s", love.window.getWidth() / 2, 10)
 end
 
@@ -149,22 +175,24 @@ function mt:playerAttack(player)
 	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
 	local x, y = player:getPosition()
 	
-	for _, p in ipairs(self:getAlivePlayers()) do
-		if (p ~= player) then
-			local x2, y2 = p:getPosition()
-			local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
-			if (d <= maxDistSqr) then
-				if (rectCollision(sword, p:getQuad())) then
-					if (p:canBeHit(player)) then
-						p:hit(PLAYER_DAMAGE, x, y)
-						local x, y = p:getPosition()
-						self.arena:blood(x, y)
-					else
-						player.shieldSound:play()
-						if (player.body) then
-							local dx = (x - x2) / d
-							local dy = (y - y2) / d
-							player.body:applyLinearImpulse(dx * 10000, dy * 10000)
+	if (not self.isCoop) or (self.isCoop and not player.isRealPlayer) then
+		for _, p in ipairs(self:getAlivePlayers()) do
+			if (p ~= player) then
+				local x2, y2 = p:getPosition()
+				local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
+				if (d <= maxDistSqr) then
+					if (rectCollision(sword, p:getQuad())) then
+						if (p:canBeHit(player)) then
+							p:hit(player, PLAYER_DAMAGE, x, y)
+							local x, y = p:getPosition()
+							self.arena:blood(x, y)
+						else
+							player.shieldSound:play()
+							if (player.body) then
+								local dx = (x - x2) / d
+								local dy = (y - y2) / d
+								player.body:applyLinearImpulse(dx * 10000, dy * 10000)
+							end
 						end
 					end
 				end
@@ -178,7 +206,7 @@ function mt:playerAttack(player)
 			if (d <= maxDistSqr) then
 				if (rectCollision(sword, p:getQuad())) then
 					if (p:canBeHit(player)) then
-						p:hit(PLAYER_DAMAGE, x, y)
+						p:hit(player, PLAYER_DAMAGE, x, y)
 						local x, y = p:getPosition()
 						self.arena:blood(x, y)
 					else
@@ -192,11 +220,11 @@ function mt:playerAttack(player)
 			end
 		end
 	end
-	self.arena:hit(sword)
+	self.arena:hit(player, sword)
 end
 
 
-function mt:getNearestPlayer(x, y) 
+function mt:getNearestPlayer(x, y)
 	local nearest = nil
 	local distance = nil
 	
@@ -215,8 +243,43 @@ end
 
 function mt:addIAPlayer(player)
 	self.iaPlayers[#self.iaPlayers + 1] = player
+	local self = self
+	player:setDyingListener(
+		function(killer, killed)
+			killer:incrementKillScore()
+			killer:heal(2)
+		end
+	)
 end
 
+function mt:getVictoryString()
+	local alives = self:getAlivePlayers()
+	self.finish = (#alives == 0) or (#alives == 1) and not self.isCoop
+	if (#alives == 1) then
+		return "Le joueur "..alives[1].playerNo.." remporte la victoire\n", 1
+	end
+	if (#alives == 0) then
+		local n = 1
+		local s = "Aucun joueur ne remporte la victoire\n"
+		for i, player in ipairs(self.players) do
+			s = s.."joueur "..i.." : "..player:getScore().." points\n"
+			n = n + 1
+		end
+		return s, n
+	end
+	if (#alives ~= 0) and self.isCoop then
+		return "Bravo !\n", 1
+	end
+	return "", 0
+end
+
+function mt:setRebootListener(func)
+	self.rebootListener = func
+end
+
+----------------------------------------------
+-- DEBUG
+----------------------------------------------
 function mt:debugInfo()
 	local res = "players = {"
 	for i, _ in ipairs(self.players) do
