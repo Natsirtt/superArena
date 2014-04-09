@@ -94,13 +94,12 @@ function mt:update(dt)
 			self.player:setDefending(false)
 			if (self:isDown(10)) then
 				self.player:attack()
+			elseif (self:isDown(13)) then
+				self.player:tornado()
 			end
 		end
 		if (self:isDown(12)) then
 			self.player:dash()
-		end
-		if (self:isDown(13)) then
-			self.player:hit(self.player.life)
 		end
 	end
 end

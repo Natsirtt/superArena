@@ -33,6 +33,20 @@ function mt:getFirstFreeConnectionUi()
 	return nil
 end
 
+function mt:startNewGame()
+	getControllersManager().bindedControllers = {}
+	local conts = getControllersManager().bindedControllers
+	for _, c in ipairs(self.controllers) do
+		conts[#conts + 1] = c
+	end
+	self.gameManager = newGameManager(self.controllers)
+	self.gameManager:setRebootListener(
+		function()
+			self:startNewGame()
+		end
+	)
+end
+
 function mt:update(dt)
 	if (self.gameManager == nil) then
 		if (#self.controllers < 4) then
@@ -50,7 +64,7 @@ function mt:update(dt)
 		for _, ui in ipairs(self.playerConnection) do
 			ui:update(dt)
 			if (ui:ready() and (self.gameManager == nil)) then
-				self.gameManager = newGameManager(self.controllers)
+				self:startNewGame()
 			end
 		end
 	else

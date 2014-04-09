@@ -58,7 +58,7 @@ function newArena(gameManager)
 	arena.canvas["up"] = nil
 	
 	arena.publicTimer = 0
-	arena.doorLife = 04
+	arena.doorLife = 100
 	arena.hasDoor = true
 	arena.boxes = {}
 	
@@ -66,6 +66,8 @@ function newArena(gameManager)
 	arena.blinkColor = {r = 255, g = 0, b = 255}	
 	arena.hitTimer = 0
 	arena.hitParticleSystem = nil
+	
+	arena.doorListener = nil
 	
 	for i, t in ipairs(ARENA_MAP) do
 		for j, tile in ipairs(t) do
@@ -101,7 +103,12 @@ function newArena(gameManager)
 	end
 	
 	arena.lvl = newLevel(arena.gameManager)
-
+	
+	--------------------------------------------------
+	-- Système de sons
+	--------------------------------------------------
+	arena.doorSound = love.audio.newSource("audio/destroyDoor.wav", "static")
+	
 	return setmetatable(arena, arena_mt)
 end
 
@@ -120,12 +127,10 @@ function arena_mt:update(dt)
 	end
 end
 
+-- Dessine la partie inférieur de l'arene (sous le joueur)
 function arena_mt:draw()
 	if (not self.hasDoor) and (self.lvl) then
-		love.graphics.push()
-		love.graphics.translate(self:getWidth() / 2 - self.lvl:getWidth() / 2, -self.lvl:getHeight() + TILE_SIZE)
 		self.lvl:draw()
-		love.graphics.pop()
 	end
 	
 	-- On dessine l'arene
@@ -153,6 +158,7 @@ function arena_mt:draw()
 	--drawBox(self:getDoorHitBox())
 end
 
+-- Dessine la partie supérieure de l'arene (au dessus du joueur)
 function arena_mt:postPlayerDraw()
 	drawAsset(arche, (self.porte.x - 1) * TILE_SIZE + TILE_SIZE / 2, (self.porte.y - 2) * TILE_SIZE + TILE_SIZE / 2)
 	if (self.hitParticleSystem ~= nil) then
@@ -179,6 +185,12 @@ function arena_mt:destroyDoor()
 		self.boxes[self.porte.x][self.porte.y - 2]:destroy()
 		self.boxes[self.porte.x][self.porte.y - 2] = nil
 		self.hasDoor = false
+		self.doorSound:play()
+		self.gameManager.camera:shake()
+		
+		if (self.doorListener) then
+			self.doorListener()
+		end
 	end
 end
 
@@ -194,11 +206,11 @@ function arena_mt:getDoorHitBox()
 end
 
 -- box == la hitbox de l'épée qui tape
-function arena_mt:hit(box)
+function arena_mt:hit(hitter, box)
 	if (self.hasDoor) then
 		self:hitDoor(box)
 	elseif (self.lvl) then
-		self.lvl:hit(box)
+		self.lvl:hit(hitter, box)
 	end
 end
 
@@ -209,20 +221,22 @@ function arena_mt:hitDoor(box)
 		if (rectCollision(box, dbox)) then
 			self.doorLife = math.max(0, self.doorLife - 1)
 			self:blink({r = 255, g = 20, b = 20})
-			local m = getQuadCenter(dbox)
-			local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
-			p:setEmissionRate(20)
-			p:setSpeed(520, 400)
-			p:setPosition(m.x, m.y)
-			p:setEmitterLifetime(0.3)
-			p:setParticleLifetime(0.3)
-			p:setDirection(0)
-			p:setSpread(368)
-			p:setRadialAcceleration(-5200)
-			p:setTangentialAcceleration(1000)
-			p:stop()
-			self.hitParticleSystem = p
-			p:start()
+			if (self.hitParticleSystem == nil) or ((self.hitParticleSystem ~= nil) and not self.hitParticleSystem:isActive()) then
+				local m = getQuadCenter(dbox)
+				local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
+				p:setEmissionRate(20)
+				p:setSpeed(520, 400)
+				p:setPosition(m.x, m.y)
+				p:setEmitterLifetime(0.3)
+				p:setParticleLifetime(0.3)
+				p:setDirection(0)
+				p:setSpread(368)
+				p:setRadialAcceleration(-5200)
+				p:setTangentialAcceleration(1000)
+				p:stop()
+				self.hitParticleSystem = p
+				p:start()
+			end
 			
 			if (self.doorLife == 0) then
 				self:destroyDoor()
@@ -250,6 +264,7 @@ end
 -- Renvoie un nouveau canvas 
 -- @param oldCanvas, si différent de nil, utilise l'ancien canvas
 function getPublicDownCanvas(oldCanvas, tiles)
+	love.graphics.setColor(255, 255, 255)
 	local canvas = oldCanvas
 	if (canvas == nil) then
 		canvas = love.graphics.newCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
@@ -274,6 +289,7 @@ end
 -- Renvoie un nouveau canvas 
 -- @param oldCanvas, si différent de nil, utilise l'ancien canvas
 function getPublicUpCanvas(oldCanvas, tiles)
+	love.graphics.setColor(255, 255, 255)
 	local canvas = oldCanvas
 	if (canvas == nil) then
 		canvas = love.graphics.newCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
@@ -310,4 +326,8 @@ function arena_mt:blood(x, y)
 		love.graphics.setCanvas()
 	end
 	self.lvl:blood(x, y)
+end
+
+function arena_mt:setDoorListener(func)
+	self.doorListener = func
 end

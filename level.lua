@@ -77,7 +77,6 @@ function newLevel(gameManager)
 														TILE_SIZE / 2, TILE_SIZE / 2,
 														-TILE_SIZE / 2, TILE_SIZE / 2)
 				local fixture = love.physics.newFixture(body, shape, 1)
-				fixture:setFriction(10000)
 				level.boxes[j][i] = fixture
 				body:setPosition((i - 1) * TILE_SIZE + level.dx, (j - 1) * TILE_SIZE + level.dy + TILE_SIZE / 2 + TILE_SIZE)
 			else
@@ -106,6 +105,9 @@ function level_mt:update(dt)
 end
 
 function level_mt:draw()
+	love.graphics.push()
+	love.graphics.translate(self.gameManager.arena:getWidth() / 2 - self:getWidth() / 2, -self:getHeight() + TILE_SIZE)
+	
 	love.graphics.draw(self.canvas)
 	love.graphics.draw(self.bloodCanvas)
 	love.graphics.draw(self.objectCanvas)
@@ -113,17 +115,20 @@ function level_mt:draw()
 	for _, p in ipairs(self.particleEffects) do
 		love.graphics.draw(p)
 	end
+	love.graphics.pop()
+	
 	-- Debug
-	-- love.graphics.push()
-	-- love.graphics.origin()
 	-- love.graphics.setColor(255, 255, 255)
-	-- for j, t in ipairs(self.boxes) do
-		-- for i, box in ipairs(t) do
-			-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.boxes[j][i]:getBoundingBox()
-			-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
+	-- for j = 1, #self.boxes do
+		-- local t = self.boxes[j]
+		-- for i = 1, #t do
+			-- local box = t[i]
+			-- if (box ~= nil) then
+				-- local topLeftX, topLeftY, bottomRightX, bottomRightY = self.boxes[j][i]:getBoundingBox()
+				-- love.graphics.rectangle("line", topLeftX, topLeftY, bottomRightX - topLeftX, bottomRightY - topLeftY)
+			-- end
 		-- end
 	-- end
-	-- love.graphics.pop()
 end
 
 function level_mt:getWidth()
@@ -191,7 +196,7 @@ function level_mt:breakTile(i, j)
 	love.graphics.setColor(r, g, b, a)
 end
 
-function level_mt:hit(box)
+function level_mt:hit(hitter, box)
 	local regen = false
 	
 	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
@@ -225,16 +230,12 @@ function level_mt:hit(box)
 		for i = minX, maxX do
 			local tileID = t[i]
 			if (tileID ~= nil) and (tileID == 42) and (self.boxes[j][i] ~= nil) then
-				local x2 = (i - 1) * TILE_SIZE + self.dx
-				local y2 = (j - 1) * TILE_SIZE + self.dy + TILE_SIZE / 2 + TILE_SIZE
-				local d = (m.x - x2) * (m.x - x2) + (m.y - y2) * (m.y - y2)
-				if (d <= maxDistSqr) then
-					local hitbox = self:getHitBox(i, j)
-					if (rectCollision(hitbox, box)) then
-						regen = true
-						self:breakTile(i, j)
-						self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
-					end
+				local hitbox = self:getHitBox(i, j)
+				if (rectCollision(hitbox, box)) then
+					regen = true
+					self:breakTile(i, j)
+					hitter:incrementBoxScore()
+					self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 				end
 			end
 		end
