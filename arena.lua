@@ -135,9 +135,9 @@ function arena_mt:draw()
 	
 	-- On dessine l'arene
 	if self.publicDown then
-		love.graphics.draw(self.canvas["down"])
+		self.canvas["down"]:draw()
 	else
-		love.graphics.draw(self.canvas["up"])
+		self.canvas["up"]:draw()
 	end
 	
 	-- On dessine la porte
@@ -267,10 +267,9 @@ function getPublicDownCanvas(oldCanvas, tiles)
 	love.graphics.setColor(255, 255, 255)
 	local canvas = oldCanvas
 	if (canvas == nil) then
-		canvas = love.graphics.newCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
+		canvas = newSuperCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
 	end
 	
-	love.graphics.setCanvas(canvas)
 	for i, t in ipairs(tiles) do
 		for j, tile in ipairs(t) do
 			if (tile ~= -1) and (tile ~= nil) then
@@ -278,11 +277,10 @@ function getPublicDownCanvas(oldCanvas, tiles)
 				if (tileToDraw == arche) then
 					tileToDraw = center
 				end
-				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+                canvas:drawTo(drawAsset, tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
 		end
 	end
-	love.graphics.setCanvas()
 	return canvas
 end
 
@@ -292,10 +290,9 @@ function getPublicUpCanvas(oldCanvas, tiles)
 	love.graphics.setColor(255, 255, 255)
 	local canvas = oldCanvas
 	if (canvas == nil) then
-		canvas = love.graphics.newCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
+		canvas = newSuperCanvas(TILE_SIZE * ARENA_WIDTH, TILE_SIZE * ARENA_HEIGHT)
 	end
 	
-	love.graphics.setCanvas(canvas)
 	for i, t in ipairs(tiles) do
 		for j, tile in ipairs(t) do
 			if (tile ~= -1) then
@@ -308,11 +305,10 @@ function getPublicUpCanvas(oldCanvas, tiles)
 				if (tileToDraw == arche) then
 					tileToDraw = center
 				end
-				drawAsset(tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+				canvas:drawTo(drawAsset, tileToDraw, (i - 1) * TILE_SIZE + TILE_SIZE / 2, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
 		end
 	end
-	love.graphics.setCanvas()
 	
 	return canvas
 end
@@ -321,9 +317,10 @@ local blood = love.graphics.newImage("assets/blood.png")
 
 function arena_mt:blood(x, y)
 	for _, s in ipairs({"down", "up"}) do
-		love.graphics.setCanvas(self.canvas[s])
-		love.graphics.draw(blood, x - blood:getWidth() / 2, y - blood:getHeight() / 2)
-		love.graphics.setCanvas()
+		self.canvas[s]:drawTo(function()
+            love.graphics.draw(blood, x - blood:getWidth() / 2, y - blood:getHeight() / 2)
+        end)
+		
 	end
 	self.lvl:blood(x, y)
 end

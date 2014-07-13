@@ -56,7 +56,7 @@ function newLevel(gameManager)
 	local c1, c2 = getLevelCanvas(nil, nil, level.map, TILE_SIZE * w, TILE_SIZE * h)
 	level.canvas = c1 -- Le canvas du sol
 	level.objectCanvas = c2 -- Le canvas des caisses et objets
-	level.bloodCanvas = love.graphics.newCanvas(TILE_SIZE * w, TILE_SIZE * h) -- Le canvas du sang
+	level.bloodCanvas = newSuperCanvas(TILE_SIZE * w, TILE_SIZE * h) -- Le canvas du sang
 	
 	level.dx = ARENA_WIDTH * TILE_SIZE / 2 - TILE_SIZE * w / 2
     level.dy = -TILE_SIZE * h
@@ -108,9 +108,9 @@ function level_mt:draw()
 	love.graphics.push()
 	love.graphics.translate(self.gameManager.arena:getWidth() / 2 - self:getWidth() / 2, -self:getHeight() + TILE_SIZE)
 	
-	love.graphics.draw(self.canvas)
-	love.graphics.draw(self.bloodCanvas)
-	love.graphics.draw(self.objectCanvas)
+	self.canvas:draw()
+	self.bloodCanvas:draw()
+	self.objectCanvas:draw()
 	
 	for _, p in ipairs(self.particleEffects) do
 		love.graphics.draw(p)
@@ -186,14 +186,16 @@ function level_mt:breakTile(i, j)
 	self.map[j][i] = 65
 	self.boxes[j][i]:destroy()
 	self.boxes[j][i] = nil
-	love.graphics.setCanvas(self.objectCanvas)
-	local r, g, b, a = love.graphics.getColor()
-	love.graphics.setBlendMode("replace")
-	love.graphics.setColor(255, 255, 255, 0)
-	love.graphics.rectangle("fill", (i - 1) * TILE_SIZE - TILE_SIZE / 2, (j - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-	love.graphics.setBlendMode("alpha")
-	love.graphics.setCanvas()
-	love.graphics.setColor(r, g, b, a)
+	self.objectCanvas:drawTo(
+        function()
+            local r, g, b, a = love.graphics.getColor()
+            love.graphics.setBlendMode("replace")
+            love.graphics.setColor(255, 255, 255, 0)
+            love.graphics.rectangle("fill", (i - 1) * TILE_SIZE - TILE_SIZE / 2, (j - 1) * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+            love.graphics.setBlendMode("alpha")
+            love.graphics.setCanvas()
+            love.graphics.setColor(r, g, b, a)
+        end)
 end
 
 function level_mt:hit(hitter, box)
@@ -269,37 +271,34 @@ function getLevelCanvas(oldCanvas, oldObjectCanvas, tiles, width, height)
 	local canvas = oldCanvas
 	local objectCanvas = oldObjectCanvas
 	if (canvas == nil) then
-		canvas = love.graphics.newCanvas(width, height)
+		canvas = newSuperCanvas(width, height)
 	end
 	if (objectCanvas == nil) then
-		objectCanvas = love.graphics.newCanvas(width, height)
+		objectCanvas = newSuperCanvas(width, height)
 	end
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.setCanvas(canvas)
 	for j, t in ipairs(tiles) do
 		for i, tileID in ipairs(t) do
 			if (tileID ~= nil) and (tileID ~= -1) then
 				if (tileID == 42) then
-					love.graphics.setCanvas(objectCanvas)
-					drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
-					love.graphics.setCanvas(canvas)
-					drawAsset(65, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+					objectCanvas:drawTo(drawAsset, tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+					canvas:drawTo(drawAsset, 65, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 				else
-					drawAsset(tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
+                    canvas:drawTo(drawAsset, tileID, (i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 				end
 			end
 		end
 	end
-	love.graphics.setCanvas()
 	return canvas, objectCanvas
 end
 
 local blood = love.graphics.newImage("assets/blood.png")
 
 function level_mt:blood(x, y)
-	love.graphics.setCanvas(self.bloodCanvas)
-	love.graphics.draw(blood, -self.dx + x - blood:getWidth() / 2, -self.dy + y - blood:getHeight() / 2)
-	love.graphics.setCanvas()
+	self.bloodCanvas:drawTo(
+        function()
+            love.graphics.draw(blood, -self.dx + x - blood:getWidth() / 2, -self.dy + y - blood:getHeight() / 2)
+        end)
 end
 
 function level_mt:spawn()
