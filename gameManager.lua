@@ -229,6 +229,35 @@ function mt:playerAttack(player)
 	self.arena:hit(player, sword)
 end
 
+function mt:playerExplosion(player)
+	local maxDistSqr = EXPLOSION_RADIUS * EXPLOSION_RADIUS
+	local x, y = player:getPosition()
+	
+	if (not self.isCoop) or (self.isCoop and not player.isRealPlayer) then
+		for _, p in ipairs(self:getAlivePlayers()) do
+			if (p ~= player) then
+				local x2, y2 = p:getPosition()
+				local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
+				if (d <= maxDistSqr) then
+					p:hit(player, PLAYER_DAMAGE, x, y)
+					self.arena:blood(x2, y2)
+				end
+			end
+		end
+	end
+	for _, p in ipairs(self.iaPlayers) do
+		if (not p:isDead()) and (p ~= player) then
+			local x2, y2 = p:getPosition()
+			local d = (x - x2) * (x - x2) + (y - y2) * (y - y2)
+			if (d <= maxDistSqr) then
+				p:hit(player, PLAYER_DAMAGE, x, y)
+				self.arena:blood(x2, y2)
+			end
+		end
+	end
+	self.arena:explosion(player, x, y, EXPLOSION_RADIUS)
+end
+
 
 function mt:getNearestPlayer(x, y)
 	local nearest = nil

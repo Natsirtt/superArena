@@ -41,17 +41,37 @@ function love.load(arg)
     manager = newMenuManager()
 end
 
+local updateTime = 0
+local updateCount= 0
+local drawTime = 0
+local drawCount= 0
+
 function love.update(dt)
+
+    local stime = love.timer.getTime()
     
     if (love.keyboard.isDown("escape")) then
         love.event.quit()
     end
     
 	manager:update(dt)
+    
+    local etime = love.timer.getTime()
+    updateTime = updateTime + 1000 * (etime - stime)
+    updateCount = updateCount + 1
 end
 
 function love.draw()
+
+    local stime = love.timer.getTime()
+    
     manager:draw()
+    
+    local etime = love.timer.getTime()
+    drawTime = updateTime + 1000 * (etime - stime)
+    drawCount = drawCount + 1
+    
+    love.graphics.print("update : "..string.format("%.1f", (updateTime / updateCount)).."ms, draw : "..string.format("%.1f", (updateTime / updateCount)).."ms")
 end
 
 -- function tableString(table)

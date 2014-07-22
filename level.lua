@@ -85,7 +85,13 @@ function newLevel(gameManager)
 					-- On ajout un controller à la liste
 					-- Le controller n'est pas spawn par défaut (appeler spawn())
 					maxPnj = maxPnj - 1
-					local player = newPlayer(gameManager, -1)
+					local player = nil
+                    local r = love.math.random()
+                    if (r <= 0.9) then
+                         player = newPlayer(gameManager, -1)
+                    else
+                        player = newPlayer(gameManager, -2)
+                    end
 					player:setPosition((i - 1) * TILE_SIZE + level.dx, (j - 1) * TILE_SIZE + level.dy + TILE_SIZE / 2 + TILE_SIZE)
 					
 					local c = newIAController(player)
@@ -202,7 +208,6 @@ function level_mt:hit(hitter, box)
 	local regen = false
 	
 	local maxDistSqr = SWORD_LENGTH * SWORD_LENGTH
-	local m = getQuadCenter(box)
 	
 	local minX = box[1].x 
 	local maxX = box[1].x
@@ -239,6 +244,43 @@ function level_mt:hit(hitter, box)
 					hitter:incrementBoxScore()
 					self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 				end
+			end
+		end
+	end
+	-- Inutile car "breakTile" met automatiquement à jours
+	-- if (regen) then
+		-- self.canvas = getLevelCanvas(self.canvas, self.map, TILE_SIZE * self.width, TILE_SIZE * self.height)
+	-- end
+end
+
+-- (x,y) == le centre de l'explosion
+-- radius == Le rayon de l'explosion
+function level_mt:explosion(hitter, x, y, radius)
+	local regen = false
+	
+	local maxDistSqr = radius * radius
+	
+	local minX = x - radius
+	local maxX = x + radius
+	local minY = y - radius
+	local maxY = y + radius
+	
+	minX = math.max(math.floor((minX - self.dx) / TILE_SIZE), 1)
+	maxX = math.min(math.ceil((maxX - self.dx) / TILE_SIZE), self.width)
+	minY = math.max(math.floor((minY - self.dy) / TILE_SIZE), 1)
+	maxY = math.min(math.ceil((maxY - self.dy) / TILE_SIZE), self.height)
+	
+	for j = minY, maxY do
+		local t = self.map[j]
+		maxX = math.min(maxX, #t)
+		for i = minX, maxX do
+			local tileID = t[i]
+			if (tileID ~= nil) and (tileID == 42) and (self.boxes[j][i] ~= nil) then
+				local hitbox = self:getHitBox(i, j)
+				regen = true
+				self:breakTile(i, j)
+				hitter:incrementBoxScore()
+				self:smoke((i - 1) * TILE_SIZE, (j - 1) * TILE_SIZE + TILE_SIZE / 2)
 			end
 		end
 	end

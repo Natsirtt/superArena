@@ -53,6 +53,7 @@ function getAssetsManager()
 		self.uiAssets["hudDeadP4"] = love.graphics.newImage(prefix.."P4_HUD_dead.png")
 		
 		self.smoke = love.graphics.newImage("assets/smoke.png")
+        self.fire = love.graphics.newImage("assets/fire.png")
 
         instance = setmetatable(self, mt)
         init = true
@@ -62,6 +63,10 @@ end
 
 function mt:getSmoke()
 	return self.smoke
+end
+
+function mt:getFire()
+	return self.fire
 end
 
 function round(num, idp)

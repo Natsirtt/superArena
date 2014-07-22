@@ -17,6 +17,9 @@ local TORNADO_COOLDOWN = 0.5
 
 PLAYER_DAMAGE = 0.3
 
+EXPLOSION_DAMAGE = 3.0
+EXPLOSION_RADIUS = 75.0
+
 local BLINK_LIMIT = 0.2
 local BLINK_PER_SECOND = 15.0
 
@@ -60,13 +63,16 @@ function newPlayer(gameManager, playerNo)
 	this.dashSound = love.audio.newSource("audio/dash.wav", "static")
 	this.shieldSound = love.audio.newSource("audio/shield.wav", "static")
 	this.tornadoSound = love.audio.newSource("audio/tornado.wav", "static")
+	this.explosionSound = love.audio.newSource("audio/explosion.wav", "static")
 
 	--------------------------------------------------
 	-- Système d'animation
 	--------------------------------------------------
 	this.assets = nil
-	if (playerNo < 0) then
+	if (playerNo == -1) then
 		this.assets = getAssetsManager():getPlayerAssets("ennemy")
+    elseif (playerNo < -1) then
+        this.assets = getAssetsManager():getPlayerAssets("assets/ennemy1.png")
 	else
 		this.assets = getAssetsManager():getPlayerAssets("assets/player"..playerNo..".png")
 	end
@@ -497,22 +503,44 @@ end
 
 function mt:explode()
 	if (not self.exploded) then
-		self.life = 0
-		self.exploded = true
-		local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
-		p:setEmissionRate(20)
-		p:setSpeed(300, 400)
-		local x, y = self:getPosition()
-		p:setPosition(x, y)
-		p:setEmitterLifetime(0.3)
-		p:setParticleLifetime(0.3)
-		p:setDirection(0)
-		p:setSpread(360)
-		p:setRadialAcceleration(-3000)
-		p:setTangentialAcceleration(1000)
-		p:stop()
-		self.hitParticleSystem = p
-		p:start()
+        self.life = 0
+        self.exploded = true
+        if (self.playerNo == -1) then
+            local p = love.graphics.newParticleSystem(getAssetsManager():getSmoke(), 100)
+            p:setEmissionRate(20)
+            p:setSpeed(300, 400)
+            local x, y = self:getPosition()
+            p:setPosition(x, y)
+            p:setEmitterLifetime(0.3)
+            p:setParticleLifetime(0.3)
+            p:setDirection(0)
+            p:setSpread(360)
+            p:setRadialAcceleration(-3000)
+            p:setTangentialAcceleration(1000)
+            p:stop()
+            self.hitParticleSystem = p
+            p:start()
+        elseif (self.playerNo < -1) then
+            local p = love.graphics.newParticleSystem(getAssetsManager():getFire(), 100)
+            p:setEmissionRate(100)
+            p:setSpeed(300, 400)
+            p:setAreaSpread("uniform", EXPLOSION_RADIUS, EXPLOSION_RADIUS)
+            local x, y = self:getPosition()
+            p:setPosition(x, y)
+            p:setEmitterLifetime(0.3)
+            p:setParticleLifetime(0.5)
+            p:setDirection(0)
+            p:setSpread(math.rad(360))
+            p:setRadialAcceleration(-3000)
+            p:setTangentialAcceleration(1000)
+            p:stop()
+            self.hitParticleSystem = p
+            p:start()
+        	if (self.gameManager ~= nil) then
+                self.gameManager:playerExplosion(self)
+            end
+            self.explosionSound:play()
+        end
 	end
 end
 

@@ -214,6 +214,12 @@ function arena_mt:hit(hitter, box)
 	end
 end
 
+-- (x,y) == le centre de l'explosion
+-- radius == Le rayon de l'explosion
+function arena_mt:explosion(hitter, x, y, radius)
+	self.lvl:explosion(hitter, x, y, radius)
+end
+
 -- box -> la hitbox de l'épée qui tape
 function arena_mt:hitDoor(box)
 	if (self.hasDoor) then
