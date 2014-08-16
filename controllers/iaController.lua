@@ -18,7 +18,7 @@ function newIAController(player)
 	
 	this.nearest = nil
 	
-	player.life = 1
+	player.life = 4
 	player.speed = player.speed / 2
     
     return setmetatable(this, mt)

@@ -49,7 +49,7 @@ function newGameManager(controllers)
 	for _, player in ipairs(self.players) do
 		player:setDyingListener(
 			function(killer, killed)
-				killer:heal(2)
+				killer:heal(0.5)
 				local alives = self:getAlivePlayers()
 				self.finish = (#alives == 0) or (#alives == 1) and not self.isCoop
 			end

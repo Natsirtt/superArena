@@ -15,9 +15,9 @@ local DEFENDING_MAX_TIME = 3
 local DASH_COOLDOWN = 0.6
 local TORNADO_COOLDOWN = 0.5
 
-PLAYER_DAMAGE = 0.3
+PLAYER_DAMAGE = 1.0
 
-EXPLOSION_DAMAGE = 3.0
+EXPLOSION_DAMAGE = 5.0
 EXPLOSION_RADIUS = 75.0
 
 local BLINK_LIMIT = 0.2
@@ -25,6 +25,8 @@ local BLINK_PER_SECOND = 15.0
 
 local KILL_POINTS = 100
 local BOX_POINTS = 5
+
+local INVULNERABILITY = 0.5 -- Durée d'invulnérabilité (en s)
 
 function newPlayer(gameManager, playerNo)
     local this = {}
@@ -49,8 +51,10 @@ function newPlayer(gameManager, playerNo)
     this.speed = SPEED_BASE
 	this.dashCooldown = 0
 	this.tornadoCooldown = 0
+    this.invulnerabilityCooldown = 0
 	this.dyingListener = nil
 	
+    
 	this.iaKilled = 0
 	this.boxDestroyed = 0
 	this.extraPoints = 0
@@ -235,6 +239,7 @@ function mt:update(dt)
 	self.blinkTimer = math.max(self.blinkTimer - dt, 0.0)
 	self.dashCooldown = math.max(self.dashCooldown - dt, 0.0)
 	self.tornadoCooldown = math.max(self.tornadoCooldown - dt, 0)
+    self.invulnerabilityCooldown = math.max(self.invulnerabilityCooldown - dt, 0)
 	
 	if (not self:isDead()) then
 		-- position checking
@@ -419,6 +424,8 @@ function mt:hit(hitter, lifePoints, x, y)
 	local oldDead = self:isDead()
 	self.hasBeenHit = true
     self.life = math.max(0, self.life - lifePoints)
+    self.invulnerabilityCooldown = INVULNERABILITY
+    
     if not oldDead and self:isDead() then
 		if (self.dyingListener) then
 			self.dyingListener(hitter, self)
@@ -484,6 +491,10 @@ end
 
 -- Vérifie si 'player' peut faire des dégats à 'self'
 function mt:canBeHit(player)
+    if (self.invulnerabilityCooldown > 0) then
+        return false
+    end
+    
 	local x, y = self:getPosition()
 	local x2,y2 = player:getPosition()
 	if (not self:isDefending()) then

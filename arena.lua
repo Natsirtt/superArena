@@ -58,7 +58,7 @@ function newArena(gameManager)
 	arena.canvas["up"] = nil
 	
 	arena.publicTimer = 0
-	arena.doorLife = 100
+	arena.doorLife = 50
 	arena.hasDoor = true
 	arena.boxes = {}
 	
