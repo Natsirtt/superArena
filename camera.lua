@@ -28,7 +28,7 @@ function mt:update(dt)
 	if (self.shakeTimer == 0) then
 		love.audio.stop(self.shakeSound)
 		for _, c in ipairs(getControllersManager():getBindedControllers()) do
-			c:rumble(0)
+			--c:rumble(0)
 		end
 	end
 end
@@ -57,7 +57,7 @@ function mt:shake()
 		self.shakeTimer = SHAKE_LIMIT
 		love.audio.play(self.shakeSound)
 		for _, c in ipairs(getControllersManager():getBindedControllers()) do
-			c:rumble(1)
+			c:rumble(SHAKE_LIMIT)
 		end
 	end
 end

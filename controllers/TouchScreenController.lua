@@ -93,9 +93,7 @@ function mt:isAnyDown()
 end
 
 function mt:rumble(f)
-	if self.joystick:isVibrationSupported() then
-		self.joystick:setVibration(f, f)
-	end
+	love.system.vibrate(f)
 end
 
 function mt:getAxes()
@@ -272,21 +270,20 @@ function mt:update(dt)
 		end
 		
 		if (self.movePressed2 and self.shieldButton:isDown()) then
-			self:rumble(1.0)
+			self:rumble(0.3)
 			self.player:setDefending(true)
 		else
 			self.player:setDefending(false)
-			if (self.movePressed2 and self.attackButton:isDown()) then
-				self:rumble(1.0)
+			if (self.movePressed2 and self.attackButton:isDown() and self.player:canAttack()) then
+				self:rumble(0.3)
 				self.player:attack()
 			elseif self.movePressed2 and self.dashButton:isDown() then
-				self:rumble(1.0)
+				self:rumble(0.3)
 				self.player:dash()
 			elseif self.movePressed2 and self.tornadoButton:isDown() then
-				self:rumble(1.0)
+				self:rumble(0.3)
 				self.player:tornado()
 			else
-				self:rumble(0.0)
 			end
 		end
 	end
